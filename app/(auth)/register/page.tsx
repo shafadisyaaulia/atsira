@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Sprout, Store, Globe2, Microscope } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -107,5 +108,9 @@ function RegisterForm() {
 }
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
+  );
 }
