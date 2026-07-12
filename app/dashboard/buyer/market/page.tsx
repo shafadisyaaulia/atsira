@@ -311,7 +311,7 @@ export default function BuyerDashboardMarketplace() {
                     </div>
                     {/* AKSI TOMBOL LAYANAN */}
                     <div className="grid grid-cols-2 gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleAddToCart(p, "finished")} className="text-xs font-bold rounded-xl h-9 border-stone-200 text-stone-700">
+                      <Button size="sm" variant="secondary" onClick={() => handleAddToCart(p, "finished")} className="text-xs font-bold rounded-xl h-9 border-stone-200 text-stone-700">
                         + Keranjang
                       </Button>
                       {/* 2. TOMBOL BELI LANGSUNG INSTAN */}
@@ -360,7 +360,7 @@ export default function BuyerDashboardMarketplace() {
                     </div>
                     {/* AKSI TOMBOL LAYANAN */}
                     <div className="grid grid-cols-2 gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleAddToCart(p, "raw")} className="text-xs font-bold rounded-xl h-9 border-stone-200 text-stone-700">
+                      <Button size="sm" variant="secondary" onClick={() => handleAddToCart(p, "raw")} className="text-xs font-bold rounded-xl h-9 border-stone-200 text-stone-700">
                         + Sourcing
                       </Button>
                       {/* 2. TOMBOL BELI LANGSUNG INSTAN */}

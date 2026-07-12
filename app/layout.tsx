@@ -40,8 +40,9 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${playfair.variable} ${jakarta.variable} ${jetbrainsMono.variable}`}>
       <head>
-        {/* Anti-Google Banner Topbar Overrides (Diperbaiki dengan dangerouslySetInnerHTML) */}
+        {/* Anti-Google Banner Topbar Overrides dengan Proteksi Mismatch Hydration */}
         <style
+          suppressHydrationWarning // 👈 MENYEMBUNYIKAN WARNING HYDRATION MISMATCH AKIBAT FORMAT FORMATTING CSS STRING
           dangerouslySetInnerHTML={{
             __html: `
               /* 1. Sembunyikan semua jenis frame, banner, dan iframe bawaan Google Translate */

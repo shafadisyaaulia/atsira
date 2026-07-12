@@ -112,7 +112,7 @@ export default function MyProductsPage() {
       badges: ["AI Verified"]
     };
 
-    setProductsList(prev => [newProduct, ...prev]);
+    setProductsList(prev => [newProduct as any, ...prev]);
     setIsAddPageOpen(false); 
     resetForm();
   };

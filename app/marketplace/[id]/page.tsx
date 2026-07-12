@@ -30,7 +30,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     // Jika komponen client butuh mapping properti lama (id vs productId)
     productId: matchedProduct.id, 
     // Sinkronisasi data CoA dinamis agar spesifikasi di kanan bawah otomatis berubah
-    coa: matchedProduct.coa || matchedProduct.coaSnapshot || {
+    coa: (matchedProduct as any).coa || (matchedProduct as any).coaSnapshot || {
       paLevel: 0,
       acidNumber: 0,
       density: 0,

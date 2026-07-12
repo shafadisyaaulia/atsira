@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { PageShell } from "@/components/layout/PageShell";
-import { Card, Button } from "@/components/ui/Card"; // Sesuaikan path komponen UI Anda
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { MapPin, DollarSign, TrendingUp, History, ShieldAlert } from "lucide-react";
 import { useLang } from "@/components/layout/Navbar";
 

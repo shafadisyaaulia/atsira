@@ -79,7 +79,8 @@ export function ProductDetailClient({ product }: { product: any }) {
   // Normalisasi tipe produk
   const isRaw = matchedProduct.type === "raw-oil" || !matchedProduct.unit || matchedProduct.unit === "kg";
   
-  const [qty, setQty] = useState(isRaw ? (matchedProduct.minOrderKg || 5) : 1);
+  // FIX 1: Gunakan Type Assertion (as any) untuk properti dinamis minOrderKg
+  const [qty, setQty] = useState(isRaw ? ((matchedProduct as any).minOrderKg || 5) : 1);
 
   // 2. PROTEKSI RENDER: Jika belum di-mount di client, tampilkan loading agar server & client sinkron
   if (!mounted) {
@@ -92,15 +93,15 @@ export function ProductDetailClient({ product }: { product: any }) {
     );
   }
 
-  // Penyesuaian nama properti gambar (imageUrl vs img)
-  const mainImage = matchedProduct.imageUrl || matchedProduct.img || "/images/products/minyak nilam.png";
+  // FIX 2: Gunakan Type Assertion (as any) untuk properti alternatif gambar .img
+  const mainImage = matchedProduct.imageUrl || (matchedProduct as any).img || "/images/products/minyak nilam.png";  
   const images = isRaw 
     ? [mainImage] 
-    : (matchedProduct.gallery && matchedProduct.gallery.length > 0 ? matchedProduct.gallery : [mainImage]);
+    : ((matchedProduct as any).gallery && (matchedProduct as any).gallery.length > 0 ? (matchedProduct as any).gallery : [mainImage]);
 
-  // Penyesuaian nama properti CoA
-  const coa = matchedProduct.coa || matchedProduct.coaSnapshot || matchedProduct.coaFields;
-  const traceability = !isRaw ? matchedProduct.traceability : undefined;
+  // FIX 3: Gunakan Type Assertion (as any) untuk properti dokumen laboratorium CoA dan Traceability
+  const coa = (matchedProduct as any).coa || (matchedProduct as any).coaSnapshot || (matchedProduct as any).coaFields;
+  const traceability = !isRaw ? (matchedProduct as any).traceability : undefined;
 
   // Normalisasi judul dan deskripsi dwi-bahasa
   const getLocalizedText = (field: any) => {
@@ -114,7 +115,8 @@ export function ProductDetailClient({ product }: { product: any }) {
       productId: matchedProduct.id,
       title: getLocalizedText(matchedProduct.title),
       imageUrl: mainImage,
-      price: isRaw ? (matchedProduct.pricePerKg || matchedProduct.price) : matchedProduct.price,
+      // FIX 4: Gunakan Type Assertion (as any) untuk pricePerKg grosir
+      price: isRaw ? ((matchedProduct as any).pricePerKg || (matchedProduct as any).price) : (matchedProduct as any).price,
       unit: isRaw ? "kg" : (matchedProduct.unit || "pcs"),
       qty,
       category: isRaw ? "raw-oil" : "finished-product", // Disinkronkan dengan keranjang belanja
@@ -166,19 +168,19 @@ export function ProductDetailClient({ product }: { product: any }) {
 
             {isRaw ? (
               <p className="text-sm text-on-surface-variant mb-4 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4" /> {getLocalizedText(matchedProduct.region)} · {T_DETAIL.by[lang]} {matchedProduct.farmerName || matchedProduct.seller || "Petani Nilam"}
+                <MapPin className="w-4 h-4" /> {getLocalizedText((matchedProduct as any).region)} · {T_DETAIL.by[lang]} {(matchedProduct as any).farmerName || (matchedProduct as any).seller || "Petani Nilam"}
               </p>
             ) : (
               <div className="flex items-center gap-2 mb-4">
                 <Star className="w-4 h-4 fill-secondary-fixed text-secondary-fixed" />
                 <span className="text-sm text-on-surface-variant">
-                  {matchedProduct.rating || "5.0"} ({matchedProduct.reviewCount || matchedProduct.reviews || 10} {T_DETAIL.reviews[lang]}) · {matchedProduct.storeName || matchedProduct.seller || "UMKM Aceh"}
+                  {(matchedProduct as any).rating || "5.0"} ({(matchedProduct as any).reviewCount || (matchedProduct as any).reviews || 10} {T_DETAIL.reviews[lang]}) · {(matchedProduct as any).storeName || (matchedProduct as any).seller || "UMKM Aceh"}
                 </span>
               </div>
             )}
 
             <p className="font-display text-3xl font-bold text-primary mb-1">
-              {formatIDR(isRaw ? (matchedProduct.pricePerKg || matchedProduct.price) : matchedProduct.price)}
+              {formatIDR(isRaw ? ((matchedProduct as any).pricePerKg || (matchedProduct as any).price) : (matchedProduct as any).price)}
               <span className="text-base font-body font-normal text-outline"> /{isRaw ? "kg" : (matchedProduct.unit || "pcs")}</span>
             </p>
 
@@ -199,12 +201,12 @@ export function ProductDetailClient({ product }: { product: any }) {
               </Card>
             )}
 
-            {!isRaw && matchedProduct.notes && (
+            {!isRaw && (matchedProduct as any).notes && (
               <Card className="p-5 mb-6">
                 <p className="text-label-md uppercase text-on-surface-variant mb-3">{T_DETAIL.scentProfile[lang]}</p>
                 <div className="space-y-2 text-sm">
                   {(["top", "middle", "base"] as const).map((layer) => {
-                    const notes = matchedProduct.notes[layer];
+                    const notes = (matchedProduct as any).notes[layer];
                     if (!notes || !notes.length) return null;
                     return (
                       <div key={layer} className="flex gap-3">
@@ -221,7 +223,7 @@ export function ProductDetailClient({ product }: { product: any }) {
               <input
                 type="number"
                 value={qty}
-                min={isRaw ? (matchedProduct.minOrderKg || 5) : 1}
+                min={isRaw ? ((matchedProduct as any).minOrderKg || 5) : 1}
                 onChange={(e) => setQty(Number(e.target.value))}
                 className="w-24 px-3 py-3 rounded border border-sand-gray bg-bone-wash text-center font-semibold"
               />
