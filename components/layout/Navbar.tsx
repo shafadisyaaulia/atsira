@@ -136,7 +136,7 @@ export function Navbar() {
         <div className="flex items-center h-full w-[160px] relative justify-start flex-shrink-0 notranslate" translate="no">
           <Link href="/" className="absolute left-0 top-1/2 -translate-y-1/2 block transition-opacity hover:opacity-90">
             <img 
-              src="/images/logo atsira.png" 
+              src="/images/logo-atsira.png" 
               alt="ATSIRA Logo"
               className="h-[76px] w-auto object-contain max-w-none block" 
             />
