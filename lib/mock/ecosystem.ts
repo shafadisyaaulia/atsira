@@ -124,7 +124,7 @@ export const MAGAZINE_ARTICLES: MagazineArticle[] = [
   {
     slug: "rembug-petani-aceh-selatan",
     title: "Jumpa Petani Nilam Aceh Selatan: Digitalisasi Rantai Pasok & Transparansi Harga",
-    category: "Kegiatan Komunitas",
+    category: "Kegiatan Komunitas" as any, 
     excerpt: "Dokumentasi nyata kegiatan rembug bersama puluhan ketua kelompok tani di Aceh Selatan. Fokus pada pengenalan teknologi Nilam Analyzer AI untuk menetapkan standardisasi harga yang adil di tingkat tapak.",
     content: [
       "Perjalanan kami ke Tapaktuan, Aceh Selatan menjadi bukti komitmen platform dalam membersamai langsung para petani hebat. Dalam agenda Rembug & Jumpa Petani Nilam ini, tim berdialog langsung mengenai kendala permainan harga spekulatif di tingkat tengkulak bawah.",
@@ -141,7 +141,7 @@ export const MAGAZINE_ARTICLES: MagazineArticle[] = [
   {
     slug: "workshop-penyulingan-aceh-jaya",
     title: "Workshop Optimalisasi Rendemen Suling bersama Petani Aceh Jaya",
-    category: "Kegiatan Komunitas",
+    category: "Kegiatan Komunitas" as any, 
     excerpt: "Turun langsung ke lokasi penyulingan rakyat di Aceh Jaya untuk membagikan modul penerapan uap bersih demi mendongkrak kualitas minyak nilam.",
     content: [
       "Tidak sekadar mengandalkan perangkat lunak di hilir, platform kami secara berkala mengadakan pelatihan fisik ke hulu produksi. Bersama belasan penyuling rakyat di Aceh Jaya, workshop ini mengupas tuntas pengaruh kebersihan pipa kondensor terhadap rendemen hasil sulingan.",
