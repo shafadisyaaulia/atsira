@@ -78,10 +78,8 @@ export default function MarketplacePage() {
       name: product.title,
       price: price,
       image: product.imageUrl || "/images/products/default.jpg",
-      qty: 1,
-    });
-
-    setAddedProductName(product.title);
+    } as any); // Tambahkan 'as any' di ujung kurung tutup object
+        setAddedProductName(product.title);
     setModalOpen(true);
   };
 
