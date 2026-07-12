@@ -125,15 +125,23 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border-b border-surface-container-high">
-      <div className="container-app flex items-center justify-between h-[72px]">
+      <div className="container-app flex items-center justify-between h-[72px] relative">
 
-        <Link href="/" className="flex items-center flex-shrink-0 transition-opacity hover:opacity-90">
-          <img 
-            src="/images/logo atsira.png" 
-            alt="ATSIRA Logo"
-            className="h-28 w-auto object-contain" 
-          />
-        </Link>
+        {/* 
+          FIX LOGO: 
+          1. Menggunakan w-[160px] h-full relative untuk mengunci area ruang logo.
+          2. Ditambahkan kelas `notranslate` dan atribut `translate="no"` agar Google Translate membiarkan elemen ini utuh.
+          3. Tag img dibuat absolute dengan h-[76px] agar frame gambar melebar maksimal tanpa merusak tinggi navbar.
+        */}
+        <div className="flex items-center h-full w-[160px] relative justify-start flex-shrink-0 notranslate" translate="no">
+          <Link href="/" className="absolute left-0 top-1/2 -translate-y-1/2 block transition-opacity hover:opacity-90">
+            <img 
+              src="/images/logo atsira.png" 
+              alt="ATSIRA Logo"
+              className="h-[76px] w-auto object-contain max-w-none block" 
+            />
+          </Link>
+        </div>
 
         {/* Navigasi Tengah Desktop */}
         <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
