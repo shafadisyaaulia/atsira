@@ -13,8 +13,8 @@ export default function CartPage() {
   const router = useRouter();
   const { items, removeItem, updateQty } = useCartStore();
 
-  // FIX: Mengizinkan kategori "finished" atau "finished-product" agar sabun/parfum terbaca sempurna
-  const retailItems = items.filter((i) => i.category === "finished-product" || i.category === "finished");
+  // FIX: Menggunakan 'as string' agar TypeScript mengizinkan pengecekan kategori "finished" tanpa error
+  const retailItems = items.filter((i) => i.category === "finished-product" || (i.category as string) === "finished");
   const bulkItems = items.filter((i) => i.category === "raw-oil");
 
   const retailTotal = retailItems.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -119,7 +119,6 @@ function CartRow({
         <p className="text-xs text-outline">{formatIDR(item.price)} /{item.unit}</p>
       </div>
       <div className="flex items-center gap-2 border border-sand-gray rounded-full px-2 py-1">
-        {/* FIX: Menambahkan proteksi agar kuantitas tidak bisa minus atau 0 */}
         <button onClick={() => onQtyChange(item.productId, Math.max(1, item.qty - 1))} className="p-1" aria-label="Kurangi jumlah">
           <Minus className="w-3.5 h-3.5" />
         </button>
