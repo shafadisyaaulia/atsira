@@ -7,18 +7,20 @@ import { PageShell } from "@/components/layout/PageShell";
 import { Card, Badge, SectionEyebrow } from "@/components/ui/Card";
 import { Input, Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { useLang } from "@/components/layout/Navbar"; 
+import { useLang } from "@/components/layout/Navbar"; // 👈 Dikembalikan ke file Navbar
+import { useCartStore } from "@/lib/store"; // 👈 useCartStore tetap mengambil dari store global
+import { CartNotificationModal } from "@/components/ui/CartNotificationModal"; 
 
 // ── IMPORT DATA PRODUK ASLI
 import { RAW_OIL_LISTINGS, FINISHED_PRODUCTS } from "@/lib/mock/products";
 
-// ── Kamus Bahasa
+// ── Kamus Bahasa (Tanda petik sudah dibersihkan total dari karakter ilegal)
 const T_MARKET = {
   eyebrow: { id: "Pusat Dagang", en: "Trading Center" },
   title: { id: "Pasar Nilam Aceh", en: "Aceh Patchouli Marketplace" },
   searchPlaceholder: { 
-    id: 'Coba: "minyak kadar pa tinggi" atau "parfum"', 
-    en: 'Try: "high PA grade oil" or "organic perfume"' 
+    id: "Coba: minyak kadar pa tinggi atau parfum", 
+    en: "Try: high PA grade oil or organic perfume" 
   },
   allGrades: { id: "Semua Kualitas", en: "All Quality Grades" },
   advFilter: { id: "Filter Lanjutan", en: "Advanced Filter" },
@@ -33,11 +35,16 @@ const T_MARKET = {
 
 export default function MarketplacePage() {
   const lang = useLang();
-  const currentLang = lang.toLowerCase() as "id" | "en";
+  const currentLang = (lang ? lang.toLowerCase() : "id") as "id" | "en";
 
   const [query, setQuery] = useState("");
   const [gradeFilter, setGradeFilter] = useState("Semua Grade");
   const [tab, setTab] = useState<"raw" | "finished">("finished");
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [addedProductName, setAddedProductName] = useState("");
+
+  const addItem = useCartStore((state) => state.addItem);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
@@ -60,9 +67,22 @@ export default function MarketplacePage() {
     });
   }, [query]);
 
-  const handleAddToCart = (e: React.MouseEvent, productName: string) => {
+  const handleAddToCart = (e: React.MouseEvent, product: any) => {
     e.preventDefault(); 
-    alert(`[Simulasi] ${productName} berhasil ditambahkan ke keranjang pembeli!`);
+    e.stopPropagation();
+
+    const price = tab === "finished" ? product.price : product.pricePerKg;
+
+    addItem({
+      id: String(product.id),
+      name: product.title,
+      price: price,
+      image: product.imageUrl || "/images/products/default.jpg",
+      qty: 1,
+    });
+
+    setAddedProductName(product.title);
+    setModalOpen(true);
   };
 
   return (
@@ -130,7 +150,6 @@ export default function MarketplacePage() {
               {filteredFinished.map((p) => (
                 <Card key={p.id} className="relative overflow-hidden h-full flex flex-col justify-between hover:shadow-xl rounded-2xl border border-surface-container-high transition-all duration-300 bg-white group">
                   <div>
-                    {/* BAGIAN 1: Gambar Link */}
                     <Link href={`/marketplace/${p.id}`} className="block relative aspect-square overflow-hidden bg-bone-wash">
                       <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
@@ -146,7 +165,6 @@ export default function MarketplacePage() {
                       <p className="text-xs font-semibold text-outline mb-1">
                         {p.id === "fp-sabun-nilam" || p.id === "fp-lilin-aromaterapi" ? "UMKM Aceh Scent" : "UMKM Seulawah Parfum"}
                       </p>
-                      {/* BAGIAN 2: Judul Link */}
                       <Link href={`/marketplace/${p.id}`}>
                         <p className="font-semibold text-on-surface text-sm leading-snug mb-2 line-clamp-2 h-10 hover:text-emerald-700 transition-colors">
                           {p.title}
@@ -162,10 +180,9 @@ export default function MarketplacePage() {
                     </div>
                   </div>
 
-                  {/* BAGIAN 3: Tombol Aksi (TIDAK BOLEH DIBUNGKUS LINK LAIN) */}
                   <div className="p-4 pt-3 flex items-center gap-2 border-t border-stone-50 mt-4 relative z-20">
                     <button 
-                      onClick={(e) => handleAddToCart(e, p.title)}
+                      onClick={(e) => handleAddToCart(e, p)}
                       className="p-2 border border-stone-200 hover:border-stone-900 rounded-xl transition-colors bg-stone-50 text-stone-700"
                       title="Tambah ke Keranjang"
                     >
@@ -182,12 +199,11 @@ export default function MarketplacePage() {
               ))}
             </div>
           ) : (
-            /* Grid Minyak Nilam Murni (B2B Bulk) */
+            /* Grid Minyak Nilam Murni */
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRaw.map((p) => (
                 <Card key={p.id} className="relative overflow-hidden h-full flex flex-col justify-between hover:shadow-xl rounded-2xl border border-surface-container-high transition-all duration-300 bg-white group">
                   <div>
-                    {/* BAGIAN 1: Gambar Link */}
                     <Link href={`/marketplace/${p.id}`} className="block relative aspect-[4/3] overflow-hidden bg-bone-wash">
                       <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
@@ -204,16 +220,18 @@ export default function MarketplacePage() {
                       <div className="flex items-center gap-1 text-xs font-semibold text-outline mb-1.5">
                         <MapPin className="w-3.5 h-3.5 text-clay-earth" /> {p.region}
                       </div>
-                      {/* BAGIAN 2: Judul Link */}
                       <Link href={`/marketplace/${p.id}`}>
                         <p className="font-semibold text-on-surface text-sm leading-snug mb-2 line-clamp-2 h-10 hover:text-emerald-700 transition-colors">
                           {p.title}
                         </p>
                       </Link>
-                      <div className="flex items-center justify-between mb-3 bg-bone-wash/60 p-2 rounded-xl">
+                      
+                      {/* BARIS BARU YANG SUDAH DIBERSIHKAN DARI STRING TANDA PETIK TERPUTUS */}
+                      <div className="flex items-center justify-between mb-3 bg-stone-50 p-2 rounded-xl border border-stone-100">
                         <span className="text-xs text-outline font-medium">Grade: <span className="text-primary font-bold">{p.grade}</span></span>
                         <span className="text-xs font-mono font-bold text-clay-earth">PA {p.coa?.paLevel}%</span>
                       </div>
+                      
                       <div className="flex items-baseline justify-between">
                         <p className="font-display font-bold text-primary text-base">
                           {formatCurrency(p.pricePerKg)}
@@ -224,10 +242,9 @@ export default function MarketplacePage() {
                     </div>
                   </div>
 
-                  {/* BAGIAN 3: Tombol Aksi */}
                   <div className="p-4 pt-3 flex items-center gap-2 border-t border-stone-50 mt-4 relative z-20">
                     <button 
-                      onClick={(e) => handleAddToCart(e, p.title)}
+                      onClick={(e) => handleAddToCart(e, p)}
                       className="p-2 border border-stone-200 hover:border-stone-900 rounded-xl transition-colors bg-stone-50 text-stone-700"
                       title="Tambah ke Keranjang"
                     >
@@ -246,6 +263,12 @@ export default function MarketplacePage() {
           )}
         </div>
       </section>
+
+      <CartNotificationModal 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        productName={addedProductName} 
+      />
     </PageShell>
   );
 }

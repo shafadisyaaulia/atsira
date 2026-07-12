@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { 
+  ArrowRight, Mail, Lock, Eye, EyeOff, ArrowLeft, 
+  Sparkles, Sprout, Droplet, FlaskConical, Store 
+} from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useLang } from "@/components/layout/Navbar"; 
@@ -22,16 +25,17 @@ const T_LOGIN = {
   loading: { id: "Memvalidasi akun...", en: "Authenticating..." },
   noAccount: { id: "Belum punya akun?", en: "Don't have an account yet?" },
   registerHere: { id: "Daftar di sini", en: "Sign Up here" },
-  simulationNotice: {
-    id: "*Mode Simulasi: Masukkan email dengan akhiran '@petani.com', '@pemasta.com', '@buyer.com', atau '@usk.ac.id' untuk menguji pengalihan dasbor otomatis.",
-    en: "*Simulation Mode: Use an email ending with '@petani.com', '@buyer.com', or '@usk.ac.id' to test custom ecosystem dashboard routing."
+  demoTitle: { id: "Akses Cepat Demo Juri", en: "Jury Quick Demo Access" },
+  demoSub: { 
+    id: "Klik ikon peran di bawah untuk simulasi login otomatis tanpa input manual.", 
+    en: "Click a role icon below to simulate instant login without manual inputs." 
   }
 };
 
 export default function LoginPage() {
   const router = useRouter();
   const lang = useLang();
-  const currentLang = lang.toLowerCase() as "id" | "en";
+  const currentLang = (lang ? lang.toLowerCase() : "id") as "id" | "en";
   
   const login = useAuthStore((s) => s.login);
   const [email, setEmail] = useState("");
@@ -39,35 +43,62 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email || !password) return;
-    
-    setLoading(true);
-
+  // Fungsi Inti Autentikasi Bawaan dengan 4 Peran Terpilih
+  function processLogin(targetEmail: string) {
     let detectedRole = "buyer"; 
-    const lowerEmail = email.toLowerCase();
+    const lowerEmail = targetEmail.toLowerCase();
     
-    if (lowerEmail.includes("@petani.com") || lowerEmail.includes("@seller.com")) {
-      detectedRole = "petani";
+    if (lowerEmail.includes("@seller.com")) {
+      detectedRole = "seller";
     } else if (lowerEmail.includes("@pemasta.com")) {
       detectedRole = "pemasta";
     } else if (lowerEmail.includes("@usk.ac.id") || lowerEmail.includes("@arc.com")) {
-      detectedRole = "peneliti";
+      detectedRole = "arc"; 
+    } else if (lowerEmail.includes("@buyer.com")) {
+      detectedRole = "buyer";
     }
 
-    login({ name: email.split("@")[0], role: detectedRole } as any);
+    login({ name: targetEmail.split("@")[0], role: detectedRole } as any);
     
+    // Mengarahkan ke rute spesifik berdasarkan role demi kelancaran demo juri
     setTimeout(() => {
-      router.push("/");
+      router.push(`/dashboard/${detectedRole}`);
     }, 1000);
   }
+
+  // Handler Kirim Form Manual
+  function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email || !password) return;
+    setLoading(true);
+    processLogin(email);
+  }
+
+  // Handler Pintu Pintas Demo (Quick Login Selector)
+  const handleQuickDemo = (demoEmail: string) => {
+    setLoading(true);
+    setEmail(demoEmail);
+    setPassword("••••••••");
+    
+    // Beri jeda visual agar efek simulasi ketik otomatis terlihat nyata bagi juri
+    setTimeout(() => {
+      processLogin(demoEmail);
+    }, 600);
+  };
+
+  // Konfigurasi 4 Peran Prototipe Juri Pilihan Anda
+  const DEMO_ROLES = [
+    { name: "Seller", email: "distributor@seller.com", icon: Sprout, color: "hover:border-emerald-500 hover:bg-emerald-50/40 text-emerald-700" },
+    { name: "Pemasta", email: "aman@pemasta.com", icon: Droplet, color: "hover:border-teal-500 hover:bg-teal-50/40 text-teal-700" },
+    { name: "ARC Lab", email: "syakir@usk.ac.id", icon: FlaskConical, color: "hover:border-amber-500 hover:bg-amber-50/40 text-amber-700" },
+    { name: "Buyer", email: "export@buyer.com", icon: Store, color: "hover:border-stone-500 hover:bg-stone-50 text-stone-700" },
+  ];
 
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center px-4 py-12 relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(circle_at_20%_20%,_white,_transparent_55%)]" />
 
-      {/* Tombol Kembali (Bilingual) */}
+      {/* Tombol Kembali */}
       <div className="absolute top-6 left-6 z-20">
         <Link 
           href="/" 
@@ -91,7 +122,8 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <Card className="p-6 bg-white shadow-xl rounded-2xl mb-6">
+        <Card className="p-6 bg-white shadow-xl rounded-2xl mb-6 space-y-5">
+          {/* FORM MANUAL */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-outline uppercase mb-1.5 flex items-center gap-1">
@@ -135,6 +167,44 @@ export default function LoginPage() {
               {!loading && <ArrowRight className="w-5 h-5 ml-2 inline" />}
             </Button>
           </form>
+
+          {/* ── SEPARATOR & PANEL DEBUGS / QUICK DEMO JURI ── */}
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-stone-200"></div>
+            <span className="flex-shrink mx-4 text-[10px] text-stone-400 font-bold uppercase tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-500" /> {T_LOGIN.demoTitle[currentLang]}
+            </span>
+            <div className="flex-grow border-t border-stone-200"></div>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-[11px] text-stone-400 text-center leading-normal">
+              {T_LOGIN.demoSub[currentLang]}
+            </p>
+            
+            {/* Grid 4 Tombol Peran Baru (Seller, Pemasta, ARC, Buyer) */}
+            <div className="grid grid-cols-4 gap-2">
+              {DEMO_ROLES.map((role) => {
+                const Icon = role.icon;
+                return (
+                  <button
+                    key={role.name}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleQuickDemo(role.email)}
+                    className={`p-2.5 border border-stone-200 rounded-xl flex flex-col items-center gap-1 transition-all group ${role.color} ${
+                      loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                    }`}
+                    title={role.email}
+                  >
+                    <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    <span className="text-[10px] font-bold tracking-tight">{role.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
         </Card>
 
         <p className="text-center text-sm text-inverse-on-surface/60">
