@@ -16,6 +16,7 @@ import {
   Wallet,
   Heart,
   Leaf,
+  ShoppingBag, // Kita tambahkan ikon tas belanja untuk Sourcing Hub
 } from "lucide-react";
 import { useAuthStore } from "@/lib/store";
 import type { UserRole } from "@/lib/types";
@@ -28,35 +29,44 @@ interface NavItem {
 }
 
 const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
+  // 1. ROLE PETANI
   petani: [
-    { label: "Dasbor", href: "/dashboard/petani", icon: LayoutDashboard },
-    { label: "Penganalisis AI", href: "/dashboard/petani#analyzer", icon: Sparkles },
-    { label: "Intelijen Harga", href: "/dashboard/petani#price", icon: TrendingUp },
-    { label: "Kebun & Suling", href: "/dashboard/petani#farm", icon: Leaf },
+    { label: "Dasbor Utama", href: "/dashboard/petani", icon: LayoutDashboard },
+    { label: "Penganalisis AI", href: "/dashboard/petani/analyzer", icon: Sparkles },
+    { label: "Intelijen Harga", href: "/dashboard/petani/harga", icon: TrendingUp },
+    { label: "Kebun & Suling", href: "/dashboard/petani/kebun", icon: Leaf },
   ],
+  
+  // 2. ROLE UMKM / SELLER PANEL
   umkm: [
-    { label: "Dasbor", href: "/dashboard/umkm", icon: LayoutDashboard },
-    { label: "Sourcing B2B", href: "/dashboard/umkm#sourcing", icon: Package },
-    { label: "Produk Saya", href: "/dashboard/umkm#products", icon: Store },
-    { label: "Traceability QR", href: "/dashboard/umkm#qr", icon: QrCode },
+    { label: "Seller Home", href: "/dashboard/seller", icon: LayoutDashboard },
+    { label: "AtBot QualitySense (AI)", href: "/dashboard/seller/qualitysense", icon: Sparkles },
+    { label: "My Products", href: "/dashboard/seller/produk", icon: Store },
+    { label: "B2B Sourcing", href: "/dashboard/seller/pengadaan", icon: Package },
+    { label: "Order Incoming", href: "/dashboard/seller/pesanan", icon: QrCode },
   ],
+  
+  // 3. ROLE BUYER / MITRA INDUSTRI (Disesuaikan dengan menu Sourcing Hub Baru)[cite: 2]
   buyer: [
-    { label: "Dasbor", href: "/dashboard/buyer", icon: LayoutDashboard },
-    { label: "Lacak Pesanan", href: "/dashboard/buyer#orders", icon: Package },
-    { label: "Dompet & Tagihan", href: "/dashboard/buyer#wallet", icon: Wallet },
-    { label: "Favorit", href: "/dashboard/buyer#favorites", icon: Heart },
+    { label: "Dasbor Buyer", href: "/dashboard/buyer", icon: LayoutDashboard },
+    { label: "Sourcing Hub", href: "/dashboard/buyer/market", icon: ShoppingBag }, // <-- SINKRONISASI DI SINI
+    { label: "Lacak Pesanan", href: "/dashboard/buyer/pesanan", icon: Package },
+    { label: "Dompet & Tagihan", href: "/dashboard/buyer/dompet", icon: Wallet },
+    { label: "Produk Favorit", href: "/dashboard/buyer/favorit", icon: Heart },
   ],
+  
+  // 4. ROLE PENELITI / VERIFIKATOR LAB[cite: 2]
   peneliti: [
-    { label: "Dasbor", href: "/dashboard/peneliti", icon: LayoutDashboard },
-    { label: "Antrean Verifikasi", href: "/dashboard/peneliti#queue", icon: FlaskConical },
-    { label: "Portal Riset", href: "/dashboard/peneliti#research", icon: BookOpen },
+    { label: "Dasbor Peneliti", href: "/dashboard/peneliti", icon: LayoutDashboard },
+    { label: "Antrean Verifikasi", href: "/dashboard/peneliti/verifikasi", icon: FlaskConical },
+    { label: "Portal Riset Atsiri", href: "/dashboard/peneliti/riset", icon: BookOpen },
   ],
 };
 
 const ROLE_LABEL: Record<UserRole, string> = {
   petani: "Petani & Penyuling",
-  umkm: "UMKM Parfum",
-  buyer: "Buyer",
+  umkm: "Seller Panel",
+  buyer: "Buyer Panel",
   peneliti: "Peneliti ARC-USK",
 };
 
@@ -74,83 +84,121 @@ export function DashboardShell({ role, children }: { role: UserRole; children: R
 
   return (
     <div className="min-h-screen bg-surface-container-low flex">
-      <aside className="hidden lg:flex w-64 flex-col bg-surface-container-lowest border-r border-surface-container-high fixed h-screen">
+      
+      {/* ─── SIDEBAR DESKTOP (Kiri) ─── */}
+      <aside className="hidden lg:flex w-64 flex-col bg-surface-container-lowest border-r border-surface-container-high fixed h-screen z-50">
+        
+        {/* LOGO & INDIKATOR PANEL */}
         <div className="p-6 border-b border-surface-container-high">
-          <Link href="/" className="font-display text-xl font-bold text-primary">
+          <Link href="/" className="font-display text-xl font-black text-emerald-950 tracking-tight">
             ATSIRA
           </Link>
-          <p className="text-xs text-outline mt-0.5">{ROLE_LABEL[role]}</p>
+          <p className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mt-0.5">
+            {ROLE_LABEL[role]}
+          </p>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
+        
+        {/* MENU DINAMIS BERDASARKAN ROLE */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isMainDashboardLink = !item.href.includes("#");
-            const active = isMainDashboardLink && pathname === item.href;
+            
+            // Logika Deteksi Menu Aktif yang Presisi
+            const isBaseDashboard = item.href === `/dashboard/${role}`;
+            const active = isBaseDashboard
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all",
                   active
-                    ? "bg-primary text-on-primary"
-                    : "text-on-surface-variant hover:bg-surface-container-high"
+                    ? "bg-stone-900 text-white shadow-sm"
+                    : "text-stone-500 hover:text-stone-900 hover:bg-stone-50"
                 )}
               >
-                <Icon className="w-4.5 h-4.5" />
+                <Icon className={cn("w-4 h-4 shrink-0", active ? "text-emerald-400" : "text-stone-400")} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="p-4 border-t border-surface-container-high space-y-1">
-          <Link href="#settings" className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-on-surface-variant hover:bg-surface-container-high">
-            <Settings className="w-4.5 h-4.5" /> Pengaturan
+        
+        {/* MENU BAWAH SIDEBAR */}
+        <div className="p-4 border-t border-surface-container-high space-y-1 bg-stone-50/50">
+          <Link 
+            href="#settings" 
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-xs font-bold text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+          >
+            <Settings className="w-4 h-4 text-stone-400" /> Arrangement
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-error hover:bg-error-container/40"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-bold text-red-600 hover:bg-red-50 text-left transition-colors"
           >
-            <LogOut className="w-4.5 h-4.5" /> Keluar
+            <LogOut className="w-4 h-4 text-red-500" /> Go out
           </button>
         </div>
       </aside>
 
-      {/* Mobile top bar */}
+      {/* ─── NAVBAR ATAS UNTUK MOBILE SCREEN ─── */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-40 bg-surface-container-lowest border-b border-surface-container-high px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="font-display text-lg font-bold text-primary">
+        <Link href="/" className="font-display text-lg font-black text-emerald-950">
           ATSIRA
         </Link>
-        <button onClick={handleLogout} className="text-error text-sm font-medium flex items-center gap-1">
-          <LogOut className="w-4 h-4" /> Keluar
+        <button onClick={handleLogout} className="text-red-600 text-xs font-bold flex items-center gap-1">
+          <LogOut className="w-4 h-4" /> Go out
         </button>
       </div>
 
-      <div className="flex-1 lg:ml-64 pt-14 lg:pt-0">
-        <header className="hidden lg:flex items-center justify-between px-8 py-5 border-b border-surface-container-high bg-surface-container-lowest">
+      {/* ─── KONTEN UTAMA DASHBOARD (Kanan) ─── */}
+      <div className="flex-1 lg:ml-64 pt-14 lg:pt-0 flex flex-col min-h-screen">
+        
+        {/* HEADER WELCOME */}
+        <header className="hidden lg:flex items-center justify-between px-8 py-4 border-b border-surface-container-high bg-surface-container-lowest shrink-0">
           <div>
-            <p className="text-sm text-outline">Selamat datang kembali,</p>
-            <p className="font-semibold text-on-surface">{user?.name ?? "Pengguna"}</p>
+            <p className="text-[11px] text-stone-400 font-bold uppercase tracking-wider">Welcome back,</p>
+            <p className="font-black text-stone-900 text-sm mt-0.5">{user?.name ?? "Users"}</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center font-semibold text-on-primary-fixed-variant">
+          <div className="w-9 h-9 rounded-full bg-emerald-900 flex items-center justify-center font-black text-xs text-emerald-100 uppercase shadow-sm border border-emerald-950">
             {(user?.name ?? "U").charAt(0)}
           </div>
         </header>
-        <main className="p-5 lg:p-8">{children}</main>
+        
+        {/* AREA INJEKSI HALAMAN KONTEN */}
+        <main className="flex-1 p-5 lg:p-8 bg-stone-50/40">
+          {children}
+        </main>
       </div>
 
-      {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface-container-lowest border-t border-surface-container-high flex justify-around py-2">
-        {navItems.slice(0, 4).map((item) => {
+      {/* ─── BOTTOM NAVIGATION BAR UNTUK MOBILE SCREEN ─── */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface-container-lowest border-t border-surface-container-high flex justify-around py-1.5 shadow-lg">
+        {navItems.slice(0, 5).map((item) => { 
           const Icon = item.icon;
+          const isBaseDashboard = item.href === `/dashboard/${role}`;
+          const active = isBaseDashboard
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
+            
           return (
-            <Link key={item.href} href={item.href} className="flex flex-col items-center gap-0.5 text-on-surface-variant px-2 py-1">
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px]">{item.label}</span>
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              className={cn(
+                "flex flex-col items-center gap-0.5 px-2 py-1 transition-all rounded-md",
+                active ? "text-stone-900 font-extrabold scale-105" : "text-stone-400"
+              )}
+            >
+              <Icon className={cn("w-4.5 h-4.5", active ? "text-emerald-700" : "text-stone-400")} />
+              <span className="text-[9px] tracking-tight text-center whitespace-nowrap">{item.label}</span>
             </Link>
           );
         })}
       </nav>
+
     </div>
   );
 }

@@ -30,7 +30,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     badges: ["AI Verified", "Eco Badge"],
     listedAt: "2026-04-08T10:00:00+07:00",
     sellMode: "fixed",
-    imageUrl: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&h=800&fit=crop",
+    imageUrl: "/images/products/minyak nilam 1.png", // Menggunakan aset foto Anda
     description:
       "Minyak nilam mentah hasil sulingan uap dari kebun Gayo, dataran tinggi Aceh Tengah. Dianalisis melalui Nilam Analyzer AI dengan kadar Patchouli Alcohol 34.2%, masuk kategori Premium sesuai SNI 06-2385-2006.",
   },
@@ -57,7 +57,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     badges: ["USK Verified", "Eco Badge"],
     listedAt: "2026-04-02T15:00:00+07:00",
     sellMode: "fixed",
-    imageUrl: "https://images.unsplash.com/photo-1556228852-80b6e16a3219?w=800&h=800&fit=crop",
+    imageUrl: "/images/products/minyak nilam.png", // Menggunakan aset foto Anda
     description:
       "Minyak nilam dari Koperasi Aceh Barat, telah diverifikasi langsung oleh laboratorium ARC-USK. Cocok untuk kebutuhan parfum kelas menengah-atas dengan rendemen tinggi.",
   },
@@ -87,14 +87,12 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     sellMode: "auction",
     auctionEndsAt: "2026-07-05T23:59:00+07:00",
     highestBid: 2380000,
-    imageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&h=800&fit=crop",
+    imageUrl: "/images/products/minyak nilam 2.png", // Menggunakan aset foto Anda
     description:
       "Akar wangi premium dengan profil aroma woody-earthy yang khas, diburu oleh rumah parfum internasional untuk base note mewah.",
   },
 ];
 
-// Traceability chain untuk produk hero "Seulawah Elixir" — dikunci agar
-// nama petani, kadar PA, dan tanggal identik di setiap halaman yang menampilkannya.
 const SEULAWAH_TRACE: TraceabilityStage[] = [
   {
     stage: "Kebun",
@@ -145,21 +143,18 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
   {
     id: "fp-seulawah-elixir",
     type: "finished-product",
-    title: "Seulawah Elixir — Eau de Parfum",
+    title: "Parfum Eksklusif ATSIRA - Eau De Parfum", // Judul disesuaikan dengan MOCK_FINISHED_PRODUCTS Anda
     category: "Parfum",
     umkmId: "umkm-seulawah",
-    price: 450000,
-    unit: "50ml",
+    price: 350000, // Harga disesuaikan agar sama dengan di toko
+    unit: "pcs",
     stock: 24,
-    rating: 4.8,
-    reviewCount: 132,
+    rating: 4.9,
+    reviewCount: 142,
     badges: ["AI Verified", "Halal Ready"],
-    imageUrl: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=900&h=1100&fit=crop",
+    imageUrl: "/images/products/parfume1.png", // SEKARANG FOTO PARFUM ANDA SUDAH MASUK KE SINI!
     gallery: [
-      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=900&h=1100&fit=crop",
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=900&h=1100&fit=crop",
-      "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=900&h=1100&fit=crop",
-      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=900&h=1100&fit=crop",
+      "/images/products/parfume1.png",
     ],
     description:
       "Eau de Parfum unisex dengan jantung wangi nilam Gayo otentik berkadar PA 34,2%. Dipadukan dengan bergamot dan kayu cendana untuk profil hangat-earthy yang tahan lama. Setiap botol membawa kisah dari kebun Pak Syukur di Gayo hingga ke tangan Anda.",
@@ -176,19 +171,18 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
   {
     id: "fp-gayowood-musk",
     type: "finished-product",
-    title: "Gayo Wood Musk — Eau de Parfum",
+    title: "Parfum Pria Maskulin Nilam Wood", // Judul disesuaikan
     category: "Parfum",
     umkmId: "umkm-seulawah",
-    price: 398000,
-    unit: "30ml",
+    price: 290000,
+    unit: "pcs",
     stock: 31,
-    rating: 4.6,
-    reviewCount: 87,
+    rating: 4.8,
+    reviewCount: 58,
     badges: ["AI Verified"],
-    imageUrl: "https://images.unsplash.com/photo-1610461888750-10bfc601b874?w=900&h=1100&fit=crop",
+    imageUrl: "/images/products/parfume2.png", // Menggunakan aset foto Anda
     gallery: [
-      "https://images.unsplash.com/photo-1610461888750-10bfc601b874?w=900&h=1100&fit=crop",
-      "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=900&h=1100&fit=crop",
+      "/images/products/parfume2.png",
     ],
     description: "Profil woody-musky pekat untuk pemakaian malam, dengan basis nilam Aceh Barat grade Standard.",
     notes: { top: ["Cengkeh"], middle: ["Nilam"], base: ["Musk", "Kayu Gaharu"] },
@@ -200,17 +194,17 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
   {
     id: "fp-nilam-diffuser",
     type: "finished-product",
-    title: "Diffuser Keramik Minimalis — Nilam Gayo",
+    title: "Paket Set Diffuser Ruangan Mewah", // Judul disesuaikan
     category: "Diffuser",
     umkmId: "umkm-seulawah",
-    price: 285000,
-    unit: "1 set",
+    price: 420000,
+    unit: "set",
     stock: 15,
     rating: 4.9,
-    reviewCount: 54,
-    badges: ["Eco Badge"],
-    imageUrl: "https://images.unsplash.com/photo-1602910344008-22f323cc1817?w=900&h=1100&fit=crop",
-    gallery: ["https://images.unsplash.com/photo-1602910344008-22f323cc1817?w=900&h=1100&fit=crop"],
+    reviewCount: 88,
+    badges: ["Eco Badge", "AI Verified"],
+    imageUrl: "/images/products/diffuser set.png", // Menggunakan aset foto Anda
+    gallery: ["/images/products/diffuser set.png"],
     description: "Reed diffuser keramik buatan tangan dengan minyak esensial nilam Gayo, cocok untuk ruang kerja maupun kamar tidur.",
     notes: { top: ["Nilam"], middle: ["Cedar"], base: ["Vanila"] },
     sourcedFromRawOilId: "raw-gayo-001",
@@ -221,17 +215,17 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
   {
     id: "fp-sabun-nilam",
     type: "finished-product",
-    title: "Sabun Nilam Organik — Bar 100g",
+    title: "Sabun Herbal Organik Ekstrak Nilam",
     category: "Sabun Nilam",
     umkmId: "umkm-acehscent",
-    price: 45000,
-    unit: "100g",
+    price: 35000,
+    unit: "bar",
     stock: 120,
     rating: 4.7,
-    reviewCount: 203,
+    reviewCount: 210,
     badges: ["Halal Ready", "Eco Badge"],
-    imageUrl: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=900&h=1100&fit=crop",
-    gallery: ["https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=900&h=1100&fit=crop"],
+    imageUrl: "/images/products/soap.png", // Menggunakan aset foto Anda
+    gallery: ["/images/products/soap.png"],
     description: "Sabun batang dengan campuran minyak nilam Aceh Jaya dan minyak kelapa organik, lembut untuk kulit sensitif.",
     notes: { top: ["Citrus"], middle: ["Nilam"], base: ["Kelapa"] },
     sourcedFromRawOilId: "raw-vetiver-003",
@@ -242,17 +236,17 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
   {
     id: "fp-lilin-aromaterapi",
     type: "finished-product",
-    title: "Lilin Aromaterapi Nilam & Lavender",
+    title: "Minyak Aromaterapi Relaksasi Nilam",
     category: "Lilin Aromaterapi",
     umkmId: "umkm-acehscent",
-    price: 89000,
-    unit: "150g",
+    price: 650000,
+    unit: "botol",
     stock: 48,
-    rating: 4.5,
-    reviewCount: 61,
+    rating: 4.8,
+    reviewCount: 96,
     badges: ["AI Verified"],
-    imageUrl: "https://images.unsplash.com/photo-1602874801007-2245fae99c33?w=900&h=1100&fit=crop",
-    gallery: ["https://images.unsplash.com/photo-1602874801007-2245fae99c33?w=900&h=1100&fit=crop"],
+    imageUrl: "/images/products/aromatherapy.png", // Menggunakan aset foto Anda
+    gallery: ["/images/products/aromatherapy.png"],
     description: "Lilin soy wax dengan campuran nilam Gayo dan lavender, waktu bakar hingga 40 jam.",
     notes: { top: ["Lavender"], middle: ["Nilam"], base: ["Vanila"] },
     sourcedFromRawOilId: "raw-gayo-001",
@@ -263,17 +257,17 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
   {
     id: "fp-minyak-eceran",
     type: "finished-product",
-    title: "Minyak Nilam Eceran — Langsung dari Petani",
+    title: "Serum Wajah Anti-Aging Nilam Glow",
     category: "Essential Oil Eceran",
     umkmId: "farmer-direct",
-    price: 65000,
-    unit: "10ml",
+    price: 185000,
+    unit: "botol",
     stock: 90,
-    rating: 4.9,
-    reviewCount: 41,
+    rating: 5.0,
+    reviewCount: 34,
     badges: ["AI Verified", "Eco Badge"],
-    imageUrl: "https://images.unsplash.com/photo-1601612628452-9e99ced43524?w=900&h=1100&fit=crop",
-    gallery: ["https://images.unsplash.com/photo-1601612628452-9e99ced43524?w=900&h=1100&fit=crop"],
+    imageUrl: "/images/products/serum.png", // Menggunakan aset foto Anda
+    gallery: ["/images/products/serum.png"],
     description: "Minyak nilam murni dalam kemasan kecil, dijual langsung oleh Pak Syukur tanpa perantara (C2C) — dengan kadar PA 34,2%.",
     notes: { top: [], middle: ["Nilam Murni"], base: [] },
     sourcedFromRawOilId: "raw-gayo-001",

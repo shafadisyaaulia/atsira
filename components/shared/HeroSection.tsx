@@ -1,9 +1,53 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { formatIDR } from "@/lib/mock";
 import { PRICE_HISTORY } from "@/lib/mock";
 
+// 1. Hubungkan hook bahasa langsung dari Navbar Anda
+import { useLang } from "@/components/layout/Navbar";
+
+// 2. Kamus Translasi Lokal untuk HeroSection
+const T_HERO = {
+  badge: {
+    ID: "Warisan Modern",
+    EN: "Modern Heritage"
+  },
+  title: {
+    ID: "Emas Cair dari Aceh: Ekosistem Wewangian Digital",
+    EN: "Liquid Gold from Aceh: Digital Fragrance Ecosystem"
+  },
+  desc: {
+    ID: "Melestarikan budidaya kuno melalui Blockchain dan AI. Rasakan sinergi tradisi dan presisi dalam minyak atsiri paling berharga di dunia.",
+    EN: "Preserving ancient cultivation through Blockchain and AI. Experience the synergy of tradition and precision in the world's most valuable essential oil."
+  },
+  btnExplore: {
+    ID: "Jelajahi Ekosistem",
+    EN: "Explore Ecosystem"
+  },
+  btnImpact: {
+    ID: "Lihat Dampaknya",
+    EN: "View Our Impact"
+  },
+  statusNetwork: {
+    ID: "Status Jaringan Langsung",
+    EN: "Live Network Status"
+  },
+  priceTitle: {
+    ID: "Harga Nilam Saat Ini",
+    EN: "Current Patchouli Price"
+  },
+  verifiedUnit: {
+    ID: "Unit Minyak Terverifikasi",
+    EN: "Verified Oil Units"
+  }
+};
+
 export default function HeroSection() {
+  // 3. Panggil hook bahasa untuk memantau perubahan bahasa aktif ("ID" atau "EN")
+  const lang = useLang();
+
   const latest = PRICE_HISTORY[PRICE_HISTORY.length - 1];
   const prev = PRICE_HISTORY[PRICE_HISTORY.length - 2];
   const priceChange = (((latest.premium - prev.premium) / prev.premium) * 100).toFixed(1);
@@ -33,7 +77,7 @@ export default function HeroSection() {
             letterSpacing: "0.05em",
           }}
         >
-          Warisan Modern
+          {T_HERO.badge[lang]}
         </span>
         <h1
           className="text-ink-green mb-6 leading-tight"
@@ -45,7 +89,7 @@ export default function HeroSection() {
             letterSpacing: "-0.02em",
           }}
         >
-          Emas Cair dari Aceh: Ekosistem Wewangian Digital
+          {T_HERO.title[lang]}
         </h1>
         <p
           className="text-on-surface-variant mb-10 max-w-xl"
@@ -55,8 +99,7 @@ export default function HeroSection() {
             lineHeight: "28px",
           }}
         >
-          Melestarikan budidaya kuno melalui Blockchain dan AI. Rasakan sinergi
-          tradisi dan presisi dalam minyak atsiri paling berharga di dunia.
+          {T_HERO.desc[lang]}
         </p>
 
         <div className="flex flex-wrap gap-4">
@@ -65,7 +108,7 @@ export default function HeroSection() {
             className="bg-patchouli-deep text-white px-8 py-4 rounded-full hover:bg-ink-green transition-all shadow-xl flex items-center gap-2 group"
             style={{ fontFamily: "Plus Jakarta Sans, sans-serif", fontSize: "14px", fontWeight: "600", letterSpacing: "0.05em" }}
           >
-            Jelajahi Ekosistem
+            {T_HERO.btnExplore[lang]}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
@@ -73,7 +116,7 @@ export default function HeroSection() {
             className="border-2 border-patchouli-deep text-patchouli-deep px-8 py-4 rounded-full hover:bg-patchouli-deep hover:text-white transition-all"
             style={{ fontFamily: "Plus Jakarta Sans, sans-serif", fontSize: "14px", fontWeight: "600", letterSpacing: "0.05em" }}
           >
-            Lihat Dampaknya
+            {T_HERO.btnImpact[lang]}
           </Link>
         </div>
       </div>
@@ -87,7 +130,7 @@ export default function HeroSection() {
               className="text-xs uppercase text-on-surface-variant"
               style={{ fontFamily: "JetBrains Mono, monospace" }}
             >
-              Status Jaringan Langsung
+              {T_HERO.statusNetwork[lang]}
             </span>
           </div>
           <div className="space-y-4">
@@ -96,7 +139,7 @@ export default function HeroSection() {
                 className="text-on-surface-variant"
                 style={{ fontFamily: "Plus Jakarta Sans, sans-serif", fontSize: "14px", fontWeight: "600", letterSpacing: "0.05em" }}
               >
-                Harga Nilam Saat Ini
+                {T_HERO.priceTitle[lang]}
               </p>
               <p
                 className="text-oil-gold"
@@ -116,7 +159,7 @@ export default function HeroSection() {
                 className="text-on-surface-variant"
                 style={{ fontFamily: "Plus Jakarta Sans, sans-serif", fontSize: "14px", fontWeight: "600", letterSpacing: "0.05em" }}
               >
-                Unit Minyak Terverifikasi
+                {T_HERO.verifiedUnit[lang]}
               </p>
               <p
                 className="text-ink-green"

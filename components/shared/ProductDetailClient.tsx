@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   ShoppingCart,
   MessageCircle,
-  Gavel,
   Star,
   ChevronLeft,
 } from "lucide-react";
@@ -17,10 +16,11 @@ import { PageShell } from "@/components/layout/PageShell";
 import { Card, Badge, SectionEyebrow } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { formatIDR, formatDateID } from "@/lib/mock";
-import { FARMERS } from "@/lib/mock/farmers";
-import { UMKM_STORES } from "@/lib/mock/ecosystem";
 import { useCartStore } from "@/lib/store";
-import type { RawOilListing, FinishedProduct } from "@/lib/types";
+import { useLang } from "@/components/layout/Navbar";
+
+// ── IMPORT DATABASE PRODUK UTAMA ──
+import { ALL_PRODUCTS } from "@/lib/mock/products";
 
 const STAGE_ICON: Record<string, typeof MapPin> = {
   Kebun: MapPin,
@@ -30,28 +30,94 @@ const STAGE_ICON: Record<string, typeof MapPin> = {
   Botol: Star,
 };
 
-export function ProductDetailClient({ product }: { product: RawOilListing | FinishedProduct }) {
+// Kamus Translasi Lokal
+const T_DETAIL = {
+  back: { ID: "Kembali ke Pasar", EN: "Back to Marketplace" },
+  by: { ID: "oleh", EN: "by" },
+  reviews: { ID: "ulasan", EN: "reviews" },
+  technicalSpec: { ID: "Spesifikasi Teknis & Kualitas", EN: "Technical & Quality Specifications" },
+  scentProfile: { ID: "Profil Aroma", EN: "Scent Profile" },
+  scentLayers: {
+    top: { ID: "Atas", EN: "Top" },
+    middle: { ID: "Tengah", EN: "Middle" },
+    base: { ID: "Dasar", EN: "Base" }
+  },
+  btnAdded: { ID: "Ditambahkan!", EN: "Added!" },
+  btnCart: { ID: "Tambah ke Keranjang", EN: "Add to Cart" },
+  btnChat: { ID: "Chat Penjual", EN: "Chat Seller" },
+  traceEyebrow: { ID: "Transparansi dari Tanah ke Botol", EN: "Transparency from Soil to Bottle" },
+  traceTitle: { ID: "Rantai Asal-Usul Interaktif", EN: "Interactive Chain of Origin" },
+  verified: { ID: "Terverifikasi", EN: "Verified" },
+  fullTrace: { ID: "Lihat halaman pelacakan lengkap untuk Batch", EN: "View full tracking page for Batch" },
+  specLabels: {
+    paLevel: { ID: "Kadar PA", EN: "PA Level" },
+    acidNumber: { ID: "Bilangan Asam", EN: "Acid Number" },
+    density: { ID: "Densitas", EN: "Density" },
+    color: { ID: "Warna", EN: "Color" },
+    viscosity: { ID: "Kekentalan", EN: "Viscosity" },
+    method: { ID: "Metode Uji", EN: "Test Method" }
+  }
+};
+
+export function ProductDetailClient({ product }: { product: any }) {
+  const lang = (useLang() || "ID") as "ID" | "EN";
+
+  // 1. STATE PENGUNCI HYDRATION MISMATCH
+  const [mounted, setMounted] = useState(false);
+  
   const [activeImg, setActiveImg] = useState(0);
-  const [qty, setQty] = useState(product.type === "raw-oil" ? product.minOrderKg : 1);
   const addItem = useCartStore((s) => s.addItem);
   const [added, setAdded] = useState(false);
 
-  const isRaw = product.type === "raw-oil";
-  const images = isRaw ? [product.imageUrl] : product.gallery;
-  const farmer = isRaw ? FARMERS.find((f) => f.id === product.farmerId) : undefined;
-  const store = !isRaw ? UMKM_STORES.find((s) => s.id === product.umkmId) : undefined;
-  const coa = isRaw ? product.coa : product.coaSnapshot;
-  const traceability = !isRaw ? product.traceability : undefined;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Cari di database ALL_PRODUCTS global yang lengkap
+  const matchedProduct = ALL_PRODUCTS.find((p: any) => p.id === product?.id) || ALL_PRODUCTS[0];
+  
+  // Normalisasi tipe produk
+  const isRaw = matchedProduct.type === "raw-oil" || !matchedProduct.unit || matchedProduct.unit === "kg";
+  
+  const [qty, setQty] = useState(isRaw ? (matchedProduct.minOrderKg || 5) : 1);
+
+  // 2. PROTEKSI RENDER: Jika belum di-mount di client, tampilkan loading agar server & client sinkron
+  if (!mounted) {
+    return (
+      <PageShell>
+        <div className="container-app py-24 flex items-center justify-center text-outline text-sm">
+          Memuat detail produk...
+        </div>
+      </PageShell>
+    );
+  }
+
+  // Penyesuaian nama properti gambar (imageUrl vs img)
+  const mainImage = matchedProduct.imageUrl || matchedProduct.img || "/images/products/minyak nilam.png";
+  const images = isRaw 
+    ? [mainImage] 
+    : (matchedProduct.gallery && matchedProduct.gallery.length > 0 ? matchedProduct.gallery : [mainImage]);
+
+  // Penyesuaian nama properti CoA
+  const coa = matchedProduct.coa || matchedProduct.coaSnapshot || matchedProduct.coaFields;
+  const traceability = !isRaw ? matchedProduct.traceability : undefined;
+
+  // Normalisasi judul dan deskripsi dwi-bahasa
+  const getLocalizedText = (field: any) => {
+    if (!field) return "";
+    if (typeof field === "string") return field;
+    return field[lang] || field["ID"] || field["EN"] || "";
+  };
 
   function handleAddToCart() {
     addItem({
-      productId: product.id,
-      title: product.title,
-      imageUrl: isRaw ? product.imageUrl : product.imageUrl,
-      price: isRaw ? product.pricePerKg : product.price,
-      unit: isRaw ? "kg" : product.unit,
+      productId: matchedProduct.id,
+      title: getLocalizedText(matchedProduct.title),
+      imageUrl: mainImage,
+      price: isRaw ? (matchedProduct.pricePerKg || matchedProduct.price) : matchedProduct.price,
+      unit: isRaw ? "kg" : (matchedProduct.unit || "pcs"),
       qty,
-      category: product.type,
+      category: isRaw ? "raw-oil" : "finished-product", // Disinkronkan dengan keranjang belanja
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -61,18 +127,18 @@ export function ProductDetailClient({ product }: { product: RawOilListing | Fini
     <PageShell>
       <div className="container-app py-6">
         <Link href="/marketplace" className="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary mb-4">
-          <ChevronLeft className="w-4 h-4" /> Kembali ke Pasar
+          <ChevronLeft className="w-4 h-4" /> {T_DETAIL.back[lang]}
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-10 mb-16">
-          {/* Gallery */}
+          {/* Sisi Kiri: Gambar */}
           <div>
-            <div className="aspect-square rounded-md overflow-hidden mb-3 bg-surface-container-low">
-              <img src={images[activeImg]} alt={product.title} className="w-full h-full object-cover" />
+            <div className="aspect-square rounded-md overflow-hidden mb-3 bg-surface-container-low border border-surface-container-high shadow-sm">
+              <img src={images[activeImg]} alt={getLocalizedText(matchedProduct.title)} className="w-full h-full object-cover" />
             </div>
             {images.length > 1 && (
               <div className="flex gap-2">
-                {images.map((img, i) => (
+                {images.map((img: string, i: number) => (
                   <button
                     key={i}
                     onClick={() => setActiveImg(i)}
@@ -87,65 +153,62 @@ export function ProductDetailClient({ product }: { product: RawOilListing | Fini
             )}
           </div>
 
-          {/* Info */}
+          {/* Sisi Kanan: Konten */}
           <div>
             <div className="flex gap-2 mb-3 flex-wrap">
-              {product.badges.map((b) => (
+              {matchedProduct.badges && matchedProduct.badges.map((b: string) => (
                 <Badge key={b} variant={b === "AI Verified" ? "ai" : b === "USK Verified" ? "usk" : b === "Eco Badge" ? "eco" : "halal"}>
                   {b}
                 </Badge>
               ))}
             </div>
-            <h1 className="font-display text-headline-md text-primary mb-2">{product.title}</h1>
+            <h1 className="font-display text-headline-md text-primary mb-2">{getLocalizedText(matchedProduct.title)}</h1>
 
             {isRaw ? (
               <p className="text-sm text-on-surface-variant mb-4 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4" /> {product.region} · oleh {farmer?.name}
+                <MapPin className="w-4 h-4" /> {getLocalizedText(matchedProduct.region)} · {T_DETAIL.by[lang]} {matchedProduct.farmerName || matchedProduct.seller || "Petani Nilam"}
               </p>
             ) : (
               <div className="flex items-center gap-2 mb-4">
                 <Star className="w-4 h-4 fill-secondary-fixed text-secondary-fixed" />
                 <span className="text-sm text-on-surface-variant">
-                  {product.rating} ({product.reviewCount} ulasan) · {store?.name}
+                  {matchedProduct.rating || "5.0"} ({matchedProduct.reviewCount || matchedProduct.reviews || 10} {T_DETAIL.reviews[lang]}) · {matchedProduct.storeName || matchedProduct.seller || "UMKM Aceh"}
                 </span>
               </div>
             )}
 
             <p className="font-display text-3xl font-bold text-primary mb-1">
-              {formatIDR(isRaw ? product.pricePerKg : product.price)}
-              <span className="text-base font-body font-normal text-outline"> /{isRaw ? "kg" : product.unit}</span>
+              {formatIDR(isRaw ? (matchedProduct.pricePerKg || matchedProduct.price) : matchedProduct.price)}
+              <span className="text-base font-body font-normal text-outline"> /{isRaw ? "kg" : (matchedProduct.unit || "pcs")}</span>
             </p>
-            {isRaw && product.sellMode === "auction" && product.highestBid && (
-              <p className="text-sm text-clay-earth font-semibold mb-4">
-                Penawaran tertinggi saat ini: {formatIDR(product.highestBid)}
-              </p>
+
+            <p className="text-body-md text-on-surface-variant mb-6 mt-4">{getLocalizedText(matchedProduct.description)}</p>
+
+            {/* COA / Lab Specs */}
+            {coa && (
+              <Card className="p-5 mb-6">
+                <p className="text-label-md uppercase text-on-surface-variant mb-3">{T_DETAIL.technicalSpec[lang]}</p>
+                <div className="grid grid-cols-2 gap-4 font-mono text-technical-mono">
+                  <Spec label={T_DETAIL.specLabels.paLevel[lang]} value={`${coa.paLevel || 30}%`} highlight />
+                  <Spec label={T_DETAIL.specLabels.acidNumber[lang]} value={`${coa.acidNumber || "1.1"}`} />
+                  <Spec label={T_DETAIL.specLabels.density[lang]} value={`${coa.density || "0.9"} g/mL`} />
+                  <Spec label={T_DETAIL.specLabels.color[lang]} value={typeof coa.color === "object" ? getLocalizedText(coa.color) : (coa.color || "Kuning")} />
+                  <Spec label={T_DETAIL.specLabels.viscosity[lang]} value={typeof coa.viscosity === "object" ? getLocalizedText(coa.viscosity) : (coa.viscosity || "Cair")} />
+                  <Spec label={T_DETAIL.specLabels.method[lang]} value={coa.method || "GC-MS"} />
+                </div>
+              </Card>
             )}
 
-            <p className="text-body-md text-on-surface-variant mb-6">{product.description}</p>
-
-            {/* Spec table */}
-            <Card className="p-5 mb-6">
-              <p className="text-label-md uppercase text-on-surface-variant mb-3">Spesifikasi Teknis & Kualitas</p>
-              <div className="grid grid-cols-2 gap-4 font-mono text-technical-mono">
-                <Spec label="Kadar PA" value={`${coa.paLevel}%`} highlight />
-                <Spec label="Bilangan Asam" value={`${coa.acidNumber}`} />
-                <Spec label="Densitas" value={`${coa.density} g/mL`} />
-                <Spec label="Warna" value={coa.color} />
-                <Spec label="Kekentalan" value={coa.viscosity} />
-                <Spec label="Metode Uji" value={coa.method} />
-              </div>
-            </Card>
-
-            {!isRaw && (product as FinishedProduct).notes && (
+            {!isRaw && matchedProduct.notes && (
               <Card className="p-5 mb-6">
-                <p className="text-label-md uppercase text-on-surface-variant mb-3">Profil Aroma</p>
+                <p className="text-label-md uppercase text-on-surface-variant mb-3">{T_DETAIL.scentProfile[lang]}</p>
                 <div className="space-y-2 text-sm">
                   {(["top", "middle", "base"] as const).map((layer) => {
-                    const notes = (product as FinishedProduct).notes[layer];
-                    if (!notes.length) return null;
+                    const notes = matchedProduct.notes[layer];
+                    if (!notes || !notes.length) return null;
                     return (
                       <div key={layer} className="flex gap-3">
-                        <span className="w-20 text-outline capitalize">{layer === "top" ? "Atas" : layer === "middle" ? "Tengah" : "Dasar"}</span>
+                        <span className="w-20 text-outline capitalize">{T_DETAIL.scentLayers[layer][lang]}</span>
                         <span className="text-on-surface">{notes.join(", ")}</span>
                       </div>
                     );
@@ -154,41 +217,40 @@ export function ProductDetailClient({ product }: { product: RawOilListing | Fini
               </Card>
             )}
 
-            {/* Actions */}
             <div className="flex items-center gap-3 mb-4">
               <input
                 type="number"
                 value={qty}
-                min={isRaw ? product.minOrderKg : 1}
+                min={isRaw ? (matchedProduct.minOrderKg || 5) : 1}
                 onChange={(e) => setQty(Number(e.target.value))}
                 className="w-24 px-3 py-3 rounded border border-sand-gray bg-bone-wash text-center font-semibold"
               />
-              <span className="text-sm text-outline">{isRaw ? "kg" : product.unit}</span>
+              <span className="text-sm text-outline">{isRaw ? "kg" : (matchedProduct.unit || "pcs")}</span>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button onClick={handleAddToCart} size="lg" className="flex-1">
                 {added ? <CheckCircle2 className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
-                {added ? "Ditambahkan!" : isRaw && product.sellMode === "auction" ? "Ajukan Penawaran" : "Tambah ke Keranjang"}
+                {added ? T_DETAIL.btnAdded[lang] : T_DETAIL.btnCart[lang]}
               </Button>
               <Button variant="secondary" size="lg">
-                <MessageCircle className="w-5 h-5" /> Chat Penjual
+                <MessageCircle className="w-5 h-5" /> {T_DETAIL.btnChat[lang]}
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Traceability */}
+        {/* Timeline Traceability */}
         {traceability && (
           <section className="mb-16">
-            <SectionEyebrow>Transparansi dari Tanah ke Botol</SectionEyebrow>
-            <h2 className="font-display text-headline-md text-primary mb-8">Rantai Asal-Usul Interaktif</h2>
+            <SectionEyebrow>{T_DETAIL.traceEyebrow[lang]}</SectionEyebrow>
+            <h2 className="font-display text-headline-md text-primary mb-8">{T_DETAIL.traceTitle[lang]}</h2>
             <div className="relative">
               <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-outline-variant hidden sm:block" />
               <div className="space-y-6">
-                {traceability.map((stage) => {
+                {traceability.map((stage: any, index: number) => {
                   const Icon = STAGE_ICON[stage.stage] ?? MapPin;
                   return (
-                    <div key={stage.stage} className="flex gap-4 sm:gap-5 relative">
+                    <div key={index} className="flex gap-4 sm:gap-5 relative">
                       <div className="hidden sm:flex w-10 h-10 rounded-full bg-primary text-on-primary items-center justify-center flex-shrink-0 z-10">
                         <Icon className="w-5 h-5" />
                       </div>
@@ -196,15 +258,15 @@ export function ProductDetailClient({ product }: { product: RawOilListing | Fini
                         <div className="flex items-start justify-between gap-3 mb-1">
                           <div>
                             <p className="text-xs uppercase tracking-wide text-clay-earth font-semibold mb-0.5">{stage.stage}</p>
-                            <p className="font-semibold text-on-surface">{stage.title}</p>
+                            <p className="font-semibold text-on-surface">{getLocalizedText(stage.title)}</p>
                           </div>
                           {stage.verified && (
                             <Badge variant="success">
-                              <CheckCircle2 className="w-3 h-3" /> Terverifikasi
+                              <CheckCircle2 className="w-3 h-3" /> {T_DETAIL.verified[lang]}
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-on-surface-variant mb-3">{stage.description}</p>
+                        <p className="text-sm text-on-surface-variant mb-3">{getLocalizedText(stage.description)}</p>
                         <div className="flex flex-wrap items-center gap-4 text-xs text-outline">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3.5 h-3.5" /> {formatDateID(stage.date)}
@@ -215,29 +277,12 @@ export function ProductDetailClient({ product }: { product: RawOilListing | Fini
                             </span>
                           )}
                         </div>
-                        {stage.meta && (
-                          <div className="flex gap-4 mt-3 pt-3 border-t border-surface-container-high flex-wrap">
-                            {Object.entries(stage.meta).map(([k, v]) => (
-                              <div key={k}>
-                                <p className="text-[10px] uppercase text-outline">{k}</p>
-                                <p className="text-sm font-mono font-semibold text-primary">{v}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
                       </Card>
                     </div>
                   );
                 })}
               </div>
             </div>
-            {"qrBatchId" in product && (
-              <div className="mt-6">
-                <Link href={`/traceability?batch=${product.qrBatchId}`} className="text-sm font-semibold text-primary hover:underline">
-                  Lihat halaman pelacakan lengkap untuk Batch {product.qrBatchId} →
-                </Link>
-              </div>
-            )}
           </section>
         )}
       </div>
