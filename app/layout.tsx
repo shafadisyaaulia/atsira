@@ -50,8 +50,7 @@ export default function RootLayout({
               .goog-te-banner,
               .goog-te-gadget,
               #goog-gt-tt,
-              .goog-te-balloon-frame,
-              .skiptranslate {
+              .goog-te-balloon-frame {
                 display: none !important;
                 visibility: hidden !important;
               }
