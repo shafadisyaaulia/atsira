@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image"; // 👈 Menggunakan optimasi Next.js Image
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -15,21 +16,18 @@ import { cn } from "@/lib/utils/cn";
 let _lang: "ID" | "EN" = "ID";
 const _listeners: Array<() => void> = [];
 
-// Fungsi toggle yang memancarkan sinyal ke LocalStorage & Memicu Engine Otomatis
 function toggleLang() {
   _lang = _lang === "ID" ? "EN" : "ID";
   
   if (typeof window !== "undefined") {
     localStorage.setItem("atsira-lang", _lang);
     
-    // 1. PICU ENGINE OTOMATIS: Beri tahu Google Translate tersembunyi untuk beraksi
     const googleCombo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
     if (googleCombo) {
       googleCombo.value = _lang === "EN" ? "en" : "id";
       googleCombo.dispatchEvent(new Event('change'));
     }
 
-    // Pancarkan sinyal cadangan agar jika ada komponen custom yang membutuhkan event tahu bahasa telah berubah
     const event = new CustomEvent("atsira-language-changed", { detail: _lang });
     window.dispatchEvent(event);
   }
@@ -47,7 +45,6 @@ export function useLang() {
         _lang = savedLang;
         setLang(savedLang);
         
-        // Pertahankan bahasa pilihan saat halaman di-refresh
         setTimeout(() => {
           const googleCombo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
           if (googleCombo) {
@@ -81,7 +78,6 @@ export function useLang() {
   return lang;
 }
 
-// ── Kamus Penerjemahan Navigasi (Tetap dipertahankan untuk redundansi menu)
 const T = {
   market:    { ID: "Marketplace",   EN: "Marketplace" },
   trace:     { ID: "NilamTrace",    EN: "NilamTrace" },
@@ -128,17 +124,18 @@ export function Navbar() {
       <div className="container-app flex items-center justify-between h-[72px] relative">
 
         {/* 
-          FIX LOGO: 
-          1. Menggunakan w-[160px] h-full relative untuk mengunci area ruang logo.
-          2. Ditambahkan kelas `notranslate` dan atribut `translate="no"` agar Google Translate membiarkan elemen ini utuh.
-          3. Tag img dibuat absolute dengan h-[76px] agar frame gambar melebar maksimal tanpa merusak tinggi navbar.
+          🎯 CONTAINER LOGO ANTI-TRANSLATE & PRESISI
+          Mengunci area ruang logo agar tidak bisa dirusak oleh struktur font Google Translate.
         */}
-        <div className="flex items-center h-full w-[160px] relative justify-start flex-shrink-0 notranslate" translate="no">
-          <Link href="/" className="absolute left-0 top-1/2 -translate-y-1/2 block transition-opacity hover:opacity-90">
-            <img 
+        <div className="flex items-center h-full w-[180px] flex-shrink-0 notranslate" translate="no">
+          <Link href="/" className="flex items-center h-full w-full justify-start transition-opacity hover:opacity-90">
+            <Image 
               src="/images/logo-atsira.png" 
               alt="ATSIRA Logo"
-              className="h-[76px] w-auto object-contain max-w-none block" 
+              width={180}
+              height={76}
+              className="h-[68px] w-auto object-contain block"
+              priority
             />
           </Link>
         </div>
@@ -182,7 +179,6 @@ export function Navbar() {
 
         {/* Navigasi Kanan Desktop */}
         <div className="hidden lg:flex items-center gap-2">
-          {/* Tombol Ganti Bahasa Global */}
           <button
             onClick={toggleLang}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-300 bg-amber-50/50 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors shadow-sm">
@@ -190,7 +186,6 @@ export function Navbar() {
             <span>{lang === "ID" ? "🇮🇩 ID" : "🇺🇸 EN"}</span>
           </button>
 
-          {/* Keranjang Belanja */}
           <Link href="/cart"
             className="relative p-2 rounded-full hover:bg-surface-container-high transition-colors"
             aria-label={T.cart[lang]}>
@@ -202,7 +197,6 @@ export function Navbar() {
             )}
           </Link>
 
-          {/* Autentikasi Dropdown Dinamis */}
           {user ? (
             <div ref={profileRef} className="relative">
               <button
@@ -281,7 +275,6 @@ export function Navbar() {
             </Link>
           ))}
 
-          {/* Ganti Bahasa Mobile */}
           <div className="flex gap-3 mt-4">
             <button onClick={() => { toggleLang(); }}
               className="flex items-center gap-1.5 px-3 py-2.5 rounded-full border border-amber-300 bg-amber-50/50 text-sm font-bold text-amber-950 flex-1 justify-center shadow-sm">
