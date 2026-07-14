@@ -13,35 +13,6 @@ import { useLang } from "@/components/layout/Navbar";
 
 // 2. Kamus Translasi Lokal untuk Semua Komponen di HomePage
 const T_HOME = {
-  // Bagian Lapisan Ekosistem
-  ecosystemTitle: { ID: "Rantai Asal-Usul", EN: "Chain of Origin" },
-  layers: [
-    {
-      label: { ID: "Lapisan 01", EN: "Layer 01" },
-      title: { ID: "Hulu (Upstream)", EN: "Upstream" },
-      desc: {
-        ID: "Memberdayakan 5.000+ petani lokal dengan wawasan budidaya berbasis AI dan pemetaan tanah regeneratif.",
-        EN: "Empowering 5,000+ local farmers with AI-driven cultivation insights and regenerative soil mapping."
-      }
-    },
-    {
-      label: { ID: "Lapisan 02", EN: "Layer 02" },
-      title: { ID: "Tengah (Midstream)", EN: "Midstream" },
-      desc: {
-        ID: "Proses distilasi terverifikasi blockchain. Setiap batch diproses dengan sidik jari digital untuk kemurnian total.",
-        EN: "Blockchain-verified distillation process. Each batch is processed with digital fingerprinting for total purity."
-      }
-    },
-    {
-      label: { ID: "Lapisan 03", EN: "Layer 03" },
-      title: { ID: "Hilir (Downstream)", EN: "Downstream" },
-      desc: {
-        ID: "Pasar Langsung-ke-Global yang menghubungkan rumah wewangian premium dengan produk Nilam Aceh terverifikasi.",
-        EN: "Direct-to-Global marketplace connecting premium fragrance houses with verified Aceh Patchouli products."
-      }
-    }
-  ],
-
   // Bagian Showcase AI
   aiEyebrow: { ID: "Teknologi Presisi", EN: "Precision Technology" },
   aiTitle: { ID: "Verifikasi Kemurnian Berbasis AI", EN: "AI-Powered Purity Verification" },
@@ -94,13 +65,6 @@ const T_HOME = {
   ctaBtnPartner: { ID: "Gabung sebagai Mitra", EN: "Join as Partner" }
 };
 
-// Array Gambar Tetap Konstan
-const LAYER_IMAGES = [
-  "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=500&fit=crop",
-  "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=600&h=500&fit=crop",
-  "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=500&fit=crop"
-];
-
 export default function HomePage() {
   // 3. Ambil nilai state bahasa aktif saat ini ("ID" atau "EN")
   const lang = useLang();
@@ -108,41 +72,6 @@ export default function HomePage() {
   return (
     <PageShell>
       <HeroSection />
-      
-      {/* 3-LAYER ECOSYSTEM */}
-      <section className="py-24 bg-surface">
-        <div className="container-app">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="font-display text-headline-lg-mobile lg:text-headline-lg text-primary mb-2">
-              {T_HOME.ecosystemTitle[lang]}
-            </h2>
-            <div className="w-12 h-1 bg-clay-earth mx-auto rounded-full" />
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {T_HOME.layers.map((layer, index) => (
-              <Card key={layer.title[lang]} className="overflow-hidden group">
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={LAYER_IMAGES[index]}
-                    alt={layer.title[lang]}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary-container/90 to-transparent" />
-                  <div className="absolute bottom-4 left-5 right-5">
-                    <p className="text-xs uppercase tracking-wider text-secondary-fixed font-semibold mb-1">
-                      {layer.label[lang]}
-                    </p>
-                    <p className="font-display text-xl font-bold text-white">{layer.title[lang]}</p>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <p className="text-sm text-on-surface-variant">{layer.desc[lang]}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* AI VERIFICATION SHOWCASE */}
       <section className="py-24 bg-primary text-inverse-on-surface relative overflow-hidden">

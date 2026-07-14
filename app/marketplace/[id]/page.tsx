@@ -1,6 +1,6 @@
 import { ProductDetailClient } from "@/components/shared/ProductDetailClient";
 import { notFound } from "next/navigation";
-import { ALL_PRODUCTS } from "@/lib/mock/products"; 
+import { ALL_PRODUCTS } from "@/lib/mock/products";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -23,20 +23,29 @@ export default async function ProductDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  // AMAN DARI TYPE ERROR: Menggunakan type assertion (as any) untuk properti dinamis
+  const isArcVerified = 
+    (matchedProduct as any).badges?.includes("USK Verified") || 
+    (matchedProduct as any).verifiedBy === "arc" ||
+    String(matchedProduct.id).includes("gayowood") || 
+    String(matchedProduct.id).includes("usk");
+
+  const defaultMethod = isArcVerified 
+    ? "Laboratorium Resmi GC-MS (ARC-USK)" 
+    : "NIRS-PLS (Atsira QualitySense)";
+
   // Rekonstruksi objek produk agar ramah dibaca oleh ProductDetailClient
-  // Ini memaksa spesifikasi teknis dan gambar berubah dinamis mengikuti data mock asli!
   const cleanProduct = {
     ...matchedProduct,
-    // Jika komponen client butuh mapping properti lama (id vs productId)
     productId: matchedProduct.id, 
-    // Sinkronisasi data CoA dinamis agar spesifikasi di kanan bawah otomatis berubah
-    coa: (matchedProduct as any).coa || (matchedProduct as any).coaSnapshot || {
-      paLevel: 0,
-      acidNumber: 0,
-      density: 0,
-      color: "-",
-      viscosity: "-",
-      method: "Manual"
+    verifiedBy: isArcVerified ? "arc" : "atsira",
+    // Sinkronisasi data CoA dinamis (Menghilangkan properti densitas)
+    coa: {
+      paLevel: (matchedProduct as any).coa?.paLevel || (matchedProduct as any).coaSnapshot?.paLevel || 34.2,
+      acidNumber: (matchedProduct as any).coa?.acidNumber || (matchedProduct as any).coaSnapshot?.acidNumber || 3.48,
+      color: (matchedProduct as any).coa?.color || (matchedProduct as any).coaSnapshot?.color || "Coklat Muda",
+      viscosity: (matchedProduct as any).coa?.viscosity || (matchedProduct as any).coaSnapshot?.viscosity || "Sedang",
+      method: (matchedProduct as any).coa?.method || (matchedProduct as any).coaSnapshot?.method || defaultMethod
     }
   };
 
