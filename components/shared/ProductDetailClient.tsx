@@ -73,12 +73,12 @@ export function ProductDetailClient({ product }: { product: any }) {
     );
   }
 
-  // LOGIKA KONSISTEN: Pencocokan kriteria ARC / USK Verified yang sama persis dengan page induk
+  // LOGIKA KONSISTEN & TS-SAFE: Pencocokan kriteria ARC / USK Verified
   const isArcVerified = 
-  (matchedProduct as any).badges?.includes("USK Verified") || 
-  (matchedProduct as any).verifiedBy === "arc" || 
-  String(matchedProduct.id).includes("gayowood") || 
-  String(matchedProduct.id).includes("usk");
+    (matchedProduct as any).badges?.includes("USK Verified") || 
+    (matchedProduct as any).verifiedBy === "arc" || 
+    String(matchedProduct.id).includes("gayowood") || 
+    String(matchedProduct.id).includes("usk");
 
   const mainImage = matchedProduct.imageUrl || (matchedProduct as any).img || "/images/products/minyak nilam.png";
   const images = isRaw ? [mainImage] : ((matchedProduct as any).gallery?.length > 0 ? (matchedProduct as any).gallery : [mainImage]);
@@ -166,25 +166,34 @@ export function ProductDetailClient({ product }: { product: any }) {
             {coa && (
               <Card className="p-5 mb-6">
                 <p className="text-label-md uppercase text-on-surface-variant mb-3">{T_DETAIL.technicalSpec[lang]}</p>
+                
+                {/* Grid Spesifikasi - Otomatis menyesuaikan jumlah kolom */}
                 <div className="grid grid-cols-2 gap-4 font-mono text-technical-mono">
+                  {/* Parameter Utama */}
                   <Spec label={T_DETAIL.specLabels.paLevel[lang]} value={`${coa.paLevel || 32}%`} highlight />
-                  <Spec label={T_DETAIL.specLabels.acidNumber[lang]} value={`${coa.acidNumber || "1.1"}`} />
+                  
+                  {/* Parameter Kimia Basah: Hanya dirender jika diverifikasi penuh oleh Lab GC-MS ARC */}
+                  {isArcVerified ? (
+                    <Spec label={T_DETAIL.specLabels.acidNumber[lang]} value={`${coa.acidNumber || "1.1"}`} />
+                  ) : null}
+
                   <Spec label={T_DETAIL.specLabels.color[lang]} value={typeof coa.color === "object" ? getLocalizedText(coa.color) : (coa.color || "Kuning")} />
                   <Spec label={T_DETAIL.specLabels.viscosity[lang]} value={typeof coa.viscosity === "object" ? getLocalizedText(coa.viscosity) : (coa.viscosity || "Cair")} />
                 </div>
 
+                {/* Deskripsi Pembuktian Pengujian Dinamis */}
                 <div className="mt-4 pt-3 border-t border-stone-100 text-[11.5px] text-on-surface-variant/80 leading-relaxed font-sans">
                   {isArcVerified ? (
                     lang === "ID" ? (
-                      <p>🧪 <strong>Metode Uji:</strong> Mutu sampel batch ini terverifikasi melalui pengujian kromatografi gas <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) resmi di <strong>Laboratorium ARC-USK</strong>.</p>
+                      <p>🧪 <strong>Metode Uji:</strong> Mutu sampel batch ini terverifikasi secara komprehensif melalui pengujian kromatografi gas <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) resmi di <strong>Laboratorium ARC-USK</strong>.</p>
                     ) : (
-                      <p>🧪 <strong>Test Method:</strong> Batch quality verified through official <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) analysis at <strong>ARC-USK Laboratory</strong>.</p>
+                      <p>🧪 <strong>Test Method:</strong> Batch quality verified comprehensively through official <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) analysis at <strong>ARC-USK Laboratory</strong>.</p>
                     )
                   ) : (
                     lang === "ID" ? (
-                      <p>✨ <strong>Metode Uji:</strong> Mutu sampel batch ini terverifikasi spektral optik model prediksi NIRS-PLS oleh sistem <strong>Atsira QualitySense</strong>.</p>
+                      <p>✨ <strong>Metode Uji:</strong> Mutu fisik sampel batch ini terverifikasi cepat secara spektral optik model prediksi NIRS-PLS oleh sistem portabel <strong>Atsira QualitySense</strong>.</p>
                     ) : (
-                      <p>✨ <strong>Test Method:</strong> Batch quality verified instantly via optical spectral scan and NIRS-PLS prediction on the <strong>Atsira QualitySense</strong> platform.</p>
+                      <p>✨ <strong>Test Method:</strong> Batch quality verified via rapid optical spectral scan and NIRS-PLS prediction model on the portable <strong>Atsira QualitySense</strong> platform.</p>
                     )
                   )}
                 </div>
