@@ -13,22 +13,31 @@ interface SessionUser {
 
 interface AuthState {
   user: SessionUser | null;
-  login: (role: UserRole, name?: string) => void;
+  login: (role: UserRole, name?: string, overrides?: Partial<SessionUser>) => void;
   logout: () => void;
 }
 
-const ROLE_PROFILES: Record<UserRole, SessionUser> = {
-  petani: { id: "farmer-syukur-gayo", name: "Pak Syukur", role: "petani", email: "syukur@atsira.id" },
-  umkm: { id: "umkm-seulawah", name: "Cut Maharani", role: "umkm", email: "maharani@seulawah.id" },
-  buyer: { id: "buyer-budi", name: "Budi Santoso", role: "buyer", email: "budi@example.com" },
-  peneliti: { id: "peneliti-arc", name: "Dr. Syarifullah", role: "peneliti", email: "syarifullah@arc-usk.ac.id" },
+const ROLE_PROFILES: Record<UserRole, Omit<SessionUser, "id" | "name" | "email"> & Partial<Pick<SessionUser, "id" | "name" | "email">>> = {
+  petani: { role: "petani" },
+  umkm: { role: "umkm" },
+  buyer: { role: "buyer" },
+  peneliti: { role: "peneliti" },
+  pemasta: { role: "pemasta" },
 };
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      login: (role) => set({ user: ROLE_PROFILES[role] }),
+      login: (role, name, overrides = {}) =>
+        set({
+          user: {
+            id: overrides.id || ROLE_PROFILES[role]?.id || "00000000-0000-0000-0000-000000000000",
+            name: name || overrides.name || ROLE_PROFILES[role]?.name || "User",
+            role,
+            email: overrides.email || ROLE_PROFILES[role]?.email || "user@atsira.id",
+          },
+        }),
       logout: () => set({ user: null }),
     }),
     { name: "atsira-session" }

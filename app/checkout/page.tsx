@@ -2,20 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import { Lock, ShieldCheck, CreditCard, ShoppingBag, Globe, Truck, UserCheck, LogIn } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Label } from "@/components/ui/Input";
-import { useCartStore } from "@/lib/store";
+import { useAuthStore, useCartStore } from "@/lib/store";
 import { formatIDR } from "@/lib/mock";
 
-// Simulasi kurs konversi IDR ke USD sederhana ($1 = Rp 16.000)
+declare global {
+  interface Window {
+    snap: any;
+  }
+}
+
 const EXCHANGE_RATE = 16000;
 const formatUSD = (val: number) => 
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(val / EXCHANGE_RATE);
 
-// Kamus Ganda Bahasa (Bilingual Dictionary) - Diperhalus & Premium
 const T = {
   title: { ID: "Pembayaran Aman", EN: "Secure Checkout" },
   empty: { ID: "Keranjang belanja Anda kosong.", EN: "Your shopping cart is empty." },
@@ -47,7 +52,6 @@ const T = {
   btnPay: { ID: "Bayar Sekarang", EN: "Pay Now" },
   processing: { ID: "Memproses...", EN: "Processing..." },
   secure: { ID: "Enkripsi Aman SSL 256-bit", EN: "256-bit SSL Secure Encryption" },
-  // Teks Gerbang Login
   authRequired: { ID: "Langkah Terakhir Sebelum Checkout", EN: "Final Step Before Checkout" },
   authSubtitle: { ID: "Silakan masuk atau buat akun baru untuk mengamankan sertifikat digital pelacakan produk Anda.", EN: "Please login or create a new account to secure your product's digital traceability certificate." },
   btnLogin: { ID: "Masuk / Login Akun", EN: "Sign In / Login Account" },
@@ -57,33 +61,72 @@ const T = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items } = useCartStore();
+  const { items, addItem } = useCartStore();
+  const user = useAuthStore((state) => state.user);
   
-  // State Utama
   const [isInternational, setIsInternational] = useState(false);
   const [courier, setCourier] = useState("std");
-  const [payment, setPayment] = useState("va");
+  const [payment, setPayment] = useState("midtrans");
   const [processing, setProcessing] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [lang, setLang] = useState<"ID" | "EN">("ID");
-  
-  // State Otentikasi Palsu untuk Demo Juri
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [shippingForm, setShippingForm] = useState({
+    fullname: "",
+    phone: "",
+    address: "",
+    province: "Aceh",
+    country: "Indonesia",
+    postal: "",
+  });
 
   useEffect(() => {
     setIsMounted(true);
+    setIsLoggedIn(Boolean(user));
+
     const savedLang = localStorage.getItem("lang");
     if (savedLang === "EN") setLang("EN");
-  }, []);
+  }, [user]);
 
-  // Proteksi otomatis jika item kosong (hanya jalan jika sudah login/bypass)
   useEffect(() => {
-    if (isMounted && isLoggedIn && items.length === 0) {
+    setShippingForm((prev) => ({
+      ...prev,
+      fullname: user?.name || prev.fullname || (isInternational ? "Maison Global Aroma Ltd" : "Budi Santoso"),
+      phone: prev.phone || (isInternational ? "+33 1 42 27 78 00" : "+62 812 3456 7890"),
+      address: prev.address || (isInternational ? "23 Rue de la Paix" : "Jl. Teuku Umar No. 45, Sukaramai"),
+      province: prev.province || "Aceh",
+      country: prev.country || "Indonesia",
+      postal: prev.postal || (isInternational ? "75002" : "23243"),
+    }));
+  }, [user, isInternational]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const directProductId = searchParams.get("productId");
+    const directProductName = searchParams.get("name");
+    const directProductPrice = Number(searchParams.get("price") ?? "0");
+    const directProductUnit = searchParams.get("unit") ?? "pcs";
+    const directProductCategory = searchParams.get("category") === "raw-oil" ? "raw-oil" : "finished-product";
+
+    if (directProductId && directProductName && items.length === 0) {
+      addItem({
+        productId: directProductId,
+        title: decodeURIComponent(directProductName),
+        imageUrl: searchParams.get("image") || "/images/products/default.jpg",
+        price: directProductPrice || 0,
+        unit: directProductUnit,
+        qty: 1,
+        category: directProductCategory,
+      });
+    }
+
+    if (isMounted && (user || isLoggedIn) && items.length === 0 && !directProductId) {
       router.push("/cart");
     }
-  }, [isMounted, isLoggedIn, items, router]);
+  }, [isMounted, user, isLoggedIn, items, router, addItem]);
 
-  // Kalkulasi Opsi Pengiriman Fleksibel
   const courierOptions = isInternational 
     ? [
         { id: "std", label: "Biteship Export Cargo (Standard)", desc: "7 - 14 Days", price: 480000 },
@@ -94,21 +137,17 @@ export default function CheckoutPage() {
         { id: "exp", label: "Pos Indonesia Kilat Khusus", desc: "1 - 2 Hari Kerja", price: 45000 }
       ];
 
-  // Metode Pembayaran Fleksibel
   const paymentOptions = isInternational
     ? [
-        { id: "card", label: "Credit / Debit Card (Visa/Mastercard)" },
-        { id: "paypal", label: "Stripe Escrow Fast-Track / PayPal" }
+        { id: "stripe", label: "Credit / Debit Card (Visa/Mastercard via Stripe)" }
       ]
     : [
-        { id: "va", label: "Bank Syariah Indonesia (BSI Virtual Account)" },
-        { id: "ewallet", label: "QRIS Instan (GoPay, OVO, DANA)" },
-        { id: "card", label: "Kartu Kredit / Debit Domestik" }
+        { id: "midtrans", label: "Virtual Account (BCA, Mandiri, BSI) / QRIS Domestik" }
       ];
 
   useEffect(() => {
     setCourier("std");
-    setPayment(isInternational ? "card" : "va");
+    setPayment(isInternational ? "stripe" : "midtrans");
   }, [isInternational]);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -118,22 +157,103 @@ export default function CheckoutPage() {
 
   const money = (val: number) => isInternational ? formatUSD(val) : formatIDR(val);
 
-  function handlePay(e: React.FormEvent) {
+  async function handlePay(e: React.FormEvent) {
     e.preventDefault();
     if (items.length === 0) return;
-    
+
     setProcessing(true);
     localStorage.setItem("lang", lang);
 
-    setTimeout(() => {
-      router.push("/checkout/success");
-    }, 1500);
+    try {
+      const selectedPaymentMethod = isInternational ? "stripe" : "midtrans";
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          buyerId: user?.id ?? null,
+          buyerName: shippingForm.fullname || user?.name || "Guest Customer",
+          buyerPhone: shippingForm.phone,
+          shippingAddress: shippingForm.address,
+          shippingProvince: shippingForm.province,
+          shippingCountry: shippingForm.country,
+          shippingPostal: shippingForm.postal,
+          items: items.map((item) => ({
+            productId: item.productId,
+            title: item.title,
+            qty: item.qty,
+            unit: item.unit || "pcs",
+            price: item.price,
+          })),
+          subtotal,
+          shippingFee,
+          tax,
+          total,
+          paymentMethod: selectedPaymentMethod,
+          courier: courierOptions.find((option) => option.id === courier)?.label ?? courier,
+          orderType: "B2C",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Checkout failed");
+      }
+
+      localStorage.setItem("lastOrderId", result.orderId);
+
+      // 1. STRIPE REDIRECT
+      if (result.url) {
+        window.location.href = result.url;
+        return;
+      }
+
+      // 2. MIDTRANS SNAP POPUP
+      if (result.token) {
+        if (window.snap) {
+          window.snap.pay(result.token, {
+            onSuccess: function () {
+              router.push(`/checkout/success?orderId=${encodeURIComponent(result.orderId)}`);
+            },
+            onPending: function () {
+              router.push(`/checkout/success?orderId=${encodeURIComponent(result.orderId)}`);
+            },
+            onError: function () {
+              alert("Pembayaran gagal!");
+              setProcessing(false);
+            },
+            onClose: function () {
+              setProcessing(false);
+            },
+          });
+          return;
+        } else {
+          // Fallback jika script Snap belum termuat
+          alert("Layanan Midtrans Snap sedang dimuat, silakan coba tekan tombol bayar sekali lagi.");
+          setProcessing(false);
+          return;
+        }
+      }
+
+      if (result.redirectUrl) {
+        window.location.href = result.redirectUrl;
+        return;
+      }
+
+      router.push(`/checkout/success?orderId=${encodeURIComponent(result.orderId)}`);
+    } catch (error) {
+      console.error("Checkout error:", error);
+      setProcessing(false);
+      alert(error instanceof Error ? error.message : "Checkout gagal. Silakan coba lagi.");
+    }
   }
 
   if (!isMounted) return null;
 
-  // GERBANG PROTEKSI: Tampilkan form login jika user belum terautentikasi
-  if (!isLoggedIn) {
+  const isSessionAuthenticated = Boolean(user) || isLoggedIn;
+
+  if (!isSessionAuthenticated) {
     return (
       <PageShell>
         <div className="container-app py-20 max-w-md mx-auto px-4">
@@ -150,10 +270,10 @@ export default function CheckoutPage() {
             </p>
 
             <div className="space-y-3">
-              <Button href="/login" className="w-full rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2">
+              <Button onClick={() => router.push("/login")} className="w-full rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2">
                 {T.btnLogin[lang]}
               </Button>
-              <Button href="/register" variant="secondary" className="w-full rounded-xl py-3 text-xs font-bold border border-surface-container-high hover:bg-surface-container-low">
+              <Button onClick={() => router.push("/register")} variant="secondary" className="w-full rounded-xl py-3 text-xs font-bold border border-surface-container-high hover:bg-surface-container-low">
                 {T.btnRegister[lang]}
               </Button>
               
@@ -191,13 +311,16 @@ export default function CheckoutPage() {
 
   return (
     <PageShell>
+      {/* Script Midtrans Snap Sandbox */}
+      <Script
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+        strategy="lazyOnload"
+      />
+
       <div className="container-app py-10 max-w-5xl mx-auto">
-        {/* HEADER AREA - Dilengkapi pengunci translasi Google agar tidak typo */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 border-b border-surface-container-high pb-4">
-          <div 
-            className="flex items-center gap-2 notranslate"
-            translate="no"
-          >
+          <div className="flex items-center gap-2 notranslate" translate="no">
             <Lock className="w-5 h-5 text-primary" />
             <h1 className="font-display text-2xl font-black text-primary tracking-tight">{T.title[lang]}</h1>
           </div>
@@ -209,9 +332,8 @@ export default function CheckoutPage() {
 
         <form onSubmit={handlePay} className="grid lg:grid-cols-[1.6fr_1fr] gap-8">
           <div className="space-y-6">
-            {/* CARD 1: FORM ALAMAT (Key ditambahkan agar reset otomatis saat pindah regional wilayah) */}
             <Card className="p-6 border border-surface-container-high bg-white rounded-2xl">
-              <p className="font-bold text-sm text-on-surface mb-5 uppercase tracking-wider text-emerald-800 flex items-center gap-2">
+              <p className="font-bold text-sm mb-5 uppercase tracking-wider text-emerald-800 flex items-center gap-2">
                 <Globe className="w-4 h-4" /> {T.section1[lang]}
               </p>
 
@@ -227,22 +349,39 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Kontainer form dengan key dinamis untuk menjamin re-render data default secara aman */}
               <div key={isInternational ? "intl-fields" : "dom-fields"} className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="fullname">{T.fullname[lang]}</Label>
-                    <Input id="fullname" required defaultValue={isInternational ? "Maison Global Aroma Ltd" : "Budi Santoso"} className="mt-1 rounded-xl" />
+                    <Input
+                      id="fullname"
+                      required
+                      value={shippingForm.fullname}
+                      onChange={(e) => setShippingForm((prev) => ({ ...prev, fullname: e.target.value }))}
+                      className="mt-1 rounded-xl"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="phone">{T.phone[lang]}</Label>
-                    <Input id="phone" required defaultValue={isInternational ? "+33 1 42 27 78 00" : "+62 812 3456 7890"} className="mt-1 rounded-xl" />
+                    <Input
+                      id="phone"
+                      required
+                      value={shippingForm.phone}
+                      onChange={(e) => setShippingForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      className="mt-1 rounded-xl"
+                    />
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="address">{T.address[lang]}</Label>
-                  <Input id="address" required defaultValue={isInternational ? "23 Rue de la Paix" : "Jl. Teuku Umar No. 45, Sukaramai"} className="mt-1 rounded-xl" />
+                  <Input
+                    id="address"
+                    required
+                    value={shippingForm.address}
+                    onChange={(e) => setShippingForm((prev) => ({ ...prev, address: e.target.value }))}
+                    className="mt-1 rounded-xl"
+                  />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -250,17 +389,28 @@ export default function CheckoutPage() {
                     {isInternational ? (
                       <>
                         <Label htmlFor="country">{T.country[lang]}</Label>
-                        <Select id="country" defaultValue="France" className="mt-1 rounded-xl h-11">
+                        <Select
+                          id="country"
+                          value={shippingForm.country}
+                          onChange={(e) => setShippingForm((prev) => ({ ...prev, country: e.target.value }))}
+                          className="mt-1 rounded-xl h-11"
+                        >
                           <option>France</option>
                           <option>Singapore</option>
                           <option>United States</option>
                           <option>Germany</option>
+                          <option>Indonesia</option>
                         </Select>
                       </>
                     ) : (
                       <>
                         <Label htmlFor="province">{T.province[lang]}</Label>
-                        <Select id="province" defaultValue="Aceh" className="mt-1 rounded-xl h-11">
+                        <Select
+                          id="province"
+                          value={shippingForm.province}
+                          onChange={(e) => setShippingForm((prev) => ({ ...prev, province: e.target.value }))}
+                          className="mt-1 rounded-xl h-11"
+                        >
                           <option>Aceh</option>
                           <option>DKI Jakarta</option>
                           <option>Sumatera Utara</option>
@@ -271,15 +421,19 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <Label htmlFor="postal">{T.postal[lang]}</Label>
-                    <Input id="postal" defaultValue={isInternational ? "75002" : "23243"} className="mt-1 rounded-xl" />
+                    <Input
+                      id="postal"
+                      value={shippingForm.postal}
+                      onChange={(e) => setShippingForm((prev) => ({ ...prev, postal: e.target.value }))}
+                      className="mt-1 rounded-xl"
+                    />
                   </div>
                 </div>
               </div>
             </Card>
 
-            {/* CARD 2: KURIR */}
             <Card className="p-6 border border-surface-container-high bg-white rounded-2xl">
-              <p className="font-bold text-sm text-on-surface mb-4 uppercase tracking-wider text-emerald-800 flex items-center gap-2">
+              <p className="font-bold text-sm mb-4 uppercase tracking-wider text-emerald-800 flex items-center gap-2">
                 <Truck className="w-4 h-4" /> {T.section2[lang]}
               </p>
               <div className="grid sm:grid-cols-2 gap-3">
@@ -308,9 +462,8 @@ export default function CheckoutPage() {
               </div>
             </Card>
 
-            {/* CARD 3: METODE PEMBAYARAN */}
             <Card className="p-6 border border-surface-container-high bg-white rounded-2xl">
-              <p className="font-bold text-sm text-on-surface mb-4 uppercase tracking-wider text-emerald-800 flex items-center gap-2">
+              <p className="font-bold text-sm mb-4 uppercase tracking-wider text-emerald-800 flex items-center gap-2">
                 <CreditCard className="w-4 h-4" /> {T.section3[lang]}
               </p>
               <div className="space-y-2">
@@ -333,12 +486,11 @@ export default function CheckoutPage() {
             </Card>
           </div>
 
-          {/* SISI KANAN: RINGKASAN & STRUK PEMBAYARAN */}
           <Card className="p-6 h-fit sticky top-24 border border-surface-container-high bg-white rounded-2xl shadow-xs">
-            <p className="font-bold text-sm text-on-surface mb-4 uppercase tracking-wider text-emerald-800">{T.summary[lang]}</p>
+            <p className="font-bold text-sm mb-4 uppercase tracking-wider text-emerald-800">{T.summary[lang]}</p>
             <div className="space-y-3 mb-4 max-h-52 overflow-y-auto pr-1 no-scrollbar">
-              {items.map((i) => (
-                <div key={i.productId} className="flex justify-between text-xs">
+              {items.map((i, index) => (
+                <div key={`${i.productId ?? i.title ?? "item"}-${index}`} className="flex justify-between text-xs">
                   <span className="text-on-surface-variant pr-2 line-clamp-1">
                     {i.title} <span className="text-outline font-bold">×{i.qty}</span>
                   </span>

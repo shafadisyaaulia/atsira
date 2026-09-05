@@ -1,21 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Clock, FileText, Download, BookOpen, Users } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card, Badge, SectionEyebrow } from "@/components/ui/Card";
-import { MAGAZINE_ARTICLES, formatDateID } from "@/lib/mock";
 
 // Filter disederhanakan menjadi 3 kategori inti saja sesuai permintaan
 const CATEGORIES = ["Semua", "Kegiatan Komunitas", "Riset & Edukasi", "Kisah Inspirasi"] as const;
 
+const formatDateID = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+  } catch {
+    return dateStr;
+  }
+};
+
 export default function NilamStoryPage() {
   const [category, setCategory] = useState<string>("Semua");
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const lang = typeof window !== "undefined" && localStorage.getItem("lang") === "EN" ? "EN" : "ID";
 
-  const filtered = category === "Semua" ? MAGAZINE_ARTICLES : MAGAZINE_ARTICLES.filter((a) => a.category === category);
-  const featured = MAGAZINE_ARTICLES.find((a) => a.featured);
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const res = await fetch("/api/pemasta/field-stories");
+        const json = await res.json();
+        setArticles(json.data || []);
+      } catch (err) {
+        console.error("Failed to fetch field stories:", err);
+        setArticles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStories();
+  }, []);
+
+  const filtered = category === "Semua" ? articles : articles.filter((a) => a.category === category);
+  const featured = articles.find((a) => a.featured);
 
   return (
     <PageShell>

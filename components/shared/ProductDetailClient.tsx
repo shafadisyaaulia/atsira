@@ -19,7 +19,6 @@ import { Card, Badge, SectionEyebrow } from "@/components/ui/Card";
 import { formatIDR, formatDateID } from "@/lib/mock";
 import { useCartStore } from "@/lib/store";
 import { useLang } from "@/components/layout/Navbar";
-import { ALL_PRODUCTS } from "@/lib/mock/products";
 
 const STAGE_ICON: Record<string, typeof MapPin> = {
   Kebun: MapPin,
@@ -59,7 +58,7 @@ export function ProductDetailClient({ product }: { product: any }) {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const matchedProduct = ALL_PRODUCTS.find((p: any) => p.id === product?.id) || ALL_PRODUCTS[0];
+  const matchedProduct = product || {};
   const isRaw = matchedProduct.type === "raw-oil" || !matchedProduct.unit || matchedProduct.unit === "kg";
   const [qty, setQty] = useState(isRaw ? ((matchedProduct as any).minOrderKg || 5) : 1);
 
@@ -77,10 +76,10 @@ export function ProductDetailClient({ product }: { product: any }) {
   const isArcVerified = 
     (matchedProduct as any).badges?.includes("USK Verified") || 
     (matchedProduct as any).verifiedBy === "arc" || 
-    String(matchedProduct.id).includes("gayowood") || 
-    String(matchedProduct.id).includes("usk");
+    String(matchedProduct.id || "").includes("gayowood") || 
+    String(matchedProduct.id || "").includes("usk");
 
-  const mainImage = matchedProduct.imageUrl || (matchedProduct as any).img || "/images/products/minyak nilam.png";
+  const mainImage = matchedProduct.imageUrl || matchedProduct.image || "/images/products/minyak nilam.png";
   const images = isRaw ? [mainImage] : ((matchedProduct as any).gallery?.length > 0 ? (matchedProduct as any).gallery : [mainImage]);
   const coa = (matchedProduct as any).coa || (matchedProduct as any).coaSnapshot || (matchedProduct as any).coaFields;
   const traceability = !isRaw ? (matchedProduct as any).traceability : undefined;

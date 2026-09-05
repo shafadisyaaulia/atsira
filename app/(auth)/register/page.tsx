@@ -57,8 +57,11 @@ function RegisterForm() {
     e.preventDefault();
     setLoading(true);
 
-    login({ name: name, role: role } as any);
-    
+    login(role, name, {
+      id: crypto.randomUUID(),
+      email: email || `${name.toLowerCase().replace(/\s+/g, ".")}@local.atsira`,
+    });
+
     setTimeout(() => {
       router.push("/");
     }, 1000);

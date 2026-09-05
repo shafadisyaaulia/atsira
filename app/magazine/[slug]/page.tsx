@@ -1,16 +1,83 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card, Badge } from "@/components/ui/Card";
-import { MAGAZINE_ARTICLES, formatDateID } from "@/lib/mock";
 
-export default async function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const article = MAGAZINE_ARTICLES.find((a) => a.slug === slug);
-  if (!article) return notFound();
+const formatDateID = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+  } catch {
+    return dateStr;
+  }
+};
 
-  const related = MAGAZINE_ARTICLES.filter((a) => a.slug !== slug && a.category === article.category).slice(0, 2);
+export default function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const [slug, setSlug] = useState<string>("");
+  const [article, setArticle] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unwrapParams = async () => {
+      const { slug: resolvedSlug } = await params;
+      setSlug(resolvedSlug);
+    };
+    unwrapParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!slug) return;
+
+    const fetchArticle = async () => {
+      try {
+        const res = await fetch("/api/pemasta/field-stories");
+        const json = await res.json();
+        const articles = json.data || [];
+
+        const found = articles.find((a: any) => a.slug === slug);
+        if (!found) {
+          notFound();
+        }
+
+        setArticle(found);
+
+        const relatedArticles = articles
+          .filter((a: any) => a.slug !== slug && a.category === found.category)
+          .slice(0, 2);
+        setRelated(relatedArticles);
+      } catch (err) {
+        console.error("Failed to fetch article:", err);
+        notFound();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticle();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <PageShell>
+        <article className="container-app py-8 max-w-3xl">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-surface-container-high rounded w-24"></div>
+            <div className="h-8 bg-surface-container-high rounded w-3/4"></div>
+            <div className="h-96 bg-surface-container-high rounded"></div>
+          </div>
+        </article>
+      </PageShell>
+    );
+  }
+
+  if (!article) {
+    return notFound();
+  }
 
   return (
     <PageShell>
@@ -26,36 +93,36 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         <div className="flex items-center gap-3 text-sm text-on-surface-variant mb-8">
           <span className="font-medium text-on-surface">{article.author}</span>
           <span>·</span>
-          <span>{article.authorRole}</span>
+          <span>{article.author_role || article.authorRole}</span>
           <span>·</span>
           <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" /> {article.readMinutes} menit
+            <Clock className="w-3.5 h-3.5" /> {article.read_minutes || article.readMinutes} menit
           </span>
         </div>
 
         <div className="aspect-[16/9] rounded-md overflow-hidden mb-10">
-          <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover" />
+          <img src={article.image_url || article.imageUrl} alt={article.title} className="w-full h-full object-cover" />
         </div>
 
         <div className="prose-content space-y-5 mb-12">
-          {article.content.map((para, i) => (
+          {(article.content || []).map((para: string, i: number) => (
             <p key={i} className="text-body-lg text-on-surface-variant leading-relaxed">
               {para}
             </p>
           ))}
         </div>
 
-        <p className="text-xs text-outline mb-12">Dipublikasikan {formatDateID(article.publishedAt)}</p>
+        <p className="text-xs text-outline mb-12">Dipublikasikan {formatDateID(article.published_at || article.publishedAt)}</p>
 
         {related.length > 0 && (
           <div className="border-t border-surface-container-high pt-10">
             <p className="font-display text-headline-md text-primary mb-6">Artikel Terkait</p>
             <div className="grid sm:grid-cols-2 gap-5">
-              {related.map((a) => (
+              {related.map((a: any) => (
                 <Link key={a.slug} href={`/magazine/${a.slug}`}>
                   <Card className="overflow-hidden h-full hover:shadow-elevation-2 transition-shadow">
                     <div className="aspect-[16/10]">
-                      <img src={a.imageUrl} alt={a.title} className="w-full h-full object-cover" />
+                      <img src={a.image_url || a.imageUrl} alt={a.title} className="w-full h-full object-cover" />
                     </div>
                     <div className="p-4">
                       <p className="font-semibold text-sm text-on-surface line-clamp-2">{a.title}</p>

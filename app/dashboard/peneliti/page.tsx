@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FlaskConical,
   CheckCircle2,
@@ -15,7 +15,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Card, Badge } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select, Label } from "@/components/ui/Input";
-import { VERIFICATION_QUEUE, MAGAZINE_ARTICLES, formatDateID } from "@/lib/mock";
+import { VERIFICATION_QUEUE, formatDateID } from "@/lib/mock";
 import type { VerificationQueueItem } from "@/lib/types";
 
 const STATUS_BADGE: Record<VerificationQueueItem["status"], "warning" | "ai" | "success" | "neutral"> = {
@@ -91,21 +91,45 @@ function VerificationQueueSection() {
 }
 
 function ResearchPortal() {
+  const [qualityData, setQualityData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchQuality = async () => {
+      try {
+        const res = await fetch("/api/peneliti/quality-assessments");
+        const json = await res.json();
+        setQualityData(
+          (json.data || [])
+            .filter((q: any) => q.category === "Quality Insights")
+            .map((q: any) => ({
+              label: q.title,
+              value: q.metadata?.value || "N/A",
+              note: q.metadata?.note || q.excerpt || ""
+            }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch quality data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuality();
+  }, []);
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-5">
         <Database className="w-5 h-5 text-primary" />
         <h2 className="font-display text-headline-md text-primary">Portal Data Riset</h2>
       </div>
-      <div className="grid sm:grid-cols-3 gap-4">
-        {[
-          { label: "Total Sampel Teranalisis", value: "5.412" },
-          { label: "Rata-rata Kadar PA Regional", value: "31,8%" },
-          { label: "Akurasi Model NIRS-PLS", value: "r = 0,93" },
-        ].map((stat) => (
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {qualityData.map((stat) => (
           <Card key={stat.label} className="p-5">
             <p className="text-xs uppercase text-outline mb-2">{stat.label}</p>
             <p className="font-display text-2xl font-bold text-primary">{stat.value}</p>
+            <p className="text-[11px] text-outline mt-2">{stat.note}</p>
           </Card>
         ))}
       </div>
@@ -124,6 +148,35 @@ function ResearchPortal() {
 
 function ContentCreator() {
   const [submitted, setSubmitted] = useState(false);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [articlesLoading, setArticlesLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const res = await fetch("/api/peneliti/quality-assessments");
+        const json = await res.json();
+        setArticles(
+          (json.data || [])
+            .filter((a: any) => a.category !== "Quality Insights")
+            .map((a: any) => ({
+              slug: a.id,
+              title: a.title,
+              published_at: a.published_at,
+              read_minutes: a.read_minutes,
+              image_url: a.image_url
+            }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch articles:", err);
+      } finally {
+        setArticlesLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-5">
@@ -168,12 +221,12 @@ function ContentCreator() {
             <BookOpen className="w-4 h-4" /> Artikel Anda yang Sudah Terbit
           </p>
           <div className="space-y-3">
-            {MAGAZINE_ARTICLES.filter((a) => a.category === "Riset ARC-USK").map((a) => (
+            {articles.map((a: any) => (
               <Card key={a.slug} className="p-4 flex gap-4">
-                <img src={a.imageUrl} alt="" className="w-16 h-16 rounded object-cover flex-shrink-0" />
+                <img src={a.image_url || "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&w=100&q=60"} alt="" className="w-16 h-16 rounded object-cover flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-on-surface line-clamp-1">{a.title}</p>
-                  <p className="text-xs text-outline">{formatDateID(a.publishedAt)} · {a.readMinutes} menit baca</p>
+                  <p className="text-xs text-outline">{formatDateID(a.published_at)} · {a.read_minutes} menit baca</p>
                 </div>
               </Card>
             ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   ShoppingBag, 
   Search, 
@@ -8,15 +8,13 @@ import {
   Trash2, 
   Building, 
   MapPin, 
-  ArrowRight,
-  ShieldCheck
+  ArrowRight
 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
-// MOCK DATA PRODUK FAVORIT BUYER
 const INITIAL_FAVORITES = [
   {
     id: "PROD-001",
@@ -43,14 +41,35 @@ const INITIAL_FAVORITES = [
 ];
 
 export default function BuyerFavoritePage() {
-  const [favorites, setFavorites] = useState(INITIAL_FAVORITES);
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Load data favorit dari localStorage
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem("atsira_buyer_favorites");
+    if (savedFavorites) {
+      try {
+        setFavorites(JSON.parse(savedFavorites));
+      } catch (err) {
+        console.error("Gagal membaca favorit:", err);
+        setFavorites(INITIAL_FAVORITES);
+      }
+    } else {
+      setFavorites(INITIAL_FAVORITES);
+      localStorage.setItem("atsira_buyer_favorites", JSON.stringify(INITIAL_FAVORITES));
+    }
+    setLoading(false);
+  }, []);
+
+  // Hapus item dari favorit dan update localStorage
   const handleRemoveFavorite = (id: string) => {
-    setFavorites(favorites.filter(item => item.id !== id));
+    const updated = favorites.filter((item) => item.id !== id);
+    setFavorites(updated);
+    localStorage.setItem("atsira_buyer_favorites", JSON.stringify(updated));
   };
 
-  const filteredFavorites = favorites.filter(item => 
+  const filteredFavorites = favorites.filter((item) => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.seller.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -86,12 +105,18 @@ export default function BuyerFavoritePage() {
         </Card>
 
         {/* DAFTAR KARTU PRODUK */}
-        {filteredFavorites.length === 0 ? (
+        {loading ? (
+          <div className="py-16 text-center text-xs font-bold text-stone-400">
+            Memuat produk favorit...
+          </div>
+        ) : filteredFavorites.length === 0 ? (
           <Card className="p-12 border border-dashed border-stone-300 text-center text-stone-500 bg-stone-50/50 rounded-xl">
             <Star className="w-10 h-10 text-stone-300 mx-auto mb-2" />
             <p className="text-xs font-bold text-stone-700">Belum Ada Produk Favorit</p>
-            <p className="text-[11px] text-stone-400 mt-0.5">Klik ikon bintang pada marketplace untuk menambahkan produk langganan.</p>
-            <Link href="/dashboard/buyer/market" className="inline-block mt-4">
+            <p className="text-[11px] text-stone-400 mt-0.5">
+              Klik ikon bintang pada marketplace untuk menambahkan produk langganan.
+            </p>
+            <Link href="/marketplace" className="inline-block mt-4">
               <Button className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold px-4 py-2 rounded-lg">
                 Jelajahi Marketplace
               </Button>
@@ -144,7 +169,7 @@ export default function BuyerFavoritePage() {
                     </p>
                   </div>
 
-                  <Link href="/dashboard/buyer/market">
+                  <Link href="/marketplace">
                     <button className="flex items-center gap-1 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs py-2 px-3.5 rounded-lg shadow-sm transition-colors group">
                       <span>Pesan Ulang</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

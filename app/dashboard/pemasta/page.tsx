@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Droplet, MapPin, Calendar, Activity, TrendingUp, 
   BookOpen, FileText, Plus, 
@@ -11,50 +11,22 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
-// ── 🔗 IMPOR REPOSITORI DATA NILAM STORY ASLI ──
-import { MAGAZINE_ARTICLES } from "@/lib/mock/ecosystem";
-
-const MOCK_BATCHES = [
-  { 
-    id: "BCH-092", 
-    date: "Rabu, 08 Jul 2026", 
-    qty: 45, 
-    pa: 32.4, 
-    status: "Terverifikasi ARC", 
-    region: "Aceh Selatan", 
-    method: "Uap (Steam Distressed)",
-    leafAge: "6 Bulan",
-    pricePerKg: 1450000,
-    estimatedValue: "Rp 65.250.000"
-  },
-  { 
-    id: "BCH-071", 
-    date: "Senin, 13 Mei 2026", 
-    qty: 50, 
-    pa: 30.5, 
-    status: "Terverifikasi AI", 
-    region: "Aceh Jaya", 
-    method: "Air & Uap (Hydro)",
-    leafAge: "5 Bulan",
-    pricePerKg: 1380000,
-    estimatedValue: "Rp 69.000.000"
-  },
-];
-
 export default function PemastaDashboard() {
   const [activeMenu, setActiveMenu] = useState<"dashboard" | "story-hub">("dashboard");
 
   // State Batch Log & Harga
   const [showBatchModal, setShowBatchModal] = useState(false);
-  const [batches, setBatches] = useState(MOCK_BATCHES);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [batchLoading, setBatchLoading] = useState(true);
   const [batchForm, setBatchForm] = useState({ 
     qty: "", pa: "", region: "Aceh Selatan", date: "", pricePerKg: "", method: "Uap (Steam Distressed)", leafAge: "6 Bulan"
   });
 
-  // State Stories menggunakan data mock ekosistem
-  const [stories, setStories] = useState(MAGAZINE_ARTICLES);
+  // State Stories
+  const [stories, setStories] = useState<any[]>([]);
+  const [storyLoading, setStoryLoading] = useState(true);
   
-  // State form cerita diperbarui untuk menampung objek File asli
+  // State form cerita
   const [storyForm, setStoryForm] = useState<{
     title: string;
     category: string;
@@ -66,6 +38,69 @@ export default function PemastaDashboard() {
     description: "", 
     imageFile: null 
   });
+
+  // Fetch market prices dari API
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const res = await fetch("/api/pemasta/market-prices");
+        const json = await res.json();
+        setBatches(
+          (json.data || []).map((p: any) => ({
+            id: p.batch_id,
+            date: new Date(p.report_date).toLocaleDateString("id-ID", {
+              weekday: "long", year: "numeric", month: "short", day: "numeric"
+            }),
+            qty: p.quantity_kg,
+            pa: p.pa_level,
+            status: p.status,
+            region: p.region,
+            method: p.method,
+            leafAge: p.leaf_age,
+            pricePerKg: p.price_per_kg,
+            estimatedValue: formatCurrency(p.quantity_kg * p.price_per_kg)
+          }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch market prices:", err);
+      } finally {
+        setBatchLoading(false);
+      }
+    };
+
+    fetchPrices();
+  }, []);
+
+  // Fetch field stories dari API
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const res = await fetch("/api/pemasta/field-stories");
+        const json = await res.json();
+        setStories(
+          (json.data || []).map((s: any) => ({
+            slug: s.slug,
+            title: s.title,
+            category: s.category,
+            excerpt: s.excerpt,
+            content: s.content,
+            author: s.author,
+            authorRole: s.author_role,
+            publishedAt: s.published_at,
+            readMinutes: s.read_minutes,
+            imageUrl: s.image_url,
+            featured: s.featured
+          }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch field stories:", err);
+      } finally {
+        setStoryLoading(false);
+      }
+    };
+
+    fetchStories();
+  }, []);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
@@ -101,12 +136,11 @@ export default function PemastaDashboard() {
     setShowBatchModal(false);
   };
 
-  // Handler Kirim Cerita Baru dengan File Foto Unggahan
+  // Handler Kirim Cerita Baru
   const handleCreateStory = (e: React.FormEvent) => {
     e.preventDefault();
     if (!storyForm.title || !storyForm.description) return;
 
-    // Generate blob URL lokal jika pengguna mengunggah file foto
     let finalImageUrl = "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&w=600&q=80";
     if (storyForm.imageFile) {
       finalImageUrl = URL.createObjectURL(storyForm.imageFile);
@@ -115,7 +149,7 @@ export default function PemastaDashboard() {
     const newStory = {
       slug: `custom-${Date.now()}`,
       title: storyForm.title,
-      category: storyForm.category as any,
+      category: storyForm.category,
       excerpt: storyForm.description,
       content: [storyForm.description],
       author: "Kelompok Suling Jaya",
@@ -128,7 +162,6 @@ export default function PemastaDashboard() {
 
     setStories([newStory, ...stories]);
     
-    // Reset form cerita ke kondisi kosong semula
     setStoryForm({ title: "", category: "Kegiatan Komunitas", description: "", imageFile: null });
   };
 

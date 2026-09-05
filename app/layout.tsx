@@ -38,33 +38,46 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${playfair.variable} ${jakarta.variable} ${jetbrainsMono.variable}`}>
+    <html 
+      lang="id" 
+      className={`${playfair.variable} ${jakarta.variable} ${jetbrainsMono.variable}`}
+    >
       <head>
-        {/* Anti-Google Banner Topbar Overrides dengan Proteksi Mismatch Hydration */}
+        {/* Mengizinkan fitur penerjemah Google berjalan, namun membersihkan tampilan bar atas yang mengganggu */}
         <style
-          suppressHydrationWarning // 👈 MENYEMBUNYIKAN WARNING HYDRATION MISMATCH AKIBAT FORMAT FORMATTING CSS STRING
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
-              /* 1. Sembunyikan semua jenis frame, banner, dan iframe bawaan Google Translate */
+              /* Sembunyikan pop-up bar abu-abu Google Translate yang muncul di atas browser */
               .goog-te-banner-frame,
               .goog-te-banner,
-              .goog-te-gadget,
-              #goog-gt-tt,
-              .goog-te-balloon-frame {
+              .goog-te-balloon-frame,
+              #goog-gt-tt {
                 display: none !important;
                 visibility: hidden !important;
               }
 
-              /* 2. Kunci body agar tidak tergeser ke bawah akibat inline-style paksaan Google */
               body {
                 top: 0px !important;
                 position: static !important;
               }
 
-              /* 3. Sembunyikan highlight kuning saat teks selesai diterjemahkan */
+              /* Sembunyikan efek highlight kuning pada teks terpilih */
               .goog-text-highlight {
                 background-color: transparent !important;
                 box-shadow: none !important;
+              }
+
+              /* Styling opsional untuk tombol pilih bahasa Google agar terlihat rapi di pojok kanan bawah jika diperlukan */
+              .google-translate-container {
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                z-index: 9999;
+                background: white;
+                padding: 4px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
               }
             `,
           }}
@@ -75,7 +88,8 @@ export default function RootLayout({
         <div className="relative z-[2]">{children}</div>
         <AtBotWidget />
 
-        {/* Elemen jangkar yang wajib ada tapi disembunyikan */}
+        {/* Wadah selektor bahasa diletakkan secara presisi agar Google skrip bisa mendeteksi perubahan state halaman */}
+       {/* Elemen jangkar Google Translate */}
         <div id="google_translate_element" style={{ display: 'none' }} />
 
         <Script id="google-translate-init" strategy="afterInteractive">
@@ -84,8 +98,29 @@ export default function RootLayout({
               new google.translate.TranslateElement({
                 pageLanguage: 'id',
                 includedLanguages: 'en,id',
-                autoDisplay: false
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: true
               }, 'google_translate_element');
+            }
+
+            // TRIK AMPUH: Mengamati perubahan halaman Next.js secara real-time
+            // Setiap kali teks di layar berubah karena pindah page, Google Translate dipaksa memindai ulang.
+            if (typeof window !== 'undefined') {
+              const observer = new MutationObserver(() => {
+                const translateElem = document.getElementById('google_translate_element');
+                if (translateElem && window.google && google.translate) {
+                  // Memicu ulang proses penerjemahan otomatis pada teks baru
+                  const select = document.querySelector('.goog-te-combo');
+                  if (select) {
+                    select.dispatchEvent(new Event('change'));
+                  }
+                }
+              });
+
+              observer.observe(document.body, {
+                childList: true,
+                subtree: true
+              });
             }
           `}
         </Script>

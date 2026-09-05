@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, ShieldCheck, Package } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
@@ -26,22 +27,22 @@ const T = {
   btnShop: { ID: "Lanjut Belanja", EN: "Continue Shopping" }
 };
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [lang, setLang] = useState<"ID" | "EN">("ID");
   const [orderId, setOrderId] = useState("");
   const { clear } = useCartStore();
 
   useEffect(() => {
-    // Membaca preferensi bahasa dari halaman sebelumnya
     const savedLang = localStorage.getItem("lang");
     if (savedLang === "EN") setLang("EN");
 
-    // Membuat Order ID acak secara Client-Side untuk menghindari mismatch SSR
-    setOrderId(`ATR-${Math.floor(1000 + Math.random() * 9000)}`);
-    
-    // KUNCI PERBAIKAN: Keranjang baru dikosongkan dengan aman di sini
-    clear(); 
-  }, [clear]);
+    const paramOrderId = searchParams.get("orderId") || localStorage.getItem("lastOrderId") || `ATR-${Math.floor(1000 + Math.random() * 9000)}`;
+    setOrderId(paramOrderId);
+
+    clear();
+  }, [clear, searchParams]);
 
   return (
     <PageShell>
@@ -87,10 +88,17 @@ export default function CheckoutSuccessPage() {
 
           {/* Navigasi Tombol Aksi */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button href="/dashboard/buyer" className="flex-1 rounded-xl text-xs font-bold py-3">
+            <Button 
+              onClick={() => router.push("/dashboard/buyer")} 
+              className="flex-1 rounded-xl text-xs font-bold py-3"
+            >
               {T.btnStatus[lang]}
             </Button>
-            <Button href="/marketplace" variant="secondary" className="flex-1 rounded-xl text-xs font-bold py-3 border border-surface-container-high hover:bg-surface-container-low">
+            <Button 
+              onClick={() => router.push("/marketplace")} 
+              variant="secondary" 
+              className="flex-1 rounded-xl text-xs font-bold py-3 border border-surface-container-high hover:bg-surface-container-low"
+            >
               {T.btnShop[lang]}
             </Button>
           </div>
@@ -98,5 +106,13 @@ export default function CheckoutSuccessPage() {
         </Card>
       </div>
     </PageShell>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<div className="container-app py-20 text-center text-sm text-outline">Loading...</div>}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

@@ -36,7 +36,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: "Intelijen Harga", href: "/dashboard/petani/harga", icon: TrendingUp },
     { label: "Kebun & Suling", href: "/dashboard/petani/kebun", icon: Leaf },
   ],
-  
+
   // 2. ROLE UMKM / SELLER PANEL
   umkm: [
     { label: "Seller Home", href: "/dashboard/seller", icon: LayoutDashboard },
@@ -45,21 +45,29 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: "B2B Sourcing", href: "/dashboard/seller/pengadaan", icon: Package },
     { label: "Order Incoming", href: "/dashboard/seller/pesanan", icon: QrCode },
   ],
-  
-  // 3. ROLE BUYER / MITRA INDUSTRI (Disesuaikan dengan menu Sourcing Hub Baru)[cite: 2]
+
+  // 3. ROLE BUYER / MITRA INDUSTRI
   buyer: [
     { label: "Dasbor Buyer", href: "/dashboard/buyer", icon: LayoutDashboard },
-    { label: "Sourcing Hub", href: "/dashboard/buyer/market", icon: ShoppingBag }, // <-- SINKRONISASI DI SINI
+    { label: "Sourcing Hub", href: "/dashboard/buyer/market", icon: ShoppingBag },
     { label: "Lacak Pesanan", href: "/dashboard/buyer/pesanan", icon: Package },
     { label: "Dompet & Tagihan", href: "/dashboard/buyer/dompet", icon: Wallet },
-    { label: "Produk Favorit", href: "/dashboard/buyer/favorit", icon: Heart },
+    { label: "Produk Favorit", href: "/dashboard/buyer/favorite", icon: Heart },
   ],
-  
-  // 4. ROLE PENELITI / VERIFIKATOR LAB[cite: 2]
+
+  // 4. ROLE PENELITI / VERIFIKATOR LAB
   peneliti: [
     { label: "Dasbor Peneliti", href: "/dashboard/peneliti", icon: LayoutDashboard },
     { label: "Antrean Verifikasi", href: "/dashboard/peneliti/verifikasi", icon: FlaskConical },
     { label: "Portal Riset Atsiri", href: "/dashboard/peneliti/riset", icon: BookOpen },
+  ],
+
+  // 5. ROLE PEMASTA / DATA LAPANGAN
+  pemasta: [
+    { label: "Dasbor Pemasta", href: "/dashboard/pemasta", icon: LayoutDashboard },
+    { label: "Nilam Story Hub", href: "/dashboard/pemasta#story-hub", icon: BookOpen },
+    { label: "Log Harga Pasar", href: "/dashboard/pemasta", icon: TrendingUp },
+    { label: "Dokumentasi Kebun", href: "/dashboard/pemasta", icon: Leaf },
   ],
 };
 
@@ -68,6 +76,7 @@ const ROLE_LABEL: Record<UserRole, string> = {
   umkm: "Seller Panel",
   buyer: "Buyer Panel",
   peneliti: "Peneliti ARC-USK",
+  pemasta: "Pemasta Node",
 };
 
 export function DashboardShell({ role, children }: { role: UserRole; children: React.ReactNode }) {

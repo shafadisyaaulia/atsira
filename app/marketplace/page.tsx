@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal, Star, MapPin, Sparkles, ShoppingCart, ArrowRight, ShieldCheck } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card, Badge, SectionEyebrow } from "@/components/ui/Card";
@@ -10,9 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { useLang } from "@/components/layout/Navbar"; 
 import { useCartStore } from "@/lib/store"; 
 import { CartNotificationModal } from "@/components/ui/CartNotificationModal"; 
-
-// ── IMPORT DATA PRODUK ASLI
-import { RAW_OIL_LISTINGS, FINISHED_PRODUCTS } from "@/lib/mock/products";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const T_MARKET = {
   eyebrow: { id: "Pusat Dagang", en: "Trading Center" },
@@ -29,6 +28,7 @@ const T_MARKET = {
 };
 
 export default function MarketplacePage() {
+  const router = useRouter();
   const lang = useLang();
   const currentLang = (lang ? lang.toLowerCase() : "id") as "id" | "en";
 
@@ -38,28 +38,91 @@ export default function MarketplacePage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [addedProductName, setAddedProductName] = useState("");
+  const [rawProducts, setRawProducts] = useState<any[]>([]);
+  const [finishedProducts, setFinishedProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const supabase = createSupabaseBrowserClient();
+      const [{ data: rawData }, { data: finishedData }] = await Promise.all([
+        supabase.from("raw_oil_listings").select("*, coa_records(*)").order("listed_at", { ascending: false }),
+        supabase.from("finished_products").select("*, coa_records(*)").order("created_at", { ascending: false }),
+      ]);
+
+      const mappedRaw = (rawData ?? []).map((p) => ({
+        id: p.id,
+        title: p.title,
+        region: p.region,
+        grade: p.grade,
+        pricePerKg: Number(p.price_per_kg ?? 0),
+        minOrderKg: Number(p.min_order_kg ?? 5),
+        imageUrl: p.image_url || "/images/products/minyak nilam.png",
+        coa: p.coa_records ? {
+          paLevel: Number(p.coa_records.pa_level ?? 0),
+          acidNumber: Number(p.coa_records.acid_number ?? 0),
+          color: p.coa_records.color || "Coklat Muda",
+          viscosity: p.coa_records.viscosity || "Sedang",
+          method: p.coa_records.method || "NIRS-PLS AI",
+        } : { paLevel: 32, acidNumber: 3.5, color: "Coklat Muda", viscosity: "Sedang", method: "NIRS-PLS AI" },
+        badges: ["AI Verified"],
+      }));
+
+      const mappedFinished = (finishedData ?? []).map((p) => ({
+        id: p.id,
+        title: p.title,
+        category: p.category,
+        price: Number(p.price ?? 0),
+        unit: p.unit || "pcs",
+        rating: Number(p.rating ?? 0),
+        reviewCount: Number(p.review_count ?? 0),
+        imageUrl: p.image_url || "/images/products/parfume1.png",
+        gallery: p.gallery || [p.image_url || "/images/products/parfume1.png"],
+        description: p.description,
+        notes: {
+          top: p.notes_top || [],
+          middle: p.notes_middle || [],
+          base: p.notes_base || [],
+        },
+        badges: ["AI Verified"],
+        coa: p.coa_records ? {
+          paLevel: Number(p.coa_records.pa_level ?? 0),
+          acidNumber: Number(p.coa_records.acid_number ?? 0),
+          color: p.coa_records.color || "Coklat Muda",
+          viscosity: p.coa_records.viscosity || "Sedang",
+          method: p.coa_records.method || "NIRS-PLS AI",
+        } : { paLevel: 32, acidNumber: 3.5, color: "Coklat Muda", viscosity: "Sedang", method: "NIRS-PLS AI" },
+      }));
+
+      setRawProducts(mappedRaw);
+      setFinishedProducts(mappedFinished);
+      setLoading(false);
+    };
+
+    loadProducts();
+  }, []);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
   };
 
   const filteredRaw = useMemo(() => {
-    return RAW_OIL_LISTINGS.filter((p) => {
+    return rawProducts.filter((p) => {
       const title = p.title || "";
-      const matchQuery = title.toLowerCase().includes(query.toLowerCase()) || p.region.toLowerCase().includes(query.toLowerCase());
+      const matchQuery = title.toLowerCase().includes(query.toLowerCase()) || (p.region || "").toLowerCase().includes(query.toLowerCase());
       const matchGrade = gradeFilter === "Semua Grade" || p.grade === gradeFilter;
       return matchQuery && matchGrade;
     });
-  }, [query, gradeFilter]);
+  }, [query, gradeFilter, rawProducts]);
 
   const filteredFinished = useMemo(() => {
-    return FINISHED_PRODUCTS.filter((p) => {
+    return finishedProducts.filter((p) => {
       const title = p.title || "";
       return title.toLowerCase().includes(query.toLowerCase());
     });
-  }, [query]);
+  }, [query, finishedProducts]);
 
   // Fungsi pengecekan konsisten untuk penentuan metode pengujian
   const checkIsArc = (product: any) => {
@@ -71,18 +134,31 @@ export default function MarketplacePage() {
     );
   };
 
+  const buildCartItem = (product: any) => {
+    const isRaw = tab === "raw";
+    return {
+      productId: String(product.id),
+      title: product.title,
+      imageUrl: product.imageUrl || "/images/products/default.jpg",
+      price: isRaw ? product.pricePerKg ?? product.price : product.price,
+      unit: isRaw ? "kg" : product.unit || "pcs",
+      qty: isRaw ? Number(product.minOrderKg || 1) : 1,
+      category: (isRaw ? "raw-oil" : "finished-product") as "raw-oil" | "finished-product",
+    };
+  };
+
   const handleAddToCart = (e: React.MouseEvent, product: any) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
-    const price = tab === "finished" ? product.price : product.pricePerKg;
-    addItem({
-      id: String(product.id),
-      name: product.title,
-      price: price,
-      image: product.imageUrl || "/images/products/default.jpg",
-    } as any); 
+
+    addItem(buildCartItem(product));
     setAddedProductName(product.title);
     setModalOpen(true);
+  };
+
+  const handleBuyNow = (product: any) => {
+    addItem(buildCartItem(product));
+    router.push("/checkout");
   };
 
   return (
@@ -139,7 +215,9 @@ export default function MarketplacePage() {
             </button>
           </div>
 
-          {tab === "finished" ? (
+          {loading ? (
+            <div className="text-sm text-outline">Memuat data marketplace dari database...</div>
+          ) : tab === "finished" ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredFinished.map((p) => {
                 const isArc = checkIsArc(p);
@@ -180,9 +258,13 @@ export default function MarketplacePage() {
                       <button onClick={(e) => handleAddToCart(e, p)} className="p-2 border border-stone-200 hover:border-stone-900 rounded-xl bg-stone-50 text-stone-700">
                         <ShoppingCart className="w-4 h-4" />
                       </button>
-                      <Link href={`/checkout?productId=${p.id}&name=${encodeURIComponent(p.title)}&price=${p.price}`} className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => handleBuyNow(p)}
+                        className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1 shadow-sm"
+                      >
                         {T_MARKET.btnBuy[currentLang]} <ArrowRight className="w-3 h-3" />
-                      </Link>
+                      </button>
                     </div>
                   </Card>
                 );
@@ -234,9 +316,13 @@ export default function MarketplacePage() {
                       <button onClick={(e) => handleAddToCart(e, p)} className="p-2 border border-stone-200 hover:border-stone-900 rounded-xl bg-stone-50 text-stone-700">
                         <ShoppingCart className="w-4 h-4" />
                       </button>
-                      <Link href={`/checkout?productId=${p.id}&name=${encodeURIComponent(p.title)}&price=${p.pricePerKg}`} className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => handleBuyNow(p)}
+                        className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1 shadow-sm"
+                      >
                         {T_MARKET.btnBuy[currentLang]} <ArrowRight className="w-3 h-3" />
-                      </Link>
+                      </button>
                     </div>
                   </Card>
                 );

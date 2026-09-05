@@ -16,65 +16,164 @@ import {
   ArrowLeft,
   CheckCircle2,
   Image as ImageIcon,
-  UploadCloud
+  UploadCloud,
+  Loader2
 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-
-// IMPORT DATA ASLI KATALOG ANDA
-import { FINISHED_PRODUCTS, RAW_OIL_LISTINGS } from "@/lib/mock/products";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { formatIDR } from "@/lib/mock";
 
 export default function MyProductsPage() {
+  const supabase = createSupabaseBrowserClient();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "finished" | "raw">("all");
   const [mounted, setMounted] = useState(false);
   
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
+  // STATE DATABASE SUPABASE
+  const [productsList, setProductsList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  const initialCombinedProducts = [
-    ...(FINISHED_PRODUCTS || []).map(p => ({ ...p, isRaw: false })),
-    ...(RAW_OIL_LISTINGS || []).map(p => ({ ...p, isRaw: true, price: p.pricePerKg, stock: p.stockKg, unit: "kg" }))
-  ];
-
-  // STATE UTAMA KATALOG
-  const [productsList, setProductsList] = useState(initialCombinedProducts);
-  
-  // STATE NAVIGASI HALAMAN
+  // STATE NAVIGASI & POPUP
   const [isAddPageOpen, setIsAddPageOpen] = useState(false);
-
-  // STATE POPUP DETAIL, EDIT, HAPUS
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [deletingProduct, setDeletingProduct] = useState<any>(null);
 
-  // FORM STATES INPUT
+  // FORM INPUT STATES
   const [formTitle, setFormTitle] = useState("");
   const [formPrice, setFormPrice] = useState("");
   const [formStock, setFormStock] = useState("");
   const [formCategory, setFormCategory] = useState("Parfum Wewangian");
-  const [formType, setFormType] = useState("finished"); // finished | raw
+  const [formType, setFormType] = useState<"finished" | "raw">("finished");
   
-  // STATE UNTUK FOTO PRODUK (Menyimpan gambar sementara untuk pratinjau)
+  // STATE FOTO PRODUK
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  // Fungsi untuk menangani saat petani memilih foto dari HP / Laptop
+  useEffect(() => {
+    setMounted(true);
+    fetchProducts();
+    return () => setMounted(false);
+  }, []);
+
+  // 1. AMBIL DATA DARI SUPABASE
+  const fetchProducts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Gagal mengambil produk:", error.message);
+    } else {
+      // Mapping field dari Supabase agar sesuai dengan UI kamu
+      const formatted = (data || []).map((item) => ({
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        stock: item.stock,
+        unit: item.unit || (item.is_raw ? "kg" : "botol"),
+        category: item.category,
+        imageUrl: item.image_url || (item.is_raw ? "/images/products/minyak nilam.png" : "/images/products/parfume1.png"),
+        isRaw: item.is_raw,
+        description: item.description,
+        seller_id: item.seller_id
+      }));
+      setProductsList(formatted);
+    }
+    setLoading(false);
+  };
+
+  // 2. FUNGSI UPLOAD FOTO KE SUPABASE STORAGE
+  const uploadImageToStorage = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError.message);
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (err) {
+      console.error("Upload fail:", err);
+      return null;
+    }
+  };
+
+  // HANDLER PILIH FOTO
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
+  // 3. HANDLER TAMBAH PRODUK BARU
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("Silakan login terlebih dahulu!");
+      setSubmitting(false);
+      return;
+    }
+
+    const isRawType = formType === "raw";
+    let finalImageUrl = isRawType ? "/images/products/minyak nilam.png" : "/images/products/parfume1.png";
+
+    // Upload ke Supabase Storage jika ada file yang dipilih
+    if (selectedFile) {
+      const uploadedUrl = await uploadImageToStorage(selectedFile);
+      if (uploadedUrl) finalImageUrl = uploadedUrl;
+    }
+
+    // Insert ke View 'products'
+    const { error } = await supabase.from("products").insert([
+      {
+        title: formTitle,
+        price: Number(formPrice),
+        stock: Number(formStock),
+        unit: isRawType ? "kg" : "botol",
+        category: isRawType ? "Minyak Mentah (Crude Oil)" : formCategory,
+        image_url: finalImageUrl,
+        is_raw: isRawType,
+        seller_id: user.id,
+      },
+    ]);
+
+    if (error) {
+      alert("Gagal menyimpan produk: " + error.message);
+    } else {
+      await fetchProducts(); // Refresh data asli dari database
+      setIsAddPageOpen(false);
+      resetForm();
+    }
+    setSubmitting(false);
+  };
+
+  // 4. HANDLER EDIT & HAPUS
   const openEditModal = (product: any) => {
     setEditingProduct(product);
     setFormTitle(product.title);
@@ -82,53 +181,56 @@ export default function MyProductsPage() {
     setFormStock(String(product.stock));
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setProductsList(prev => prev.map(p => 
-      p.id === editingProduct.id 
-        ? { ...p, title: formTitle, price: Number(formPrice), stock: Number(formStock) } 
-        : p
-    ));
-    setEditingProduct(null);
-    resetForm();
+    setSubmitting(true);
+
+    // Update ke tabel fisik berdasarkan tipe produk
+    const targetTable = editingProduct.isRaw ? "raw_oil_listings" : "finished_products";
+    const updateData = editingProduct.isRaw
+      ? { title: formTitle, price_per_kg: Number(formPrice), stock_kg: Number(formStock) }
+      : { title: formTitle, price: Number(formPrice), stock: Number(formStock) };
+
+    const { error } = await supabase
+      .from(targetTable)
+      .update(updateData)
+      .eq("id", editingProduct.id);
+
+    if (error) {
+      alert("Gagal update data: " + error.message);
+    } else {
+      await fetchProducts();
+      setEditingProduct(null);
+      resetForm();
+    }
+    setSubmitting(false);
   };
 
-  const handleAddProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    const isRawType = formType === "raw";
-    
-    // Jika petani mengunggah foto, gunakan foto tersebut. Jika tidak, pakai foto contoh bawaan.
-    const finalImageUrl = imagePreview || (isRawType ? "/images/products/minyak nilam.png" : "/images/products/parfume1.png");
+  const handleConfirmDelete = async () => {
+    if (!deletingProduct) return;
+    setSubmitting(true);
 
-    const newProduct = {
-      id: `custom-${Date.now()}`,
-      title: formTitle,
-      price: Number(formPrice),
-      stock: Number(formStock),
-      unit: isRawType ? "kg" : "botol",
-      category: isRawType ? "Minyak Mentah (Crude Oil)" : formCategory,
-      imageUrl: finalImageUrl, 
-      isRaw: isRawType,
-      badges: ["AI Verified"]
-    };
+    const targetTable = deletingProduct.isRaw ? "raw_oil_listings" : "finished_products";
+    const { error } = await supabase
+      .from(targetTable)
+      .delete()
+      .eq("id", deletingProduct.id);
 
-    setProductsList(prev => [newProduct as any, ...prev]);
-    setIsAddPageOpen(false); 
-    resetForm();
-  };
-
-  const handleConfirmDelete = () => {
-    if (deletingProduct) {
-      setProductsList(prev => prev.filter(p => p.id !== deletingProduct.id));
+    if (error) {
+      alert("Gagal menghapus produk: " + error.message);
+    } else {
+      await fetchProducts();
       setDeletingProduct(null);
     }
+    setSubmitting(false);
   };
 
   const resetForm = () => {
     setFormTitle("");
     setFormPrice("");
     setFormStock("");
-    setImagePreview(null); // Reset foto kembali kosong
+    setSelectedFile(null);
+    setImagePreview(null);
   };
 
   const filteredProducts = productsList.filter((product: any) => {
@@ -143,12 +245,11 @@ export default function MyProductsPage() {
     return true;
   });
 
-  // ─── TAMPILAN 1: HALAMAN FORM TAMBAH PRODUK BARU (FULL PAGE) ───
+  // TAMPILAN 1: FORM TAMBAH PRODUK
   if (isAddPageOpen) {
     return (
       <DashboardShell role="umkm">
         <div className="max-w-3xl mx-auto w-full pb-16 pt-2">
-          
           <button 
             onClick={() => setIsAddPageOpen(false)}
             className="flex items-center gap-2 text-stone-600 hover:text-stone-900 font-bold text-sm mb-6 bg-stone-100 hover:bg-stone-200 px-4 py-2 rounded-lg transition-colors border border-stone-200"
@@ -157,7 +258,6 @@ export default function MyProductsPage() {
           </button>
 
           <Card className="bg-white border border-stone-200 shadow-md rounded-xl p-8 space-y-6">
-            
             <div className="border-b border-stone-100 pb-4">
               <h1 className="text-xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
                 <span className="p-2 bg-emerald-50 text-emerald-800 rounded-lg"><Plus className="w-5 h-5 stroke-[3]" /></span>
@@ -169,8 +269,6 @@ export default function MyProductsPage() {
             </div>
 
             <form onSubmit={handleAddProduct} className="space-y-6 text-sm">
-              
-              {/* KOLOM 1: Pilihan Jenis Dagangan */}
               <div className="space-y-2 bg-stone-50 p-4 rounded-xl border border-stone-200">
                 <label className="block text-sm font-extrabold text-stone-900">
                   1. Pilih Jenis Barang Yang Ingin Dijual:
@@ -204,14 +302,12 @@ export default function MyProductsPage() {
                 </div>
               </div>
 
-              {/* KOLOM BARU: Input Unggah Foto Produk (Tema Putih Bersih & Jelas) */}
               <div className="space-y-2">
                 <label className="block text-sm font-extrabold text-stone-900">
                   2. Unggah Foto / Gambar Produk:
                 </label>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4 p-4 border-2 border-dashed border-stone-300 rounded-xl bg-stone-50/50">
-                  {/* Kotak Pratinjau Foto */}
                   <div className="w-28 h-28 bg-stone-100 rounded-lg border border-stone-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {imagePreview ? (
                       <img src={imagePreview} alt="Pratinjau barang" className="w-full h-full object-cover" />
@@ -220,7 +316,6 @@ export default function MyProductsPage() {
                     )}
                   </div>
 
-                  {/* Tombol Klik Unggah */}
                   <div className="flex-1 w-full text-center sm:text-left space-y-1">
                     <label className="inline-flex items-center gap-1.5 bg-white hover:bg-stone-100 text-stone-800 font-extrabold text-xs py-2 px-4 border border-stone-300 rounded-lg shadow-sm cursor-pointer transition-colors">
                       <UploadCloud className="w-4 h-4 text-emerald-700" />
@@ -239,7 +334,6 @@ export default function MyProductsPage() {
                 </div>
               </div>
 
-              {/* KOLOM 3: Nama Barang */}
               <div className="space-y-2">
                 <label className="block text-sm font-extrabold text-stone-900">
                   3. Tulis Nama Lengkap Produk / Barang:
@@ -253,7 +347,6 @@ export default function MyProductsPage() {
                 />
               </div>
 
-              {/* KOLOM 4: Kategori */}
               {formType === "finished" && (
                 <div className="space-y-2">
                   <label className="block text-sm font-extrabold text-stone-900">
@@ -269,9 +362,7 @@ export default function MyProductsPage() {
                 </div>
               )}
 
-              {/* KOLOM 5: Harga Jual & Stok Dagangan */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                
                 <div className="space-y-2">
                   <label className="block text-sm font-extrabold text-stone-900">
                     {formType === "raw" ? "5. Harga Jual per Kilo (Rp):" : "5. Harga Jual per Botol/Pcs (Rp):"}
@@ -287,7 +378,6 @@ export default function MyProductsPage() {
                       required 
                     />
                   </div>
-                  <p className="text-xs text-stone-400 font-medium">Tuliskan angka saja tanpa menggunakan titik (.) atau koma (,).</p>
                 </div>
 
                 <div className="space-y-2">
@@ -308,10 +398,8 @@ export default function MyProductsPage() {
                     </span>
                   </div>
                 </div>
-
               </div>
 
-              {/* TOMBOL SIMPAN / SELESAI */}
               <div className="pt-6 border-t border-stone-100 flex flex-col sm:flex-row gap-3">
                 <button 
                   type="button" 
@@ -322,12 +410,13 @@ export default function MyProductsPage() {
                 </button>
                 <Button 
                   type="submit" 
+                  disabled={submitting}
                   className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3 px-4 rounded-xl text-sm border-none shadow-md flex items-center justify-center gap-1.5 transition-colors order-1 sm:order-2 h-11"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> Simpan Produk Masuk Katalog
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} 
+                  {submitting ? "Menyimpan ke Supabase..." : "Simpan Produk Masuk Katalog"}
                 </Button>
               </div>
-
             </form>
           </Card>
         </div>
@@ -335,12 +424,10 @@ export default function MyProductsPage() {
     );
   }
 
-  // ─── TAMPILAN 2: HALAMAN UTAMA DAFTAR KATALOG PRODUK ───
+  // TAMPILAN 2: DAFTAR KATALOG UTAMA
   return (
     <DashboardShell role="umkm">
       <div className="space-y-6 max-w-7xl mx-auto w-full pb-12">
-        
-        {/* TOP HEADER CONTROLS */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl font-black text-stone-900 tracking-tight">Katalog Produk Saya</h1>
@@ -356,7 +443,6 @@ export default function MyProductsPage() {
           </Button>
         </div>
 
-        {/* TAB FILTER SELECTION BOX */}
         <Card className="p-4 bg-white border border-stone-200 shadow-sm space-y-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex bg-stone-100 p-1 rounded-lg w-full md:w-auto text-xs font-bold">
@@ -383,8 +469,12 @@ export default function MyProductsPage() {
           </div>
         </Card>
 
-        {/* CATALOG DISPLAY GRID */}
-        {filteredProducts.length === 0 ? (
+        {loading ? (
+          <div className="py-20 text-center text-stone-500 flex flex-col items-center gap-2">
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-700" />
+            <p className="text-xs font-semibold">Memuat produk dari Supabase...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <Card className="p-12 border border-dashed border-stone-300 text-center text-stone-500 bg-stone-50/50 rounded-xl">
             <Store className="w-10 h-10 text-stone-300 mx-auto mb-2" />
             <p className="text-xs font-bold text-stone-700">Belum Ada Produk</p>
@@ -432,10 +522,9 @@ export default function MyProductsPage() {
           </div>
         )}
 
-        {/* ── SAFETY PORTAL POPUP UNTUK EDIT & HAPUS (PUTIH BERSIH) ── */}
+        {/* MODAL EDIT, DELETE, DETAIL */}
         {mounted && typeof document !== "undefined" && (
           <>
-            {/* MODAL EDIT PRODUK */}
             {editingProduct && createPortal(
               <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-black/60 backdrop-blur-sm m-0 p-0 top-0 left-0" style={{ zIndex: 999999 }}>
                 <div className="bg-white border border-stone-200 rounded-xl max-w-md w-full overflow-hidden shadow-2xl p-6 text-stone-900 space-y-4 mx-4">
@@ -466,7 +555,9 @@ export default function MyProductsPage() {
                     </div>
                     <div className="pt-3 border-t border-stone-100 flex gap-2">
                       <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold py-2.5 rounded-lg text-xs transition-colors">Batal</button>
-                      <Button type="submit" className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-lg text-xs border-none transition-colors">Perbarui Data</Button>
+                      <Button type="submit" disabled={submitting} className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-lg text-xs border-none transition-colors">
+                        {submitting ? "Memperbarui..." : "Perbarui Data"}
+                      </Button>
                     </div>
                   </form>
                 </div>
@@ -474,7 +565,6 @@ export default function MyProductsPage() {
               document.body
             )}
 
-            {/* MODAL KONFIRMASI HAPUS */}
             {deletingProduct && createPortal(
               <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-black/60 backdrop-blur-sm m-0 p-0 top-0 left-0" style={{ zIndex: 999999 }}>
                 <div className="bg-white border border-stone-200 rounded-xl max-w-sm w-full overflow-hidden shadow-2xl p-6 text-center space-y-4 mx-4">
@@ -487,14 +577,15 @@ export default function MyProductsPage() {
                   </div>
                   <div className="flex gap-2.5 pt-2 text-xs font-bold">
                     <button onClick={() => setDeletingProduct(null)} className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-600 py-2.5 rounded-lg transition-colors">Tidak, Simpan</button>
-                    <button onClick={handleConfirmDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg transition-colors border-none shadow-sm">Ya, Hapus</button>
+                    <button onClick={handleConfirmDelete} disabled={submitting} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg transition-colors border-none shadow-sm">
+                      {submitting ? "Menghapus..." : "Ya, Hapus"}
+                    </button>
                   </div>
                 </div>
               </div>,
               document.body
             )}
 
-            {/* MODAL PREVIEW DETAIL */}
             {selectedProduct && createPortal(
               <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-black/60 backdrop-blur-sm m-0 p-0 top-0 left-0" style={{ zIndex: 999999 }}>
                 <div className="bg-white rounded-xl max-w-md w-full overflow-hidden shadow-xl border border-stone-200 relative p-5 space-y-4 mx-4">
@@ -516,7 +607,6 @@ export default function MyProductsPage() {
             )}
           </>
         )}
-
       </div>
     </DashboardShell>
   );

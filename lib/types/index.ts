@@ -4,7 +4,7 @@
 // nantinya. Setiap interface = calon nama tabel (snake_case di DB).
 // ============================================================================
 
-export type UserRole = "petani" | "umkm" | "buyer" | "peneliti";
+export type UserRole = "petani" | "umkm" | "buyer" | "peneliti" | "pemasta";
 
 export interface User {
   id: string;

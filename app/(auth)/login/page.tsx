@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useLang } from "@/components/layout/Navbar"; 
 import { useAuthStore } from "@/lib/store";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const T_LOGIN = {
   title: { id: "Masuk ke Aplikasi", en: "Sign In to ATSIRA" },
@@ -42,47 +43,59 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Fungsi Inti Autentikasi Bawaan dengan 4 Peran Terpilih
-  function processLogin(targetEmail: string) {
-    let detectedRole = "buyer"; 
+  function detectRoleFromEmail(targetEmail: string): "petani" | "umkm" | "buyer" | "peneliti" | "pemasta" {
     const lowerEmail = targetEmail.toLowerCase();
-    
-    if (lowerEmail.includes("@seller.com")) {
-      detectedRole = "seller";
-    } else if (lowerEmail.includes("@pemasta.com")) {
-      detectedRole = "pemasta";
-    } else if (lowerEmail.includes("@usk.ac.id") || lowerEmail.includes("@arc.com")) {
-      detectedRole = "arc"; 
-    } else if (lowerEmail.includes("@buyer.com")) {
-      detectedRole = "buyer";
-    }
-
-    login({ name: targetEmail.split("@")[0], role: detectedRole } as any);
-    
-    // Mengarahkan ke rute spesifik berdasarkan role demi kelancaran demo juri
-    setTimeout(() => {
-      router.push(`/dashboard/${detectedRole}`);
-    }, 1000);
+    if (lowerEmail.includes("pemasta") || lowerEmail.includes("@pemasta") || lowerEmail.includes("aman@")) return "pemasta";
+    if (lowerEmail.includes("syukur@") || lowerEmail.includes("@petani.")) return "petani";
+    if (lowerEmail.includes("khali") || lowerEmail.includes("umkm") || lowerEmail.includes("@seulawah") || lowerEmail.includes("atelier")) return "umkm";
+    if (lowerEmail.includes("@arc") || lowerEmail.includes("usk") || lowerEmail.includes("peneliti")) return "peneliti";
+    return "buyer";
   }
 
-  // Handler Kirim Form Manual
+  async function processLogin(targetEmail: string, targetPassword: string) {
+    const supabase = createSupabaseBrowserClient();
+    const { data, error } = await supabase.auth.signInWithPassword({ email: targetEmail, password: targetPassword });
+
+    if (error) {
+      setErrorMessage(error.message);
+      setLoading(false);
+      return;
+    }
+
+    const detectedRole = detectRoleFromEmail(targetEmail);
+    const userName =
+      data.user.user_metadata?.full_name ||
+      data.user.user_metadata?.name ||
+      targetEmail.split("@")[0];
+
+    login(detectedRole, userName, {
+      id: data.user.id,
+      email: data.user.email || targetEmail,
+    });
+
+    setTimeout(() => {
+      router.push(`/dashboard/${detectedRole}`);
+    }, 600);
+  }
+
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     if (!email || !password) return;
+    setErrorMessage("");
     setLoading(true);
-    processLogin(email);
+    processLogin(email, password);
   }
 
   // Handler Pintu Pintas Demo (Quick Login Selector)
   const handleQuickDemo = (demoEmail: string) => {
     setLoading(true);
     setEmail(demoEmail);
-    setPassword("••••••••");
-    
-    // Beri jeda visual agar efek simulasi ketik otomatis terlihat nyata bagi juri
+    setPassword("demo123");
+    setErrorMessage("");
     setTimeout(() => {
-      processLogin(demoEmail);
+      processLogin(demoEmail, "demo123");
     }, 600);
   };
 
@@ -125,8 +138,11 @@ export default function LoginPage() {
         <Card className="p-6 bg-white shadow-xl rounded-2xl mb-6 space-y-5">
           {/* FORM MANUAL */}
           <form onSubmit={handleLogin} className="space-y-4">
+            {errorMessage ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{errorMessage}</div>
+            ) : null}
             <div>
-              <label className="block text-xs font-semibold text-outline uppercase mb-1.5 flex items-center gap-1">
+              <label className="inline-flex items-center gap-1 text-xs font-semibold text-outline uppercase mb-1.5">
                 <Mail className="w-3.5 h-3.5" /> {T_LOGIN.emailLabel[currentLang]}
               </label>
               <input
@@ -140,7 +156,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-outline uppercase mb-1.5 flex items-center gap-1">
+              <label className="inline-flex items-center gap-1 text-xs font-semibold text-outline uppercase mb-1.5">
                 <Lock className="w-3.5 h-3.5" /> {T_LOGIN.passLabel[currentLang]}
               </label>
               <div className="relative">
