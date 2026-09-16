@@ -159,7 +159,7 @@ export default function B2BSourcingPage() {
                           <h3 className="text-xs font-bold text-stone-900 line-clamp-1">{product.title}</h3>
                           {/* HARGA DARI MOCK (pricePerKg) */}
                           <span className="text-xs font-mono font-black text-emerald-700 whitespace-nowrap">
-                            {formatIDR(product.pricePerKg)} / kg
+                            {formatIDR(product.price)} / kg
                           </span>
                         </div>
                         <p className="text-[11px] text-stone-500 line-clamp-2 leading-relaxed">{product.description}</p>
