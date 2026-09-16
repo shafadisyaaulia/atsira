@@ -19,10 +19,8 @@ export default async function DashboardIndexPage() {
   
   if (role === "seller" || role === "umkm" || role === "petani") {
     redirect("/dashboard/seller");
-  } else if (role === "arc") {
+  } else if (role === "peneliti" || role === "arc") {
     redirect("/dashboard/arc");
-  } else if (role === "peneliti") {
-    redirect("/dashboard/peneliti");
   } else {
     redirect(`/dashboard/${role}`);
   }

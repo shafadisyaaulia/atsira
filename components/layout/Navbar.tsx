@@ -68,7 +68,7 @@ export function Navbar() {
   const logout = useAuthStore((s) => s.logout);
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.qty, 0));
   
-  const dashboardHref = user ? `/dashboard/${user.role}` : "/login"; 
+  const dashboardHref = user ? (user.role === "peneliti" ? "/dashboard/arc" : `/dashboard/${user.role}`) : "/login";
 
   useEffect(() => {
     function handleOutsideClick(e: MouseEvent) {

@@ -87,6 +87,7 @@ export default function HomePage() {
             description: s.excerpt,
             author: s.author,
             authorRole: s.author_role,
+            imageUrl: s.image_url || null,
             date: new Date(s.published_at).toLocaleDateString("id-ID", { month: "short", day: "numeric", year: "numeric" })
           })));
         }
@@ -246,12 +247,10 @@ export default function HomePage() {
           {/* Left: Image */}
           <div className="lg:w-1/2 relative">
             <div className="aspect-square rounded-[40px] overflow-hidden shadow-2xl relative">
-              <div
-                className="w-full h-full bg-cover bg-center"
-                style={{
-                  backgroundImage:
-                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCFFvYGardEFoCENoaSF7swTl_SekC0fN9ZpXEbyFer8TUVas5NREjsiyDJsTXab2APHVC1jf8oEMVe_sJ1SnhqexXYHvvEkFlaVZwdAoGJw1vgbFNcPWlYumpXpy1c0a220kdGdDI5zR6bq2Jyrf4E-hYGEvdgu70ZcOrF5unot10TZ3MqB8BP10yR9DvLtHHULQ7Tfdr7dGYALKtEiRLO5jmmF4D0E3rIx67he66w8AD1L1F80mUYEyrqYGjN-BRQKhq8J0hbhz9e')",
-                }}
+              <img
+                src="/stories/professional_documentary_photography_of_an_atsira_team_meeting_with_acehnese.png"
+                alt="Tim ATSIRA"
+                className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-ink-green/10" />
             </div>
@@ -318,6 +317,15 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {stories.slice(0, 3).map((s) => (
                 <Card key={s.id} className="p-6 border border-stone-200 flex flex-col gap-4 hover:shadow-lg transition-all group bg-white">
+                  {s.imageUrl && (
+                    <div className="rounded-xl overflow-hidden aspect-[16/10] mb-2">
+                      <img
+                        src={s.imageUrl}
+                        alt={s.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
                       {s.category}

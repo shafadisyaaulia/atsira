@@ -62,14 +62,19 @@ export default function LoginPage() {
     // Normalisasi role DB yang mungkin berbeda dengan sistem ATSIRA
     const ROLE_MAP: Record<string, string> = {
       "seller": "umkm",     // Role lama "seller" → umkm
-      "arc": "peneliti",    // Role lama "arc" → peneliti
       "farmer": "petani",   // Alias lainnya
     };
     const dbRole = ROLE_MAP[rawRole] ?? rawRole;
     
-    // URL redirect: petani & umkm masuk ke /dashboard/seller
-    const sellerRoles = ["petani", "umkm"];
-    const redirectPath = sellerRoles.includes(dbRole) ? "/dashboard/seller" : `/dashboard/${dbRole}`;
+    // URL redirect berdasarkan role
+    let redirectPath: string;
+    if (dbRole === "petani" || dbRole === "umkm") {
+      redirectPath = "/dashboard/seller";
+    } else if (dbRole === "peneliti" || dbRole === "arc") {
+      redirectPath = "/dashboard/arc";
+    } else {
+      redirectPath = `/dashboard/${dbRole}`;
+    }
     
     const userName =
       data.user.user_metadata?.full_name ||

@@ -56,13 +56,11 @@ export default function HeroSection() {
     <section className="relative min-h-screen flex items-center pt-20 px-4 md:px-16 overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <div
-          className="w-full h-full bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXQbTQcjmQUuxxSOW5EwDAsyVHPzLls6Dc4CB9VYsrS0LPJoJrvUqMXZgZ1jVuR6MMOAUdjupA0-Y5OdHJa2k3WJkGoqWX8QFJxXg5p23vUB-YBMyB5tLctQYymwvDu1lIiRDvQIwyerKGb2LWsquuS1T6xh6nG4PPjd2sPN84ud9oBCyF_HMh_feJecPJxHhFDfbKxMIBfa_hIOcrjTgYQpBKeHjYpmj6IcP5qlAEVo9E-KaIigbH9cmKsA4zc8sTCSR9ffBIWBHd')",
-          }}
-        />
+          <img
+            src="/stories/high_tech_laboratory_photography_at_arc_usk._a_researcher_in_a_white_lab_coat.png"
+            alt="ATSIRA Hero"
+            className="w-full h-full object-cover"
+          />
         <div className="absolute inset-0 bg-gradient-to-r from-bone-wash via-bone-wash/60 to-transparent" />
       </div>
 
