@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Leaf, FlaskConical, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Leaf, FlaskConical, Sparkles, CheckCircle2, ShieldAlert, X } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/Button";
 import { Card, SectionEyebrow, Badge } from "@/components/ui/Card";
 import { IMPACT_METRICS } from "@/lib/mock";
 import HeroSection from "@/components/shared/HeroSection";
+import { useAuthStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
 
 // 1. Hubungkan hook bahasa langsung dari Navbar Anda
 import { useLang } from "@/components/layout/Navbar";
@@ -68,6 +71,50 @@ const T_HOME = {
 export default function HomePage() {
   // 3. Ambil nilai state bahasa aktif saat ini ("ID" atau "EN")
   const lang = useLang();
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const [stories, setStories] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/pemasta/field-stories")
+      .then(res => res.json())
+      .then(json => {
+        if (json.data) {
+          setStories(json.data.map((s: any) => ({
+            id: s.slug,
+            title: s.title,
+            category: s.category,
+            description: s.excerpt,
+            author: s.author,
+            authorRole: s.author_role,
+            date: new Date(s.published_at).toLocaleDateString("id-ID", { month: "short", day: "numeric", year: "numeric" })
+          })));
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  const [showRoleModal, setShowRoleModal] = useState(false);
+
+  const ROLE_LABELS: Record<string, string> = {
+    petani: "Petani",
+    umkm: "UMKM / Seller",
+    buyer: "Buyer",
+    peneliti: "Peneliti",
+    pemasta: "Pemasta",
+  };
+
+  const handleAnalyzerAccess = useCallback(() => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (user.role !== "petani") {
+      setShowRoleModal(true);
+      return;
+    }
+    router.push("/marketplace/analyzer");
+  }, [user, router]);
 
   return (
     <PageShell>
@@ -116,7 +163,7 @@ export default function HomePage() {
                 <p className="text-sm font-mono text-on-primary-container">ACEH_001</p>
               </div>
             </div>
-            <Button href="/marketplace/analyzer" variant="gold" className="w-full">
+            <Button onClick={handleAnalyzerAccess} variant="gold" className="w-full">
               {T_HOME.aiBtnScan[lang]}
             </Button>
           </Card>
@@ -137,12 +184,38 @@ export default function HomePage() {
                 </li>
               ))}
             </ul>
-            <Button href="/marketplace/analyzer" variant="gold" size="lg">
+            <Button onClick={handleAnalyzerAccess} variant="gold" size="lg">
               {T_HOME.aiBtnTry[lang]}
             </Button>
           </div>
         </div>
       </section>
+
+      {/* Role Warning Modal */}
+      {showRoleModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-primary/70 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative">
+            <button 
+              onClick={() => setShowRoleModal(false)}
+              className="absolute right-4 top-4 p-2 hover:bg-surface-container rounded-full"
+            >
+              <X className="w-5 h-5 text-on-surface" />
+            </button>
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-error-container p-4 rounded-full mb-4">
+                <ShieldAlert className="w-8 h-8 text-error" />
+              </div>
+              <h3 className="font-display text-headline-md text-primary mb-2">Akses Terbatas</h3>
+              <p className="text-on-surface-variant mb-6">
+                Fitur Penganalisis AI hanya tersedia untuk <strong>Petani</strong>.
+              </p>
+              <Button onClick={() => setShowRoleModal(false)} variant="primary" className="w-full">
+                Mengerti
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* LIVE METRICS */}
       <section className="py-20 bg-surface-container-low">
@@ -226,6 +299,55 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* NILAM STORY HUB (Dari Pemasta) */}
+      {stories.length > 0 && (
+        <section className="py-24 bg-surface-container-lowest border-t border-surface-container-high">
+          <div className="container-app">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <SectionEyebrow>{lang === "ID" ? "Cerita Komunitas" : "Community Stories"}</SectionEyebrow>
+              <h2 className="font-display text-headline-lg-mobile lg:text-4xl text-primary mt-4 mb-4 text-balance">
+                {lang === "ID" ? "Nilam Story Hub" : "Patchouli Story Hub"}
+              </h2>
+              <p className="text-body-lg text-on-surface-variant">
+                {lang === "ID" 
+                  ? "Kabar terbaru, edukasi, dan dokumentasi lapangan langsung dari para Pahlawan Nilam (Pemasta) di berbagai daerah."
+                  : "Latest updates, education, and field documentation straight from our Patchouli Heroes (Pemasta) across regions."}
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stories.slice(0, 3).map((s) => (
+                <Card key={s.id} className="p-6 border border-stone-200 flex flex-col gap-4 hover:shadow-lg transition-all group bg-white">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {s.category}
+                    </span>
+                    <span className="text-xs font-semibold text-stone-400">{s.date}</span>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-stone-900 leading-tight mb-2 group-hover:text-emerald-700 transition-colors">
+                      {s.title}
+                    </h3>
+                    <p className="text-sm text-stone-500 line-clamp-3 leading-relaxed">
+                      {s.description}
+                    </p>
+                  </div>
+                  <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-[9px] font-bold text-white">
+                        {s.author.charAt(0)}
+                      </div>
+                      <span className="text-xs font-bold text-stone-700">{s.author}</span>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-medium bg-stone-100 px-2 py-0.5 rounded-full">{s.authorRole}</span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA */}
       <section className="py-20">
         <div className="container-app">
@@ -238,10 +360,10 @@ export default function HomePage() {
               {T_HOME.ctaDesc[lang]}
             </p>
             <div className="flex flex-wrap gap-4 justify-center relative z-10">
-              <Button href="/auth/register?role=petani" variant="gold" size="lg">
+              <Button href="/register?role=petani" variant="gold" size="lg">
                 {T_HOME.ctaBtnFarmer[lang]}
               </Button>
-              <Button href="/auth/register?role=buyer" variant="secondary" size="lg" className="border-white text-white hover:bg-white hover:text-primary">
+              <Button href="/register?role=buyer" variant="secondary" size="lg" className="border-white text-white hover:bg-white hover:text-primary">
                 {T_HOME.ctaBtnPartner[lang]}
               </Button>
             </div>
@@ -251,3 +373,4 @@ export default function HomePage() {
     </PageShell>
   );
 }
+

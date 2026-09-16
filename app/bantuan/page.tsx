@@ -141,14 +141,11 @@ export default function HelpCenterPage() {
                   <p className="text-xs text-on-surface-variant leading-relaxed">{T.pdfBuyerDesc[lang]}</p>
                 </div>
                 {/* Atur rute file PDF Anda di properti href */}
-                <a 
-                  href="/docs/panduan-atsira-buyer.pdf" 
-                  download 
-                  className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-colors"
+                <div 
+                  className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-stone-100 text-stone-500 text-xs font-bold cursor-not-allowed"
                 >
-                  <Download className="w-4 h-4" />
-                  {T.pdfBtn[lang]}
-                </a>
+                  Coming Soon
+                </div>
               </div>
 
               {/* Kartu Panduan Sisi Seller (Warna Hijau Daun Nilam) */}
@@ -164,14 +161,11 @@ export default function HelpCenterPage() {
                   <p className="text-xs text-on-surface-variant leading-relaxed">{T.pdfSellerDesc[lang]}</p>
                 </div>
                 {/* Atur rute file PDF Anda di properti href */}
-                <a 
-                  href="/docs/panduan-atsira-seller.pdf" 
-                  download 
-                  className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors"
+                <div 
+                  className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-stone-100 text-stone-500 text-xs font-bold cursor-not-allowed"
                 >
-                  <Download className="w-4 h-4" />
-                  {T.pdfBtn[lang]}
-                </a>
+                  Coming Soon
+                </div>
               </div>
             </div>
           </div>
@@ -225,43 +219,6 @@ export default function HelpCenterPage() {
                 </div>
               );
             })}
-          </div>
-
-          {/* 4. PORTAL KONTAK BANTUAN */}
-          <div className="bg-gradient-to-tr from-surface via-surface-container-lowest to-primary-container/10 border-2 border-primary/10 rounded-3xl p-6 md:p-8 text-center space-y-6 shadow-md relative overflow-hidden">
-            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/5 rounded-full blur-2xl" />
-            <div className="absolute -left-10 -top-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-2xl" />
-
-            <div className="space-y-2 relative z-10">
-              <h2 className="text-xl font-black text-on-surface tracking-tight">{T.contactTitle[lang]}</h2>
-              <p className="text-xs text-on-surface-variant max-w-md mx-auto">{T.contactSubtitle[lang]}</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto relative z-10">
-              <a href="https://wa.me/62811xxxxxx" target="_blank" rel="noreferrer" className="flex flex-col items-center p-5 rounded-2xl border border-emerald-100 bg-white/70 hover:border-emerald-500 hover:bg-emerald-50/40 shadow-sm hover:shadow transition-all group">
-                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 mb-3 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-on-surface">WhatsApp Chat</span>
-                <span className="text-[10px] text-emerald-700 font-medium mt-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Respon Cepat</span>
-              </a>
-
-              <a href="mailto:support@atsira.id" className="flex flex-col items-center p-5 rounded-2xl border border-blue-100 bg-white/70 hover:border-blue-500 hover:bg-blue-50/40 shadow-sm hover:shadow transition-all group">
-                <div className="p-3 bg-blue-50 rounded-xl text-blue-600 mb-3 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-on-surface">Email Support</span>
-                <span className="text-[10px] text-blue-700 font-medium mt-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">24 Jam</span>
-              </a>
-
-              <a href="tel:021xxxxxx" className="flex flex-col items-center p-5 rounded-2xl border border-amber-100 bg-white/70 hover:border-amber-600 hover:bg-amber-50/40 shadow-sm hover:shadow transition-all group">
-                <div className="p-3 bg-amber-50 rounded-xl text-amber-600 mb-3 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-on-surface">Hotline Call</span>
-                <span className="text-[10px] text-amber-800 font-medium mt-1 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">Jam Kerja</span>
-              </a>
-            </div>
           </div>
 
         </div>

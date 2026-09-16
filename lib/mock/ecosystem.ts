@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   UmkmStore,
   PriceTick,
   Order,
@@ -27,7 +27,7 @@ export const UMKM_STORES: UmkmStore[] = [
     ownerName: "Reza Pahlevi",
     location: "Lhokseumawe",
     logoUrl: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=200&h=200&fit=crop",
-    bio: "Produk perawatan rumah berbasis minyak atsiri nilam — sabun, lilin, dan diffuser.",
+    bio: "Produk perawatan rumah berbasis minyak atsiri nilam â€” sabun, lilin, dan diffuser.",
     joinedAt: "2025-01-15",
     halalCertified: true,
     bpomCertified: false,
@@ -36,7 +36,7 @@ export const UMKM_STORES: UmkmStore[] = [
   },
 ];
 
-// 12 bulan data harga historis — dipakai di Price Intelligence Dashboard
+// 12 bulan data harga historis â€” dipakai di Price Intelligence Dashboard
 // dan Price Intelligence Panel di Dashboard Petani.
 function generatePriceHistory(): PriceTick[] {
   const months = [
@@ -192,7 +192,7 @@ export const IMPACT_METRICS: ImpactMetric[] = [
   { label: "Total Minyak Diperdagangkan", value: "41,8 ton", change: "+12,4%", trend: "up" },
   { label: "Petani & Penyuling Bergabung", value: "5.412", change: "+312 bulan ini", trend: "up" },
   { label: "Total Nilai Transaksi", value: "Rp 18,2 M", change: "+8,1%", trend: "up" },
-  { label: "Estimasi CO₂ Dicegah", value: "284 ton", change: "+5,6%", trend: "up" },
+  { label: "Estimasi COâ‚‚ Dicegah", value: "284 ton", change: "+5,6%", trend: "up" },
   { label: "UMKM Naik Kelas", value: "118 toko", change: "+9 bulan ini", trend: "up" },
   { label: "Kota Terlayani", value: "23 kota", trend: "flat" },
 ];
@@ -205,7 +205,7 @@ export const VERIFICATION_QUEUE: VerificationQueueItem[] = [
     region: "Aceh Jaya",
     submittedAt: "2026-06-27T09:00:00+07:00",
     aiPaLevel: 28.9,
-    aiGrade: "Standard",
+    aiGrade: "Grade B",
     status: "Menunggu",
     sampleImageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop",
   },
@@ -216,7 +216,7 @@ export const VERIFICATION_QUEUE: VerificationQueueItem[] = [
     region: "Aceh Barat",
     submittedAt: "2026-06-25T13:20:00+07:00",
     aiPaLevel: 31.6,
-    aiGrade: "Standard",
+    aiGrade: "Grade B",
     status: "Dalam Proses",
     sampleImageUrl: "https://images.unsplash.com/photo-1556228852-80b6e16a3219?w=400&h=400&fit=crop",
   },
@@ -227,7 +227,7 @@ export const VERIFICATION_QUEUE: VerificationQueueItem[] = [
     region: "Gayo",
     submittedAt: "2026-06-20T08:40:00+07:00",
     aiPaLevel: 34.2,
-    aiGrade: "Premium",
+    aiGrade: "Grade A",
     status: "Lulus",
     sampleImageUrl: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=400&fit=crop",
   },

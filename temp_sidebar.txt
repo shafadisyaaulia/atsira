@@ -1,0 +1,35 @@
+﻿          <div className="border-t border-stone-100 pt-4 space-y-3">
+            <Link 
+              href="/dashboard/community" 
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-100 to-emerald-200 hover:from-emerald-200 hover:to-emerald-300 text-emerald-900 px-4 py-2.5 rounded-xl border border-emerald-300 shadow-sm transition-all text-xs font-bold"
+            >
+              <Users className="w-4 h-4 text-emerald-700" />
+              ATSIRA Connect
+            </Link>
+
+            <div className="flex gap-2 px-2">
+              <button
+                onClick={toggleLang}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50/50 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors shadow-sm w-full"
+              >
+                <Globe className="w-3.5 h-3.5 text-amber-700" />
+                <span>{lang === "ID" ? "ID" : "EN"}</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-all border border-red-100/50 hover:border-red-200"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 px-2 pt-2">
+              <div className="w-9 h-9 bg-stone-200 rounded-full flex items-center justify-center font-bold text-stone-700 text-sm">
+                {user?.name ? user.name.charAt(0).toUpperCase() : "KP"}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-stone-900 truncate">{user?.name || "Kelompok Suling Jaya"}</p>
+                <p className="text-[10px] text-stone-400 truncate">Pemasta Node</p>
+              </div>
+            </div>
+          </div>

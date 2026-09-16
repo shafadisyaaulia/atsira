@@ -1,21 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store";
+import { getLang, subscribeLang, toggleLang } from "@/lib/language";
 import { 
   Droplet, MapPin, Calendar, Activity, TrendingUp, 
-  BookOpen, FileText, Plus, 
+  BookOpen, FileText, Plus, Globe, Users,
   Upload, LayoutDashboard, PenSquare, LogOut, Sparkles,
   Scale, Layers, Sprout, Coins
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { RegionCascade } from "@/components/ui/RegionCascade";
+
 
 export default function PemastaDashboard() {
   const [activeMenu, setActiveMenu] = useState<"dashboard" | "story-hub">("dashboard");
+  const router = useRouter();
+  const logout = useAuthStore((s) => s.logout);
+  const [lang, setLang] = useState<"ID"|"EN">("ID");
+  useEffect(() => { setLang(getLang() as "ID"|"EN"); const unsub = subscribeLang(() => setLang(getLang() as "ID"|"EN")); return unsub; }, []);
 
   // State Batch Log & Harga
   const [showBatchModal, setShowBatchModal] = useState(false);
+  const [showRiwayat, setShowRiwayat] = useState(false);
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterYear, setFilterYear] = useState("");
+  const [batchSubmitting, setBatchSubmitting] = useState(false);
   const [batches, setBatches] = useState<any[]>([]);
   const [batchLoading, setBatchLoading] = useState(true);
   const [batchForm, setBatchForm] = useState({ 
@@ -106,34 +120,29 @@ export default function PemastaDashboard() {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
   };
 
-  const handleCreateBatch = (e: React.FormEvent) => {
+  const handleCreateBatch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!batchForm.qty || !batchForm.pa || !batchForm.pricePerKg || !batchForm.date) return;
-
-    const volume = Number(batchForm.qty);
-    const hargaKustom = Number(batchForm.pricePerKg);
-    const totalNilai = volume * hargaKustom;
-
-    const formattedDate = new Date(batchForm.date).toLocaleDateString("id-ID", {
-      weekday: "long", year: "numeric", month: "short", day: "numeric"
-    });
-
-    const newBatch = {
-      id: `BCH-${Math.floor(100 + Math.random() * 900)}`,
-      date: formattedDate,
-      qty: volume,
-      pa: Number(batchForm.pa),
-      status: "Verifikasi AI QualitySense",
-      region: batchForm.region,
-      method: batchForm.method,
-      leafAge: batchForm.leafAge,
-      pricePerKg: hargaKustom,
-      estimatedValue: formatCurrency(totalNilai)
-    };
-
-    setBatches([newBatch, ...batches]);
-    setBatchForm({ qty: "", pa: "", region: "Aceh Selatan", date: "", pricePerKg: "", method: "Uap (Steam Distressed)", leafAge: "6 Bulan" });
-    setShowBatchModal(false);
+    if (!batchForm.qty || !batchForm.pa || !batchForm.pricePerKg || !batchForm.date || !batchForm.region) return;
+    setBatchSubmitting(true);
+    try {
+      const volume = Number(batchForm.qty);
+      const hargaKustom = Number(batchForm.pricePerKg);
+      const batchId = `BCH-${Math.floor(100 + Math.random() * 900)}`;
+      const res = await fetch("/api/pemasta/market-prices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ batchId, region: batchForm.region, reportDate: batchForm.date, quantityKg: volume, paLevel: Number(batchForm.pa), pricePerKg: hargaKustom, method: batchForm.method, leafAge: batchForm.leafAge }),
+      });
+      if (!res.ok) throw new Error();
+      const formattedDate = new Date(batchForm.date).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "short", day: "numeric" });
+      setBatches([{ id: batchId, date: formattedDate, qty: volume, pa: Number(batchForm.pa), region: batchForm.region, method: batchForm.method, leafAge: batchForm.leafAge, pricePerKg: hargaKustom, estimatedValue: new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(volume * hargaKustom) }, ...batches]);
+      setBatchForm({ qty: "", pa: "", region: "", date: "", pricePerKg: "", method: "Uap (Steam Distressed)", leafAge: "6 Bulan" });
+      setShowBatchModal(false);
+    } catch {
+      alert("Gagal menyimpan ke server");
+    } finally {
+      setBatchSubmitting(false);
+    }
   };
 
   // Handler Kirim Cerita Baru
@@ -199,13 +208,26 @@ export default function PemastaDashboard() {
           </nav>
         </div>
 
-        <div className="border-t border-stone-100 pt-4 space-y-3">
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-9 h-9 bg-stone-200 rounded-full flex items-center justify-center font-bold text-stone-700 text-sm">KP</div>
+        <div className="border-t border-surface-container-high pt-4 space-y-2 bg-stone-50/50 -mx-5 px-5 pb-5 rounded-b-3xl">
+          <Link href="/dashboard/community">
+            <button className="w-full flex items-center justify-center gap-2 py-2 px-3 mb-2 rounded-xl bg-emerald-100/50 hover:bg-emerald-100 border border-emerald-200/50 text-emerald-800 text-xs font-bold transition-colors shadow-sm">
+              <Users className="w-3.5 h-3.5" /> ATSIRA Connect
+            </button>
+          </Link>
+          <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-surface-container-high shadow-sm">
+            <div className="w-9 h-9 bg-surface-container-highest rounded-full flex items-center justify-center font-bold text-stone-700 text-sm">KP</div>
             <div>
               <p className="text-xs font-bold text-stone-900">Kelompok Suling Jaya</p>
               <p className="text-[10px] text-stone-400">Petani Mitra ARC</p>
             </div>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <button onClick={toggleLang} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50/50 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors shadow-sm w-full">
+              <Globe className="w-3.5 h-3.5 text-amber-700" /> <span>{lang === "ID" ? "ID" : "EN"}</span>
+            </button>
+            <button onClick={() => { logout(); router.push('/login'); }} className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-all border border-red-100/50 hover:border-red-200 shadow-sm">
+              <LogOut className="w-4 h-4 shrink-0" />
+            </button>
           </div>
         </div>
       </aside>
@@ -215,55 +237,136 @@ export default function PemastaDashboard() {
         
         {/* DASHBOARD TAB */}
         {activeMenu === "dashboard" && (
-          <div className="space-y-8 animate-fadeIn">
+          <div className="space-y-6 animate-fadeIn">
+
+            {/* HEADER */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200/60 pb-5">
               <div>
                 <h1 className="text-xl font-bold text-stone-900 font-display">Log Histori Harga & Kualitas Suling</h1>
                 <p className="text-xs text-stone-500">Rekam seluruh data harga kesepakatan riil lapangan untuk AI QualitySense.</p>
               </div>
-              <Button onClick={() => setShowBatchModal(true)} variant="primary" className="rounded-xl flex items-center gap-2 text-xs font-semibold shadow-sm">
-                <Plus className="w-4 h-4" /> Catat Batch & Harga Baru
-              </Button>
-            </div>
-
-            {/* List Riwayat Batch */}
-            <div className="space-y-4">
-              <h2 className="text-sm font-bold text-stone-800 flex items-center gap-2 uppercase tracking-wider"><FileText className="w-4 h-4 text-emerald-800" /> Lembar Verifikasi Batch & Analisis AI</h2>
-              <div className="grid gap-4">
-                {batches.map((b) => (
-                  <Card key={b.id} className="p-5 bg-white border border-stone-200/60 hover:shadow-md transition-all rounded-2xl">
-                    <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                          <span className="text-sm font-bold text-stone-800">{b.id}</span>
-                          <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">{b.status}</span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-400">
-                          <span className="flex items-center gap-1 font-semibold text-stone-600"><MapPin className="w-3.5 h-3.5 text-stone-500" /> {b.region}</span>
-                          <span className="flex items-center gap-1"><Layers className="w-3.5 h-3.5" /> {b.method}</span>
-                          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {b.date}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-8 justify-between lg:justify-end border-t lg:border-t-0 border-stone-100 pt-3 lg:pt-0">
-                        <div className="text-left lg:text-right">
-                          <p className="text-[10px] text-stone-400 font-bold uppercase">Harga & Volume</p>
-                          <p className="text-xs text-stone-500">{formatCurrency(b.pricePerKg)}/Kg</p>
-                          <p className="text-sm font-bold text-stone-800">{b.qty} Kg ({b.estimatedValue})</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] text-stone-400 font-bold uppercase">Kadar PA</p>
-                          <p className="text-sm font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded font-mono">{b.pa}%</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setShowRiwayat(true)}
+                  variant="secondary"
+                  className="rounded-xl flex items-center gap-2 text-xs font-semibold shadow-sm border border-stone-300"
+                >
+                  <BookOpen className="w-4 h-4" /> Riwayat
+                </Button>
+                <Button onClick={() => setShowBatchModal(true)} variant="primary" className="rounded-xl flex items-center gap-2 text-xs font-semibold shadow-sm">
+                  <Plus className="w-4 h-4" /> Catat Batch & Harga Baru
+                </Button>
               </div>
             </div>
+
+            {/* KARTU DATA TERBARU (HIGHLIGHTED) */}
+            {batches.length > 0 && (() => {
+              const latest = batches[0];
+              return (
+                <div className="bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-2xl p-5 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-emerald-700/60 p-2 rounded-xl">
+                        <TrendingUp className="w-4 h-4 text-emerald-200" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-300">Data Terbaru</p>
+                        <p className="text-xs font-bold text-white">{latest.id}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] bg-emerald-700/60 border border-emerald-600/40 text-emerald-200 font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> {latest.date}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 border-t border-emerald-700/50 pt-4">
+                    <div>
+                      <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Harga/Kg</p>
+                      <p className="text-lg font-black text-white">{formatCurrency(latest.pricePerKg)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Volume</p>
+                      <p className="text-lg font-black text-white">{latest.qty} Kg</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Kadar PA</p>
+                      <p className="text-lg font-black text-amber-300">{latest.pa}%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-emerald-700/50 text-xs text-emerald-300">
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {latest.region}</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1"><Layers className="w-3 h-3" /> {latest.method}</span>
+                    
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* DATA SEBELUMNYA (3 TERBARU) */}
+            {batches.length > 1 && (
+              <div className="space-y-3">
+                <h2 className="text-xs font-black text-stone-500 uppercase tracking-widest flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-emerald-700" /> 3 Data Sebelumnya
+                </h2>
+                <div className="grid gap-3">
+                  {batches.slice(1, 4).map((b) => (
+                    <Card key={b.id} className="p-4 bg-white border border-stone-200/60 hover:shadow-md transition-all rounded-xl">
+                      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-bold text-stone-800">{b.id}</span>
+                            
+                            <span className="text-[10px] text-stone-400 flex items-center gap-0.5"><Calendar className="w-3 h-3" /> {b.date}</span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-400">
+                            <span className="flex items-center gap-1 font-semibold text-stone-600"><MapPin className="w-3 h-3" /> {b.region}</span>
+                            <span className="flex items-center gap-1"><Layers className="w-3 h-3" /> {b.method}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-6 shrink-0">
+                          <div className="text-right">
+                            <p className="text-[10px] text-stone-400 uppercase font-bold">Harga</p>
+                            <p className="text-xs font-bold text-stone-800">{formatCurrency(b.pricePerKg)}/Kg</p>
+                            <p className="text-[10px] text-stone-500">{b.qty} Kg</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] text-stone-400 uppercase font-bold">PA</p>
+                            <p className="text-sm font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded font-mono">{b.pa}%</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {batches.length > 4 && (
+                  <button
+                    onClick={() => setShowRiwayat(true)}
+                    className="w-full text-center text-xs font-bold text-emerald-700 hover:text-emerald-900 py-2.5 border border-dashed border-emerald-300 hover:border-emerald-500 rounded-xl transition-all bg-emerald-50/50 hover:bg-emerald-50"
+                  >
+                    Lihat semua {batches.length} data riwayat →
+                  </button>
+                )}
+              </div>
+            )}
+
+            {batches.length === 0 && !batchLoading && (
+              <div className="text-center py-16 text-stone-400">
+                <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <p className="font-bold text-sm">Belum ada data batch</p>
+                <p className="text-xs mt-1">Klik "Catat Batch & Harga Baru" untuk memulai</p>
+              </div>
+            )}
+            {batchLoading && (
+              <div className="text-center py-16 text-stone-300 text-xs animate-pulse">Memuat data dari database...</div>
+            )}
+
           </div>
         )}
 
-        {/* NILAM STORY HUB TAB */}
+{/* NILAM STORY HUB TAB */}
         {activeMenu === "story-hub" && (
           <div className="space-y-8 animate-fadeIn">
             <div className="border-b border-stone-200/60 pb-5">
@@ -422,13 +525,9 @@ export default function PemastaDashboard() {
                   <Input type="date" value={batchForm.date} onChange={(e) => setBatchForm({...batchForm, date: e.target.value})} required />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-stone-700 block mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Wilayah Sentra Lahan</label>
-                  <select className="w-full text-xs border border-stone-200 rounded-xl p-2.5 bg-white" value={batchForm.region} onChange={(e) => setBatchForm({...batchForm, region: e.target.value})}>
-                    <option value="Aceh Selatan">Aceh Selatan</option>
-                    <option value="Aceh Jaya">Aceh Jaya</option>
-                    <option value="Aceh Barat Daya">Aceh Barat Daya</option>
-                  </select>
-                </div>
+                    <label className="text-[11px] font-bold text-stone-700 block mb-1.5 flex items-center gap-1"><MapPin className="w-3 h-3" /> Wilayah Sentra Lahan</label>
+                    <RegionCascade value={batchForm.region} onChange={(region) => setBatchForm(prev => ({ ...prev, region }))} />
+                  </div>
               </div>
 
               <div className="grid sm:grid-cols-3 gap-3 border-t border-stone-100 pt-3">
@@ -448,9 +547,112 @@ export default function PemastaDashboard() {
 
               <div className="flex gap-2 justify-end pt-3 border-t border-stone-100">
                 <Button type="button" variant="secondary" onClick={() => setShowBatchModal(false)} className="rounded-xl text-xs">Batal</Button>
-                <Button type="submit" variant="primary" className="rounded-xl text-xs font-bold shadow-md">Simpan Data & Kirim</Button>
+                <Button type="submit" variant="primary" className="rounded-xl text-xs font-bold shadow-md" disabled={batchSubmitting}>{batchSubmitting ? "Menyimpan..." : "Simpan Data & Kirim"}</Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+
+      {/* MODAL RIWAYAT */}
+      {showRiwayat && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white rounded-2xl p-6 max-w-4xl w-full shadow-2xl space-y-4 border border-stone-100 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-stone-100 text-stone-600 rounded-xl"><BookOpen className="w-5 h-5" /></div>
+                <div>
+                  <h3 className="text-base font-bold text-stone-900">Riwayat Kesepakatan & Suling</h3>
+                  <p className="text-[11px] text-stone-500">Semua data yang pernah diinput.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowRiwayat(false)} className="rounded-xl w-8 h-8 flex items-center justify-center border border-stone-200 hover:bg-stone-50 text-stone-500 font-bold">
+                X
+              </button>
+            </div>
+            
+            {/* Filter */}
+            <div className="flex flex-wrap gap-3 bg-stone-50 p-3 rounded-xl border border-stone-100">
+               <select 
+                 className="text-xs border border-stone-200 rounded-lg px-3 py-2 bg-white"
+                 value={filterMonth}
+                 onChange={(e) => setFilterMonth(e.target.value)}
+               >
+                 <option value="">Semua Bulan</option>
+                 <option value="Jan">Januari</option>
+                 <option value="Feb">Februari</option>
+                 <option value="Mar">Maret</option>
+                 <option value="Apr">April</option>
+                 <option value="Mei">Mei</option>
+                 <option value="Jun">Juni</option>
+                 <option value="Jul">Juli</option>
+                 <option value="Agt">Agustus</option>
+                 <option value="Sep">September</option>
+                 <option value="Okt">Oktober</option>
+                 <option value="Nov">November</option>
+                 <option value="Des">Desember</option>
+               </select>
+               
+               <select 
+                 className="text-xs border border-stone-200 rounded-lg px-3 py-2 bg-white"
+                 value={filterYear}
+                 onChange={(e) => setFilterYear(e.target.value)}
+               >
+                 <option value="">Semua Tahun</option>
+                 <option value="2026">2026</option>
+                 <option value="2025">2025</option>
+                 <option value="2024">2024</option>
+               </select>
+            </div>
+
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+              {batches
+                .filter(b => {
+                  if (!filterMonth && !filterYear) return true;
+                  const matchMonth = filterMonth ? b.date.includes(filterMonth) : true;
+                  const matchYear = filterYear ? b.date.includes(filterYear) : true;
+                  return matchMonth && matchYear;
+                })
+                .map((b) => (
+                <div key={b.id} className="p-4 bg-white border border-stone-200/60 hover:shadow-md transition-all rounded-xl">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-stone-800">{b.id}</span>
+                        
+                        <span className="text-[10px] text-stone-400 flex items-center gap-0.5"><Calendar className="w-3 h-3" /> {b.date}</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-400">
+                        <span className="flex items-center gap-1 font-semibold text-stone-600"><MapPin className="w-3 h-3" /> {b.region}</span>
+                        <span className="flex items-center gap-1"><Layers className="w-3 h-3" /> {b.method}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6 shrink-0">
+                      <div className="text-right">
+                        <p className="text-[10px] text-stone-400 uppercase font-bold">Harga</p>
+                        <p className="text-xs font-bold text-stone-800">{b.pricePerKg}/Kg</p>
+                        <p className="text-[10px] text-stone-500">{b.qty} Kg</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-stone-400 uppercase font-bold">PA</p>
+                        <p className="text-sm font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded font-mono">{b.pa}%</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {batches.filter(b => {
+                  if (!filterMonth && !filterYear) return true;
+                  const matchMonth = filterMonth ? b.date.includes(filterMonth) : true;
+                  const matchYear = filterYear ? b.date.includes(filterYear) : true;
+                  return matchMonth && matchYear;
+              }).length === 0 && (
+                <div className="text-center py-10 text-stone-400 text-sm">
+                  Tidak ada data yang cocok dengan filter.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

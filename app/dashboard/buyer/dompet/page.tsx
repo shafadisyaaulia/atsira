@@ -57,11 +57,11 @@ export default function BuyerWalletPage() {
 
   // AGREGASI STATISTIK SUPABASE
   const totalUnpaidIDR = orders
-    .filter((o) => o.status === "Menunggu Pembayaran")
+    .filter((o) => o.status === "pending" || o.status === "Menunggu Pembayaran")
     .reduce((acc, curr) => acc + Number(curr.total || 0), 0);
 
   const totalPaidIDR = orders
-    .filter((o) => o.status !== "Menunggu Pembayaran" && o.status !== "Dibatalkan")
+    .filter((o) => o.status !== "pending" && o.status !== "Menunggu Pembayaran" && o.status !== "Dibatalkan")
     .reduce((acc, curr) => acc + Number(curr.total || 0), 0);
 
   const formatCurrency = (amountIDR: number) => {
@@ -115,10 +115,25 @@ export default function BuyerWalletPage() {
           alert("Sesi Stripe dibuat, namun URL pembayaran tidak ditemukan.");
         }
       } else {
-        // Simulasi Midtrans VA Modal
-        alert(`[MIDTRANS SNAP GATEWAY]\nVirtual Account ${selectedBank} berhasil dikoneksikan ke Supabase Order: ${order.id}`);
-        await fetchInvoices();
-        setActiveInvoice(null);
+        const payload = {
+          orderId: order.id,
+          total: Number(order.total || 0),
+          buyerName: order.buyer_name || "Pembeli ATSIRA",
+          bank: selectedBank
+        };
+        const res = await fetch("/api/payments/create-midtrans", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Gagal menghubungkan ke Midtrans");
+        
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        } else {
+          alert("Sesi Midtrans dibuat, namun URL pembayaran tidak ditemukan.");
+        }
       }
     } catch (err: any) {
       alert(`Gagal memproses pembayaran: ${err.message}`);
@@ -215,7 +230,7 @@ export default function BuyerWalletPage() {
           <div className="space-y-4">
             {orders.map((order) => {
               const orderAmount = Number(order.total || 0);
-              const isUnpaid = order.status === "Menunggu Pembayaran";
+              const isUnpaid = order.status === "pending" || order.status === "Menunggu Pembayaran";
               const itemTitle = order.items && order.items.length > 0 ? order.items[0].title : "Produk Essential Oil ATSIRA";
 
               return (

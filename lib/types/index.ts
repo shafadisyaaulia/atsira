@@ -17,7 +17,7 @@ export interface User {
   verified: boolean;
 }
 
-export type QualityGrade = "Premium" | "Standard" | "Economy" | "Reject";
+export type QualityGrade = "Grade A" | "Grade B" | "Grade C";
 
 export type CertBadge = "AI Verified" | "USK Verified" | "Eco Badge" | "Halal Ready";
 
@@ -87,6 +87,8 @@ export interface RawOilListing {
   highestBid?: number;
   imageUrl: string;
   description: string;
+  qrBatchId?: string;
+  traceability?: TraceabilityStage[];
 }
 
 export interface FinishedProduct {

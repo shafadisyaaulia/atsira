@@ -29,15 +29,7 @@ export async function GET(req: Request) {
 
     // Filter berdasarkan status
     if (status && status !== "all") {
-      const statusMap: Record<string, string> = {
-        pending: "Menunggu Pembayaran",
-        processing: "Diproses",
-        shipped: "Dikirim",
-        delivered: "Diterima",
-        completed: "Selesai",
-        cancelled: "Dibatalkan",
-      };
-      query = query.eq("status", statusMap[status] || status);
+      query = query.eq("status", status);
     }
 
     const { data, error } = await query;

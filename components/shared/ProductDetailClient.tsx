@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   MessageCircle,
   Star,
+  Heart,
   ChevronLeft,
   Sparkles,
   ShieldCheck
@@ -55,8 +56,43 @@ export function ProductDetailClient({ product }: { product: any }) {
   const [activeImg, setActiveImg] = useState(0);
   const addItem = useCartStore((s) => s.addItem);
   const [added, setAdded] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    // Cek apakah produk ini sudah difavoritkan di localStorage
+    try {
+      const saved = JSON.parse(localStorage.getItem("atsira_buyer_favorites") || "[]");
+      const currentId = product?.id || product?.slug || "";
+      setIsFavorite(saved.some((f: any) => f.id === currentId));
+    } catch {}
+  }, [product]);
+
+  const handleToggleFavorite = () => {
+    try {
+      const currentId = product?.id || product?.slug || "";
+      const currentProduct = {
+        id: currentId,
+        name: product?.title || product?.name || "Produk",
+        seller: product?.storeName || product?.seller || "Seller ATSIRA",
+        location: product?.region || "Aceh",
+        price: `Rp ${(product?.price || 0).toLocaleString("id-ID")}`,
+        unit: product?.unit || "kg",
+        rating: String(product?.rating || "5.0"),
+        stock: "Tersedia",
+        grade: product?.grade || (product?.coa?.grade) || "-",
+      };
+      const saved: any[] = JSON.parse(localStorage.getItem("atsira_buyer_favorites") || "[]");
+      let updated;
+      if (isFavorite) {
+        updated = saved.filter((f: any) => f.id !== currentId);
+      } else {
+        updated = [...saved, currentProduct];
+      }
+      localStorage.setItem("atsira_buyer_favorites", JSON.stringify(updated));
+      setIsFavorite(!isFavorite);
+    } catch {}
+  };
 
   const matchedProduct = product || {};
   const isRaw = matchedProduct.type === "raw-oil" || !matchedProduct.unit || matchedProduct.unit === "kg";
@@ -144,13 +180,13 @@ export function ProductDetailClient({ product }: { product: any }) {
 
             {isRaw ? (
               <p className="text-sm text-on-surface-variant mb-4 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4" /> {getLocalizedText((matchedProduct as any).region)} · {T_DETAIL.by[lang]} {(matchedProduct as any).farmerName || (matchedProduct as any).seller || "Petani Nilam"}
+                <MapPin className="w-4 h-4" /> {getLocalizedText((matchedProduct as any).region)} Â· {T_DETAIL.by[lang]} {(matchedProduct as any).farmerName || (matchedProduct as any).seller || "Petani Nilam"}
               </p>
             ) : (
               <div className="flex items-center gap-2 mb-4">
                 <Star className="w-4 h-4 fill-secondary-fixed text-secondary-fixed" />
                 <span className="text-sm text-on-surface-variant">
-                  {(matchedProduct as any).rating || "5.0"} ({(matchedProduct as any).reviewCount || 10} {T_DETAIL.reviews[lang]}) · {(matchedProduct as any).storeName || "UMKM Aceh"}
+                  {(matchedProduct as any).rating || "5.0"} ({(matchedProduct as any).reviewCount || 10} {T_DETAIL.reviews[lang]}) Â· {(matchedProduct as any).storeName || "UMKM Aceh"}
                 </span>
               </div>
             )}
@@ -184,15 +220,15 @@ export function ProductDetailClient({ product }: { product: any }) {
                 <div className="mt-4 pt-3 border-t border-stone-100 text-[11.5px] text-on-surface-variant/80 leading-relaxed font-sans">
                   {isArcVerified ? (
                     lang === "ID" ? (
-                      <p>🧪 <strong>Metode Uji:</strong> Mutu sampel batch ini terverifikasi secara komprehensif melalui pengujian kromatografi gas <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) resmi di <strong>Laboratorium ARC-USK</strong>.</p>
+                      <p>ðŸ§ª <strong>Metode Uji:</strong> Mutu sampel batch ini terverifikasi secara komprehensif melalui pengujian kromatografi gas <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) resmi di <strong>Laboratorium ARC-USK</strong>.</p>
                     ) : (
-                      <p>🧪 <strong>Test Method:</strong> Batch quality verified comprehensively through official <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) analysis at <strong>ARC-USK Laboratory</strong>.</p>
+                      <p>ðŸ§ª <strong>Test Method:</strong> Batch quality verified comprehensively through official <em>Gas Chromatography-Mass Spectrometry</em> (GC-MS) analysis at <strong>ARC-USK Laboratory</strong>.</p>
                     )
                   ) : (
                     lang === "ID" ? (
-                      <p>✨ <strong>Metode Uji:</strong> Mutu fisik sampel batch ini terverifikasi cepat secara spektral optik model prediksi NIRS-PLS oleh sistem portabel <strong>Atsira QualitySense</strong>.</p>
+                      <p>âœ¨ <strong>Metode Uji:</strong> Mutu fisik sampel batch ini terverifikasi cepat secara spektral optik model prediksi NIRS-PLS oleh sistem portabel <strong>Atsira QualitySense</strong>.</p>
                     ) : (
-                      <p>✨ <strong>Test Method:</strong> Batch quality verified via rapid optical spectral scan and NIRS-PLS prediction model on the portable <strong>Atsira QualitySense</strong> platform.</p>
+                      <p>âœ¨ <strong>Test Method:</strong> Batch quality verified via rapid optical spectral scan and NIRS-PLS prediction model on the portable <strong>Atsira QualitySense</strong> platform.</p>
                     )
                   )}
                 </div>
@@ -235,6 +271,17 @@ export function ProductDetailClient({ product }: { product: any }) {
               </button>
               <button className="px-4 py-3 border border-stone-200 hover:border-stone-900 rounded-xl transition-colors bg-stone-50 text-stone-700 font-bold text-sm flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" /> {T_DETAIL.btnChat[lang]}
+              </button>
+              <button
+                onClick={handleToggleFavorite}
+                title={isFavorite ? "Hapus dari Favorit" : "Simpan ke Favorit"}
+                className={`px-4 py-3 border rounded-xl transition-all flex items-center gap-2 ${
+                  isFavorite
+                    ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
+                    : "bg-stone-50 border-stone-200 text-stone-400 hover:border-red-300 hover:text-red-500"
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
               </button>
             </div>
           </div>

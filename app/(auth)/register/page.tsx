@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ShoppingCart, Store, ArrowRight, User, Mail, Lock, MapPin, ArrowLeft } from "lucide-react";
+import { ShoppingCart, Store, ArrowRight, User, Mail, Lock, MapPin, ArrowLeft, Sprout } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
@@ -19,7 +19,8 @@ const T_REG = {
     en: "Join the premier ATSIRA patchouli oil trade & analysis ecosystem." 
   },
   roleLabel: { id: "Saya mendaftar sebagai:", en: "I am registering as:" },
-  roleSeller: { id: "Seller (Petani / UMKM)", en: "Seller (Farmer / MSME)" },
+  rolePetani: { id: "Petani (Penghasil Minyak)", en: "Farmer (Oil Producer)" },
+  roleUmkm: { id: "UMKM (Produk Turunan)", en: "MSME (Derivative Product)" },
   roleBuyer: { id: "Buyer (Lokal / Ekspor)", en: "International / Local Buyer" },
   nameLabel: { id: "Nama Lengkap", en: "Full Name / Company Name" },
   namePlaceholder: { id: "Masukkan nama Anda", en: "Enter your full or enterprise name" },
@@ -44,27 +45,66 @@ function RegisterForm() {
   const login = useAuthStore((s) => s.login);
 
   const paramRole = params.get("role");
-  const initialRole = paramRole === "petani" || paramRole === "seller" ? "petani" : "buyer";
+  const initialRole: "petani" | "umkm" | "buyer" = paramRole === "petani" ? "petani" : paramRole === "umkm" ? "umkm" : "buyer";
 
-  const [role, setRole] = useState<"petani" | "buyer">(initialRole);
+  const [role, setRole] = useState<"petani" | "umkm" | "buyer">(initialRole);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
-    login(role, name, {
-      id: crypto.randomUUID(),
-      email: email || `${name.toLowerCase().replace(/\s+/g, ".")}@local.atsira`,
-    });
+    try {
+      const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+      const supabase = createSupabaseBrowserClient();
 
-    setTimeout(() => {
-      router.push("/");
-    }, 1000);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          }
+        }
+      });
+
+      if (error) {
+        alert("Gagal mendaftar: " + error.message);
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        // Simpan role secara eksplisit ke tabel profiles di Supabase
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          role: role, // 'petani', 'umkm', atau 'buyer'
+        });
+        
+        if (profileError) {
+          console.error("Gagal menyimpan profile:", profileError);
+        }
+      }
+
+      // Fallback update global state (Zustand) agar langsung login di sisi UI
+      login(role, name, {
+        id: data.user?.id || crypto.randomUUID(),
+        email: email || `${name.toLowerCase().replace(/\s+/g, ".")}@local.atsira`,
+      });
+
+      // Redirect berdasarkan role
+      let dashboardPath = `/dashboard/${role}`;
+      if (role === "umkm" || role === "petani") dashboardPath = `/dashboard/seller`;
+      
+      router.push(dashboardPath);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   }
 
   return (
@@ -102,7 +142,7 @@ function RegisterForm() {
               <label className="block text-xs font-semibold text-outline uppercase mb-2">
                 {T_REG.roleLabel[currentLang]}
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   type="button"
                   onClick={() => setRole("petani")}
@@ -113,8 +153,22 @@ function RegisterForm() {
                       : "border-sand-gray bg-bone-wash text-on-surface-variant hover:border-outline"
                   )}
                 >
-                  <Store className={cn("w-5 h-5", role === "petani" ? "text-primary" : "text-outline")} />
-                  <span className="text-xs leading-tight">{T_REG.roleSeller[currentLang]}</span>
+                  <Sprout className={cn("w-5 h-5", role === "petani" ? "text-primary" : "text-outline")} />
+                  <span className="text-xs leading-tight">{T_REG.rolePetani[currentLang]}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRole("umkm")}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border text-center transition-all",
+                    role === "umkm"
+                      ? "border-primary bg-primary/5 text-primary ring-2 ring-primary/20 font-semibold"
+                      : "border-sand-gray bg-bone-wash text-on-surface-variant hover:border-outline"
+                  )}
+                >
+                  <Store className={cn("w-5 h-5", role === "umkm" ? "text-primary" : "text-outline")} />
+                  <span className="text-xs leading-tight">{T_REG.roleUmkm[currentLang]}</span>
                 </button>
 
                 <button

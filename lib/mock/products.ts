@@ -1,6 +1,6 @@
-import type { RawOilListing, FinishedProduct, TraceabilityStage, CoaData } from "@/lib/types";
+﻿import type { RawOilListing, FinishedProduct, TraceabilityStage, CoaData } from "@/lib/types";
 
-// CoA milik minyak Pak Syukur — hasil Nilam Analyzer AI. Angka ini (34.2% PA)
+// CoA milik minyak Pak Syukur â€” hasil Nilam Analyzer AI. Angka ini (34.2% PA)
 // dipakai ulang persis di marketplace, di dashboard UMKM, dan di traceability,
 // supaya kontinuitas cerita ke juri terlihat solid.
 export const SYUKUR_COA: CoaData = {
@@ -18,7 +18,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
   {
     id: "raw-gayo-001",
     type: "raw-oil",
-    title: "Minyak Nilam Mentah — Gayo Premium",
+    title: "Minyak Nilam Mentah â€” Gayo Premium",
     farmerId: "farmer-syukur-gayo",
     distilleryId: "distillery-gayo-lestari",
     region: "Gayo, Aceh Tengah",
@@ -26,13 +26,14 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     minOrderKg: 5,
     stockKg: 42,
     coa: SYUKUR_COA,
-    grade: "Premium",
+    grade: "Grade A",
     badges: ["AI Verified", "Eco Badge"],
     listedAt: "2026-04-08T10:00:00+07:00",
     sellMode: "fixed",
     imageUrl: "/images/products/minyak nilam 1.png", // Menggunakan aset foto Anda
     description:
       "Minyak nilam mentah hasil sulingan uap dari kebun Gayo, dataran tinggi Aceh Tengah. Dianalisis melalui Nilam Analyzer AI dengan kadar Patchouli Alcohol 34.2%, masuk kategori Premium sesuai SNI 06-2385-2006.",
+    qrBatchId: "ATSIRA-R001",
   },
   {
     id: "raw-baratdaya-002",
@@ -53,13 +54,14 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
       analyzedAt: "2026-04-02T14:30:00+07:00",
       method: "GC-MS Lab (ARC-USK)",
     },
-    grade: "Standard",
+    grade: "Grade B",
     badges: ["USK Verified", "Eco Badge"],
     listedAt: "2026-04-02T15:00:00+07:00",
     sellMode: "fixed",
     imageUrl: "/images/products/minyak nilam.png", // Menggunakan aset foto Anda
     description:
       "Minyak nilam dari Koperasi Aceh Barat, telah diverifikasi langsung oleh laboratorium ARC-USK. Cocok untuk kebutuhan parfum kelas menengah-atas dengan rendemen tinggi.",
+    qrBatchId: "ATSIRA-R002",
   },
   {
     id: "raw-vetiver-003",
@@ -81,7 +83,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
       method: "NIRS-PLS AI",
       confidenceScore: 89.4,
     },
-    grade: "Standard",
+    grade: "Grade B",
     badges: ["AI Verified"],
     listedAt: "2026-03-20T11:30:00+07:00",
     sellMode: "auction",
@@ -90,6 +92,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     imageUrl: "/images/products/minyak nilam 2.png", // Menggunakan aset foto Anda
     description:
       "Akar wangi premium dengan profil aroma woody-earthy yang khas, diburu oleh rumah parfum internasional untuk base note mewah.",
+    qrBatchId: "ATSIRA-R003",
   },
 ];
 
@@ -99,7 +102,7 @@ const SEULAWAH_TRACE: TraceabilityStage[] = [
     title: "Panen di Kebun Bener Meriah",
     description: "Daun nilam dipanen dari lahan 1,4 hektar milik Pak Syukur, varietas Pogostemon cablin, ditanam Januari 2024.",
     date: "2026-08-01",
-    location: "Desa Bangerango, Gayo — Elevasi 1.200m",
+    location: "Desa Bangerango, Gayo â€” Elevasi 1.200m",
     gpsCoords: { lat: 4.7283, lng: 96.8917 },
     meta: { "Luas Lahan": "1,4 Ha", Varietas: "Pogostemon Cablin" },
     verified: true,
@@ -115,10 +118,10 @@ const SEULAWAH_TRACE: TraceabilityStage[] = [
   },
   {
     stage: "Pengujian",
-    title: "Analisis Kadar PA — AI Verified",
+    title: "Analisis Kadar PA â€” AI Verified",
     description: "Nilam Analyzer AI menganalisis sampel dan menghasilkan estimasi kadar Patchouli Alcohol 34,2%, masuk grade Premium.",
     date: "2026-08-13",
-    meta: { "Kadar PA": "34,2%", Grade: "Premium", Metode: "NIRS-PLS AI" },
+    meta: { "Kadar PA": "34,2%", Grade: "Grade A", Metode: "NIRS-PLS AI" },
     verified: true,
   },
   {
@@ -166,7 +169,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-gayo-001",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: SYUKUR_COA,
-    qrBatchId: "ATR-2024-NLM",
+    qrBatchId: "ATSIRA-F001",
   },
   {
     id: "fp-gayowood-musk",
@@ -189,7 +192,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-baratdaya-002",
     traceability: SEULAWAH_TRACE.map((s) => ({ ...s, title: s.title.replace("Bener Meriah", "Aceh Barat") })),
     coaSnapshot: RAW_OIL_LISTINGS[1].coa,
-    qrBatchId: "ATR-2024-GWM",
+    qrBatchId: "ATSIRA-F002",
   },
   {
     id: "fp-nilam-diffuser",
@@ -210,7 +213,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-gayo-001",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: SYUKUR_COA,
-    qrBatchId: "ATR-2024-DIF",
+    qrBatchId: "ATSIRA-F003",
   },
   {
     id: "fp-sabun-nilam",
@@ -231,28 +234,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-vetiver-003",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: RAW_OIL_LISTINGS[2].coa,
-    qrBatchId: "ATR-2024-SBN",
-  },
-  {
-    id: "fp-lilin-aromaterapi",
-    type: "finished-product",
-    title: "Minyak Aromaterapi Relaksasi Nilam",
-    category: "Lilin Aromaterapi",
-    umkmId: "umkm-acehscent",
-    price: 650000,
-    unit: "botol",
-    stock: 48,
-    rating: 4.8,
-    reviewCount: 96,
-    badges: ["AI Verified"],
-    imageUrl: "/images/products/aromatherapy.png", // Menggunakan aset foto Anda
-    gallery: ["/images/products/aromatherapy.png"],
-    description: "Lilin soy wax dengan campuran nilam Gayo dan lavender, waktu bakar hingga 40 jam.",
-    notes: { top: ["Lavender"], middle: ["Nilam"], base: ["Vanila"] },
-    sourcedFromRawOilId: "raw-gayo-001",
-    traceability: SEULAWAH_TRACE,
-    coaSnapshot: SYUKUR_COA,
-    qrBatchId: "ATR-2024-LLN",
+    qrBatchId: "ATSIRA-F004",
   },
   {
     id: "fp-minyak-eceran",
@@ -273,7 +255,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-gayo-001",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: SYUKUR_COA,
-    qrBatchId: "ATR-2024-ECR",
+    qrBatchId: "ATSIRA-F006",
   },
 ];
 

@@ -10,12 +10,10 @@ import { Card, Badge, SectionEyebrow } from "@/components/ui/Card";
 const CATEGORIES = ["Semua", "Kegiatan Komunitas", "Riset & Edukasi", "Kisah Inspirasi"] as const;
 
 const formatDateID = (dateStr: string) => {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
-  } catch {
-    return dateStr;
-  }
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
 };
 
 export default function NilamStoryPage() {
@@ -66,7 +64,7 @@ export default function NilamStoryPage() {
             <Link href={`/magazine/${featured.slug}`}>
               <Card className="overflow-hidden grid md:grid-cols-2 hover:shadow-md transition-all rounded-2xl border border-surface-container-high bg-white group">
                 <div className="h-56 md:h-full overflow-hidden relative bg-neutral-900">
-                  <img src={featured.imageUrl} alt={featured.title} className="w-full h-full object-cover opacity-90 group-hover:scale-102 transition-transform duration-500" />
+                  <img src={featured.image_url} alt={featured.title} className="w-full h-full object-cover opacity-90 group-hover:scale-102 transition-transform duration-500" />
                   <div className="absolute top-3 left-3">
                     <Badge className="bg-amber-500 text-neutral-950 border-none font-bold px-3 py-1 shadow text-[10px] uppercase tracking-wider flex items-center gap-1">
                       <Users className="w-3 h-3" /> Kegiatan Terbaru
@@ -125,7 +123,7 @@ export default function NilamStoryPage() {
               <Link key={article.slug} href={`/magazine/${article.slug}`}>
                 <Card className="overflow-hidden h-full group hover:shadow-sm transition-all rounded-xl border border-surface-container-high bg-white flex flex-col">
                   <div className="aspect-[16/10] overflow-hidden bg-surface-container-low">
-                    <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={article.image_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>

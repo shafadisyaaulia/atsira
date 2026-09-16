@@ -19,15 +19,7 @@ export async function GET(req: Request) {
 
     if (status && status !== "all") {
       // Map UI status to database status
-      const statusMap: Record<string, string> = {
-        pending: "Menunggu Pembayaran",
-        processing: "Diproses",
-        shipped: "Dikirim",
-        delivered: "Diterima",
-        completed: "Selesai",
-        cancelled: "Dibatalkan",
-      };
-      query = query.eq("status", statusMap[status] || status);
+      query = query.eq("status", status);
     }
 
     if (buyerId) {

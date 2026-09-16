@@ -1,41 +1,77 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store";
+import { useState } from "react";
+import { ShieldAlert, X } from "lucide-react";
 
 const FOOTER_COLUMNS = [
   {
     title: "Ekosistem",
     links: [
-      { label: "Penganalisis AI", href: "/dashboard/seller/qualitysense" },
+      { label: "Penganalisis AI", href: "/dashboard/seller/qualitysense", requireAuth: true, requireRole: "petani" as const },
       { label: "Rantai Pasok", href: "/traceability" },
       { label: "Pasar", href: "/marketplace" },
-      { label: "Dasbor Harga", href: "/price-dashboard" },
-    ],
-  },
-  {
-    title: "Perusahaan",
-    links: [
-      { label: "Tentang ARC-USK", href: "/magazine" },
-      { label: "Laporan Dampak", href: "/tracker" },
-      { label: "Makalah Penelitian", href: "/magazine" },
-      { label: "Karir", href: "#" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Ketentuan Layanan", href: "#" },
-      { label: "Kebijakan Privasi", href: "#" },
-      { label: "Kebijakan Cookie", href: "#" },
+      { label: "Ketentuan Layanan", href: "/legal/terms" },
+      { label: "Kebijakan Privasi", href: "/legal/privacy" },
+      { label: "Kebijakan Cookie", href: "/legal/cookies" },
     ],
   },
 ];
 
+const ROLE_LABELS: Record<string, string> = {
+  petani: "Petani",
+  umkm: "UMKM / Seller",
+  buyer: "Buyer",
+  peneliti: "Peneliti",
+  pemasta: "Pemasta",
+};
+
 export function Footer() {
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const [roleWarning, setRoleWarning] = useState(false);
+
+  const handleAnalyzerClick = (e: React.MouseEvent, link: (typeof FOOTER_COLUMNS)[number]["links"][number]) => {
+    if (!("requireAuth" in link)) return;
+    e.preventDefault();
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if ("requireRole" in link && user.role !== link.requireRole) {
+      setRoleWarning(true);
+      setTimeout(() => setRoleWarning(false), 3000);
+      return;
+    }
+    router.push(link.href);
+  };
+
   return (
-    <footer className="bg-primary text-inverse-on-surface">
+    <footer className="bg-primary text-inverse-on-surface relative">
+      {roleWarning && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-lg bg-error-container text-on-error-container px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-4">
+          <ShieldAlert className="w-6 h-6 text-error" />
+          <div className="flex-1">
+            <p className="font-semibold">Akses Terbatas</p>
+            <p className="text-sm opacity-90">Fitur Penganalisis AI hanya untuk Petani.</p>
+          </div>
+          <button onClick={() => setRoleWarning(false)} className="p-2 hover:bg-black/5 rounded-full">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       {/* Bagian Grid Atas */}
-      <div className="container-app py-16 grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10">
+      <div className="container-app py-16 grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-10">
         <div>
-          <p className="font-display text-2xl font-bold text-secondary-fixed mb-3">ATSIRA</p>
+          <p className="font-display text-4xl font-bold text-secondary-fixed mb-3">ATSIRA</p>
           <p className="text-sm text-inverse-on-surface/70 max-w-xs">
             Ekosistem digital terintegrasi pertama di Indonesia untuk perdagangan minyak nilam Aceh
             yang transparan dan terverifikasi.
@@ -47,9 +83,18 @@ export function Footer() {
             <ul className="space-y-3">
               {col.links.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-sm text-inverse-on-surface/85 hover:text-secondary-fixed transition-colors">
-                    {link.label}
-                  </Link>
+                  {"requireAuth" in link ? (
+                    <button
+                      onClick={(e) => handleAnalyzerClick(e, link)}
+                      className="text-sm text-inverse-on-surface/85 hover:text-secondary-fixed transition-colors text-left"
+                    >
+                      {link.label}
+                    </button>
+                  ) : (
+                    <Link href={link.href} className="text-sm text-inverse-on-surface/85 hover:text-secondary-fixed transition-colors">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

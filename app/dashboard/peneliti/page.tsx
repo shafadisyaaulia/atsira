@@ -15,7 +15,8 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Card, Badge } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select, Label } from "@/components/ui/Input";
-import { VERIFICATION_QUEUE, formatDateID } from "@/lib/mock";
+import { formatDateID } from "@/lib/mock";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { VerificationQueueItem } from "@/lib/types";
 
 const STATUS_BADGE: Record<VerificationQueueItem["status"], "warning" | "ai" | "success" | "neutral"> = {
@@ -43,10 +44,28 @@ export default function DashboardPenelitiPage() {
 }
 
 function VerificationQueueSection() {
-  const [queue, setQueue] = useState(VERIFICATION_QUEUE);
+  const [queue, setQueue] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchQueue = async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { data } = await supabase.from("verification_queue").select("*").order("created_at", {ascending: false});
+      if (data) {
+        setQueue(data.map((item: any) => ({
+          id: item.id,
+          farmer_name: item.product_title,
+          farm_region: item.notes || "Aceh",
+          submit_date: new Date(item.created_at).toISOString().split("T")[0],
+          status: item.status,
+          sample_volume: item.sample_volume,
+          method: "NIRS-PLS",
+        })));
+      }
+    };
+    fetchQueue();
+  }, []);
 
   function updateStatus(id: string, status: VerificationQueueItem["status"]) {
-    setQueue((q) => q.map((item) => (item.id === id ? { ...item, status } : item)));
+    setQueue((q: any) => q.map((item: any) => (item.id === id ? { ...item, status } : item)));
   }
 
   return (
@@ -56,13 +75,13 @@ function VerificationQueueSection() {
         <h2 className="font-display text-headline-md text-primary">Antrean Verifikasi Sampel</h2>
       </div>
       <div className="space-y-3">
-        {queue.map((item) => (
+        {queue.map((item: any) => (
           <Card key={item.id} className="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
             <img src={item.sampleImageUrl} alt="" className="w-16 h-16 rounded object-cover flex-shrink-0" />
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <p className="font-medium text-on-surface">{item.farmerName}</p>
-                <Badge variant={STATUS_BADGE[item.status]}>{item.status}</Badge>
+                <Badge variant={(STATUS_BADGE as any)[item.status]}>{item.status}</Badge>
               </div>
               <p className="text-xs text-outline">
                 {item.region} · Estimasi AI: PA {item.aiPaLevel}% ({item.aiGrade}) · Diajukan{" "}

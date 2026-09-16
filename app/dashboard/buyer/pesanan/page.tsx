@@ -82,6 +82,27 @@ export default function BuyerPesananPage() {
   }, []);
 
   // Handler Lanjut Pembayaran Langsung via Stripe / Midtrans
+  
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/seller/orders`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+      if (res.ok) {
+        fetchOrders();
+        if (activeDetailOrder && activeDetailOrder.id === orderId) {
+          setActiveDetailOrder({ ...activeDetailOrder, status: newStatus });
+        }
+      } else {
+        alert("Gagal memperbarui status.");
+      }
+    } catch (e) {
+      alert("Terjadi kesalahan sistem.");
+    }
+  };
+
   const handlePayNow = async (order: any) => {
     setPayLoadingId(order.id);
     try {
@@ -119,7 +140,24 @@ export default function BuyerPesananPage() {
           window.location.href = data.checkoutUrl;
         }
       } else {
-        alert(`[MIDTRANS SNAP GATEWAY]\nVirtual Account diterbitkan untuk Order ${order.id}. Silakan periksa instruksi pembayaran di email Anda.`);
+        const payload = {
+          orderId: order.id,
+          total: order.totalPrice,
+          buyerName: order.buyerName || "Pembeli ATSIRA",
+        };
+        const res = await fetch("/api/payments/create-midtrans", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Gagal menghubungkan ke Midtrans");
+        
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        } else {
+          alert("Sesi Midtrans dibuat, namun URL pembayaran tidak ditemukan.");
+        }
       }
     } catch (err: any) {
       alert(`Gagal memproses pembayaran: ${err.message}`);
@@ -130,28 +168,28 @@ export default function BuyerPesananPage() {
 
   const renderStatusBadge = (status: string) => {
     const s = status.toLowerCase();
-    if (s.includes("menunggu")) {
+    if (s === "pending" || s.includes("menunggu")) {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200">
           <Clock className="w-3 h-3 text-amber-600" /> Menunggu Pembayaran
         </span>
       );
     }
-    if (s.includes("proses") || s.includes("diproses")) {
+    if (s === "processing" || s.includes("proses") || s.includes("diproses")) {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
           <Clock className="w-3 h-3 text-blue-600" /> Diproses / Uji Lab
         </span>
       );
     }
-    if (s.includes("kirim") || s.includes("dikirim")) {
+    if (s === "shipped" || s.includes("kirim") || s.includes("dikirim")) {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
           <Truck className="w-3 h-3 text-indigo-600" /> Dalam Pengiriman
         </span>
       );
     }
-    if (s.includes("selesai") || s.includes("diterima")) {
+    if (s === "completed" || s.includes("selesai") || s.includes("diterima")) {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
           <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Pesanan Selesai
@@ -182,7 +220,8 @@ export default function BuyerPesananPage() {
 
   // ─── TAMPILAN 1: DETAILS FULL PAGE ───
   if (activeDetailOrder) {
-    const isUnpaid = activeDetailOrder.status.toLowerCase().includes("menunggu");
+    const isUnpaid = activeDetailOrder.status.toLowerCase() === "pending" || activeDetailOrder.status.toLowerCase().includes("menunggu");
+    const isCOD = activeDetailOrder.paymentMethod === "cod";
 
     return (
       <DashboardShell role="buyer">
@@ -291,7 +330,7 @@ export default function BuyerPesananPage() {
                 Kembali ke Daftar
               </button>
 
-              {isUnpaid ? (
+              {isUnpaid && !isCOD ? (
                 <button 
                   onClick={() => handlePayNow(activeDetailOrder)}
                   disabled={payLoadingId === activeDetailOrder.id}
@@ -399,7 +438,8 @@ export default function BuyerPesananPage() {
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => {
-              const isUnpaid = order.status.toLowerCase().includes("menunggu");
+              const isUnpaid = order.status.toLowerCase() === "pending" || order.status.toLowerCase().includes("menunggu");
+                const isCOD = order.paymentMethod === "cod";
 
               return (
                 <div 
@@ -440,7 +480,7 @@ export default function BuyerPesananPage() {
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      {isUnpaid && (
+                      {isUnpaid && !isCOD && (
                         <button 
                           onClick={() => handlePayNow(order)}
                           disabled={payLoadingId === order.id}

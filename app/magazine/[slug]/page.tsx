@@ -8,12 +8,10 @@ import { PageShell } from "@/components/layout/PageShell";
 import { Card, Badge } from "@/components/ui/Card";
 
 const formatDateID = (dateStr: string) => {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
-  } catch {
-    return dateStr;
-  }
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
 };
 
 export default function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {

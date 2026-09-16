@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { 
@@ -124,7 +124,7 @@ export default function OrderIncomingPage() {
   };
 
   return (
-    <DashboardShell role="umkm">
+    <DashboardShell>
       <div className="space-y-6 max-w-7xl mx-auto w-full pb-12">
         
         {/* HEADER MODUL */}
@@ -263,7 +263,7 @@ export default function OrderIncomingPage() {
                             <div className="min-w-0 flex-1">
                               <p className="text-xs font-bold text-stone-100 truncate">{item.title}</p>
                               <p className="text-[10px] text-stone-400 font-mono mt-0.5">
-                                {formatIDR(item.price)} × {item.qty}
+                                {formatIDR(item.price)} Ã— {item.qty}
                               </p>
                             </div>
                           </div>
@@ -309,7 +309,7 @@ export default function OrderIncomingPage() {
                       )}
                       {(selectedOrder.status === "shipped" || selectedOrder.status === "dikirim") && (
                         <div className="text-center p-2.5 bg-stone-950 border border-emerald-900/40 text-emerald-400 font-mono text-[11px] rounded-lg">
-                          ✓ Paket dalam perjalanan pengiriman kurir.
+                          âœ“ Paket dalam perjalanan pengiriman kurir.
                         </div>
                       )}
                     </div>

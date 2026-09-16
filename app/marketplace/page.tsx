@@ -54,6 +54,7 @@ export default function MarketplacePage() {
 
       const mappedRaw = (rawData ?? []).map((p) => ({
         id: p.id,
+        qrBatchId: p.qr_batch_id,
         title: p.title,
         region: p.region,
         grade: p.grade,
@@ -72,6 +73,7 @@ export default function MarketplacePage() {
 
       const mappedFinished = (finishedData ?? []).map((p) => ({
         id: p.id,
+        qrBatchId: p.qr_batch_id,
         title: p.title,
         category: p.category,
         price: Number(p.price ?? 0),
@@ -239,6 +241,7 @@ export default function MarketplacePage() {
                         </div>
                       </Link>
                       <div className="p-4 pb-0">
+                        <div className="text-[10px] uppercase tracking-wider font-bold text-emerald-700/60 mb-0.5">ID: {p.qrBatchId}</div>
                         <p className="text-xs font-semibold text-outline mb-1">UMKM Partner</p>
                         <Link href={`/marketplace/${p.id}`}>
                           <p className="font-semibold text-on-surface text-sm leading-snug mb-2 line-clamp-2 h-10 hover:text-emerald-700 transition-colors">
@@ -292,6 +295,7 @@ export default function MarketplacePage() {
                         </div>
                       </Link>
                       <div className="p-4 pb-0">
+                        <div className="text-[10px] uppercase tracking-wider font-bold text-emerald-700/60 mb-0.5">ID: {p.qrBatchId}</div>
                         <div className="flex items-center gap-1 text-xs font-semibold text-outline mb-1.5">
                           <MapPin className="w-3.5 h-3.5 text-clay-earth" /> {p.region}
                         </div>

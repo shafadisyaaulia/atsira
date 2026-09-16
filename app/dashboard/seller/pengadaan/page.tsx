@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { 
@@ -17,18 +17,57 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 // 1. IMPORT DATA DAN HELPER YANG VALID SESUAI FILE MOCK ANDA
-import { RAW_OIL_LISTINGS } from "@/lib/mock/products";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useEffect } from "react";
+import { useCartStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 import { formatIDR } from "@/lib/mock";
 
 export default function B2BSourcingPage() {
+  const router = useRouter();
+  const supabase = createSupabaseBrowserClient();
+  const { addItem } = useCartStore();
+  const [productsList, setProductsList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [quantity, setQuantity] = useState<number>(5); // Default 5 kg sesuai minOrderKg terkecil
+  const [quantity, setQuantity] = useState<number>(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_raw", true)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setProductsList(data.map(item => ({
+        id: item.id,
+        title: item.title,
+        price_per_kg: item.price,
+        stock_kg: item.stock,
+        farmerId: item.seller_id,
+        farmerName: "Mitra Petani",
+        region: "Aceh",
+        pa_level: 30, // Mock
+        isVerified: item.is_verified,
+        minOrderKg: 5,
+        imageUrl: item.image_url || "/images/products/minyak nilam.png"
+      })));
+    }
+    setLoading(false);
+  };
+
   // 2. FILTER DATA PENCARIAN BERDASARKAN PROPERTI ASLI MOCK (title, farmerId, region)
-  const filteredProducts = (RAW_OIL_LISTINGS || []).filter((p: any) => {
+  const filteredProducts = (productsList || []).filter((p: any) => {
     const title = p?.title?.toLowerCase() ?? "";
     const farmer = p?.farmerId?.toLowerCase() ?? "";
     const region = p?.region?.toLowerCase() ?? "";
@@ -56,7 +95,7 @@ export default function B2BSourcingPage() {
   }
 
   return (
-    <DashboardShell role="umkm">
+    <DashboardShell>
       <div className="space-y-6 max-w-7xl mx-auto w-full pb-12">
         
         {/* HEADER MODUL */}

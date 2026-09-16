@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useAuthStore } from "@/lib/store";
 import { 
   TrendingUp, 
   Package, 
@@ -21,12 +23,52 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 export default function BuyerDashboardPage() {
-  // Mock data ringkasan pengadaan buyer
+  const supabase = createSupabaseBrowserClient();
+  const { user } = useAuthStore();
+  const [totalPengadaan, setTotalPengadaan] = useState(0);
+  const [totalKontrak, setTotalKontrak] = useState(0);
+  const [totalVolume, setTotalVolume] = useState(0);
+
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchBuyerStats = async () => {
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("*, order_items(*)")
+        .eq("buyer_id", user.id);
+
+      if (orders) {
+        const expense = orders
+          .filter(o => o.status !== "Dibatalkan" && o.status !== "cancelled")
+          .reduce((acc, curr) => acc + Number(curr.total || 0), 0);
+        setTotalPengadaan(expense);
+
+        const validOrders = orders.filter(o => o.status !== "Dibatalkan" && o.status !== "cancelled");
+        setTotalKontrak(validOrders.length);
+
+        let volume = 0;
+        validOrders.forEach(o => {
+          if (o.order_items) {
+            o.order_items.forEach((item: any) => {
+              if (item.unit === "kg") volume += Number(item.qty || 0);
+            });
+          }
+        });
+        setTotalVolume(volume);
+      }
+    };
+    fetchBuyerStats();
+  }, [user]);
+
+  const formatIDR = (num: number) => new Intl.NumberFormat("id-ID", {style: "currency", currency: "IDR", minimumFractionDigits: 0}).format(num);
+
   const stats = [
     {
       label: "Total Pengadaan (Tahun Ini)",
-      value: "Rp 427.500.000",
-      change: "+12.5%",
+      value: formatIDR(totalPengadaan),
+      change: "Sepanjang waktu",
       isPositive: true,
       icon: Wallet,
       iconColor: "text-emerald-600",
@@ -34,8 +76,8 @@ export default function BuyerDashboardPage() {
     },
     {
       label: "Kontrak Berjalan",
-      value: "3 Kontrak",
-      change: "2 Mitra Tani",
+      value: `${totalKontrak} Transaksi`,
+      change: "Berhasil dibuat",
       isPositive: true,
       icon: Package,
       iconColor: "text-blue-600",
@@ -43,43 +85,12 @@ export default function BuyerDashboardPage() {
     },
     {
       label: "Volume Total Atsiri",
-      value: "750 Kg",
-      change: "+150 Kg bulan ini",
+      value: `${totalVolume} Kg`,
+      change: "Minyak Mentah (Raw)",
       isPositive: true,
       icon: Layers,
       iconColor: "text-purple-600",
       bgColor: "bg-purple-50/60",
-    },
-  ];
-
-  // Mock data aktivitas pasokan terbaru
-  const recentActivities = [
-    {
-      id: "ACT-001",
-      title: "Batch Pengiriman Minyak Nilam Gayo A",
-      description: "Manifes manifes kurir diperbarui: J&T Cargo - Sampai di Medan Hub.",
-      time: "2 jam yang lalu",
-      status: "shipping",
-      icon: Clock,
-      color: "text-purple-600 bg-purple-50"
-    },
-    {
-      id: "ACT-002",
-      title: "Kontrak Pembelian Baru Disetujui",
-      description: "Koperasi Sulingan Jaya Blangkejeren telah menandatangani kontrak 500 Kg.",
-      time: "1 hari yang lalu",
-      status: "success",
-      icon: CheckCircle2,
-      color: "text-emerald-600 bg-emerald-50"
-    },
-    {
-      id: "ACT-003",
-      title: "Tagihan Invoice Menunggu Pembayaran",
-      description: "UMKM Atsiri Wangi Banda menerbitkan invoice Termin 14 Hari untuk 100 Botol Parfum.",
-      time: "2 hari yang lalu",
-      status: "pending",
-      icon: AlertCircle,
-      color: "text-amber-600 bg-amber-50"
     }
   ];
 

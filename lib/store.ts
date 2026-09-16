@@ -17,13 +17,15 @@ interface AuthState {
   logout: () => void;
 }
 
-const ROLE_PROFILES: Record<UserRole, Omit<SessionUser, "id" | "name" | "email"> & Partial<Pick<SessionUser, "id" | "name" | "email">>> = {
+const ROLE_PROFILES: Record<UserRole, { role: UserRole }> = {
   petani: { role: "petani" },
   umkm: { role: "umkm" },
   buyer: { role: "buyer" },
   peneliti: { role: "peneliti" },
   pemasta: { role: "pemasta" },
 };
+
+const VALID_ROLES = ["petani", "umkm", "buyer", "peneliti", "pemasta"];
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -32,15 +34,27 @@ export const useAuthStore = create<AuthState>()(
       login: (role, name, overrides = {}) =>
         set({
           user: {
-            id: overrides.id || ROLE_PROFILES[role]?.id || "00000000-0000-0000-0000-000000000000",
-            name: name || overrides.name || ROLE_PROFILES[role]?.name || "User",
+            id: overrides.id || "00000000-0000-0000-0000-000000000000",
+            name: name || overrides.name || "User",
             role,
-            email: overrides.email || ROLE_PROFILES[role]?.email || "user@atsira.id",
+            email: overrides.email || "user@atsira.id",
           },
         }),
       logout: () => set({ user: null }),
     }),
-    { name: "atsira-session" }
+    {
+      name: "atsira-session",
+      version: 2,
+      migrate: (persistedState: any, version) => {
+        if (version < 2) {
+          const role = persistedState?.user?.role;
+          if (role && !VALID_ROLES.includes(role)) {
+            return { user: null };
+          }
+        }
+        return persistedState as AuthState;
+      },
+    }
   )
 );
 
@@ -87,5 +101,81 @@ export const useCartStore = create<CartState>()(
       clear: () => set({ items: [] }),
     }),
     { name: "atsira-cart" }
+  )
+);
+
+// ---- ARC Certification Store ----
+export interface ArcRequest {
+  id: string; // e.g. "BCH-099"
+  nodeName: string;
+  region: string;
+  status: "Menunggu" | "Dalam Pengujian" | "Terverifikasi" | "Ditolak";
+  date: string;
+  farmerId: string;
+}
+
+interface ArcState {
+  queue: ArcRequest[];
+  coas: any[];
+  addRequest: (req: Omit<ArcRequest, "id" | "status" | "date">) => void;
+  updateStatus: (id: string, status: ArcRequest["status"]) => void;
+  addCoa: (coa: any) => void;
+}
+
+export const useArcStore = create<ArcState>()(
+  persist(
+    (set, get) => ({
+      queue: [
+        { id: "BCH-092", nodeName: "Kelompok Suling Jaya", status: "Menunggu", date: "2026-09-12", region: "Aceh Selatan", farmerId: "petani-1" },
+        { id: "BCH-071", nodeName: "Koperasi Nilam Babahrot", status: "Dalam Pengujian", date: "2026-09-11", region: "Aceh Barat", farmerId: "petani-2" },
+        { id: "BCH-068", nodeName: "Suling Murni Gayo", status: "Terverifikasi", date: "2026-09-10", region: "Gayo", farmerId: "petani-3" },
+      ],
+      coas: [
+        {
+          id: "COA-2026-001", batch_id: "BCH-068", product_name: "Minyak Nilam Mentah",
+          farmer_name: "Mahmud", region: "Gayo", pa_level: 33.5, acid_number: 3.2,
+          density: 0.95, color: "Kuning Muda", viscosity: "Cair", method: "GC-MS",
+          confidence_score: 98, grade: "Grade A", notes: "Sesuai standar ekspor SNI",
+          issued_by: "ARC-USK", analyzed_at: "2026-09-11",
+        }
+      ],
+      addRequest: (req) => {
+        const id = "BCH-" + Math.floor(Math.random() * 900 + 100);
+        const date = new Date().toISOString().split("T")[0];
+        set({ queue: [{ ...req, id, status: "Menunggu", date }, ...get().queue] });
+      },
+      updateStatus: (id, status) => {
+        set({ queue: get().queue.map(q => q.id === id ? { ...q, status } : q) });
+      },
+      addCoa: (coa) => {
+        set({ 
+          coas: [coa, ...get().coas],
+          queue: get().queue.map(q => q.id === coa.batch_id ? { ...q, status: "Terverifikasi" } : q) 
+        });
+      }
+    }),
+    { name: "atsira-arc" }
+  )
+);
+interface PemastaState {
+  marketPrices: any[];
+  addMarketPrice: (price: any) => void;
+  stories: any[];
+  addStory: (story: any) => void;
+}
+
+export const usePemastaStore = create<PemastaState>()(
+  persist(
+    (set, get) => ({
+      marketPrices: [
+        { id: "PRC-100", date: "2026-09-15", region: "Aceh Jaya", pricePerKg: 1350000, pa: 32, qty: 150 }
+      ],
+      stories: [
+        { id: "STR-1", title: "Panen Raya Nilam", category: "Edukasi", description: "Panen raya bersama kelompok tani...", author: "Pemasta Node", date: "2026-09-14" }
+      ],
+      addMarketPrice: (price) => set({ marketPrices: [{ ...price, id: "PRC-" + Math.floor(Math.random() * 900 + 100), date: new Date().toISOString().split("T")[0] }, ...get().marketPrices] }),
+      addStory: (story) => set({ stories: [{ ...story, id: "STR-" + Math.floor(Math.random() * 900 + 100), date: new Date().toISOString().split("T")[0] }, ...get().stories] }),
+    }),
+    { name: "atsira-pemasta-store" }
   )
 );

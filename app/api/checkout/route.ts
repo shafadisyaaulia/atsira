@@ -49,14 +49,14 @@ export async function POST(request: Request) {
     const orderInsert: Record<string, any> = {
       id: orderId,
       buyer_id: buyerId || null,
-      seller_id: null,
+      seller_id: items[0]?.seller || items[0]?.sellerId || null,
       buyer_name: buyerName || "Pembeli ATSIRA",
       order_type: orderType || "B2C",
       subtotal: Number(subtotal || 0),
       shipping_fee: Number(shippingFee || 0),
       tax: Number(tax || 0),
       total: Number(total || 0),
-      status: "Menunggu Pembayaran",
+      status: paymentMethod === "cod" ? "pending" : "pending",
       payment_method: paymentMethod || "midtrans",
       courier: courier || "JNE Regular",
       tracking_number: null,
@@ -118,7 +118,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, url: session.url });
     }
 
-    // 4. JALUR MIDTRANS (DOMESTIK)
+    // 4. JALUR COD
+    if (paymentMethod === "cod") {
+      return NextResponse.json({
+        ok: true,
+        orderId,
+      });
+    }
+
+    // 5. JALUR MIDTRANS (DOMESTIK)
     // Dipaksa FALSE agar Midtrans selalu menggunakan server Sandbox
     const snap = new Midtrans.Snap({
       isProduction: false,

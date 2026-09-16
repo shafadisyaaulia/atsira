@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
-import { Lock, ShieldCheck, CreditCard, ShoppingBag, Globe, Truck, UserCheck, LogIn } from "lucide-react";
+import { Lock, ShieldCheck, CreditCard, ShoppingBag, Globe, Truck, UserCheck, LogIn, CheckCircle2, Loader2, Copy, Building2 } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -66,8 +66,10 @@ export default function CheckoutPage() {
   
   const [isInternational, setIsInternational] = useState(false);
   const [courier, setCourier] = useState("std");
-  const [payment, setPayment] = useState("midtrans");
+  const [payment, setPayment] = useState("cod");
   const [processing, setProcessing] = useState(false);
+  const [payStep, setPayStep] = useState("form"); // form | va_code | verifying
+  const [vaCode, setVaCode] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const [lang, setLang] = useState<"ID" | "EN">("ID");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -147,7 +149,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setCourier("std");
-    setPayment(isInternational ? "stripe" : "midtrans");
+    setPayment(isInternational ? "stripe" : "cod");
   }, [isInternational]);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);

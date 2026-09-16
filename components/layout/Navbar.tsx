@@ -13,65 +13,28 @@ import { useAuthStore, useCartStore } from "@/lib/store";
 import { cn } from "@/lib/utils/cn";
 
 // ── Modul State Bahasa Internal Terintegrasi Event Global + Mesin Otomatis
-let _lang: "ID" | "EN" = "ID";
-const _listeners: Array<() => void> = [];
+import { toggleLang, subscribeLang, getLang } from "@/lib/language";
 
-function toggleLang() {
-  _lang = _lang === "ID" ? "EN" : "ID";
-  
-  if (typeof window !== "undefined") {
-    localStorage.setItem("atsira-lang", _lang);
-    
-    const googleCombo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-    if (googleCombo) {
-      googleCombo.value = _lang === "EN" ? "en" : "id";
-      googleCombo.dispatchEvent(new Event('change'));
-    }
-
-    const event = new CustomEvent("atsira-language-changed", { detail: _lang });
-    window.dispatchEvent(event);
-  }
-  
-  _listeners.forEach((fn) => fn());
-}
+// ... (remove old _lang, _listeners, toggleLang)
+// ... use getLang(), subscribeLang() in useLang hook
 
 export function useLang() {
-  const [lang, setLang] = useState<"ID" | "EN">(_lang);
+  const [lang, setLang] = useState<"ID" | "EN">("ID"); // Selalu mulai dengan ID untuk mencegah hydration error
   
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedLang = localStorage.getItem("atsira-lang") as "ID" | "EN";
-      if (savedLang && (savedLang === "ID" || savedLang === "EN")) {
-        _lang = savedLang;
-        setLang(savedLang);
-        
-        setTimeout(() => {
-          const googleCombo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-          if (googleCombo) {
-            googleCombo.value = savedLang === "EN" ? "en" : "id";
-            googleCombo.dispatchEvent(new Event('change'));
-          }
-        }, 800);
-      }
-    }
+    // Sinkronisasi dengan localStorage setelah komponen di-mount di client
+    setLang(getLang());
 
-    const fn = () => setLang(_lang);
-    _listeners.push(fn);
+    const fn = () => setLang(getLang());
+    const unsubscribe = subscribeLang(fn);
+    
+    // Fallback sync window event
+    const handleGlobal = (e: any) => setLang(e.detail);
+    window.addEventListener("atsira-language-changed", handleGlobal);
 
-    const handleGlobalChange = (e: Event) => {
-      const customEvent = e as CustomEvent<"ID" | "EN">;
-      if (customEvent.detail !== _lang) {
-        _lang = customEvent.detail;
-        fn();
-      }
-    };
-
-    window.addEventListener("atsira-language-changed", handleGlobalChange);
-
-    return () => { 
-      const i = _listeners.indexOf(fn); 
-      if (i > -1) _listeners.splice(i, 1); 
-      window.removeEventListener("atsira-language-changed", handleGlobalChange);
+    return () => {
+      unsubscribe();
+      window.removeEventListener("atsira-language-changed", handleGlobal);
     };
   }, []);
   
@@ -134,7 +97,7 @@ export function Navbar() {
               alt="ATSIRA Logo"
               width={180}
               height={76}
-              className="h-[68px] w-auto object-contain block"
+              className="h-[68px] w-auto object-contain block scale-[1.7] origin-left pl-2"
               priority
             />
           </Link>

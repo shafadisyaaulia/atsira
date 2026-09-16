@@ -21,10 +21,10 @@ const STAGE_ICON: Record<string, any> = {
 const T = {
   eyebrow: { ID: "Verifikasi Transparansi Produk", EN: "Product Transparency Verification" },
   title: { ID: "Telusuri Jejak Nilam Anda", EN: "Trace Your Patchouli Journey" },
-  placeholder: { ID: "Masukkan ID Batch atau Kode Produk (misal: PAT-2026-001 / fp-sabun-nilam)", EN: "Enter Batch ID or Product Code (e.g. PAT-2026-001 / fp-sabun-nilam)" },
+  placeholder: { ID: "Masukkan ID Batch atau Kode Produk (misal: ATSIRA-F001 / ATSIRA-R001)", EN: "Enter Batch ID or Product Code (e.g. ATSIRA-F001 / ATSIRA-R001)" },
   searchBtn: { ID: "Lacak Sekarang", EN: "Track Now" },
   hint: { ID: "Coba salin ID simulasi:", EN: "Try simulation IDs:" },
-  notFound: { ID: "ID Batch / Produk tidak ditemukan di sistem Supabase maupun katalog.", EN: "Batch / Product ID not found in Supabase or catalog." },
+  notFound: { ID: "ID produk tidak ditemukan. Pastikan kode yang dimasukkan benar.", EN: "Product ID not found. Please check your code." },
   verified: { ID: "Terverifikasi ARC-USK", EN: "Verified by ARC-USK" },
   timelineTitle: { ID: "Perjalanan Rantai Pasok Digital", EN: "Digital Supply Chain Journey" },
   ledgerLabel: { ID: "Tercatat Permanen di Ledger Terenkripsi ATSIRA", EN: "Permanently Recorded on ATSIRA Encrypted Ledger" },
@@ -57,11 +57,15 @@ function TraceabilityContent() {
   }, []);
 
   const findLocalProduct = (id: string) => {
-    return ALL_PRODUCTS.find(
+    const searchId = id.toLowerCase().trim();
+    console.log("Searching for:", searchId);
+    const found = ALL_PRODUCTS.find(
       (p: any) => 
-        String(p.id).toLowerCase() === id.toLowerCase().trim() || 
-        String(p.qrBatchId || "").toLowerCase() === id.toLowerCase().trim()
+        String(p.id).toLowerCase() === searchId || 
+        String(p.qrBatchId || "").toLowerCase() === searchId
     );
+    console.log("Found:", found);
+    return found;
   };
 
   const performSearch = async (query: string) => {
@@ -69,34 +73,39 @@ function TraceabilityContent() {
     setLoading(true);
     setNotFoundFlag(false);
 
-    // 1. Cari Data Real dari Supabase
-    const { data: dbData } = await supabase
-      .from("traceability_logs")
-      .select("*")
-      .ilike("batch_code", query.trim())
+    // 1. Cari Data Real dari Supabase (Gabungan finished_products & raw_oil_listings)
+    const { data: finishedData, error: finishedError } = await supabase
+      .from("finished_products")
+      .select("*, coa_records(*)")
+      .eq("qr_batch_id", query.trim())
       .maybeSingle();
 
-    if (dbData) {
+    const { data: rawData, error: rawError } = await supabase
+      .from("raw_oil_listings")
+      .select("*, coa_records(*)")
+      .eq("qr_batch_id", query.trim())
+      .maybeSingle();
+
+    // Mapping hasil Supabase ke format yang diharapkan traceability
+    if (finishedData || rawData) {
+      const dbData = finishedData || rawData;
+      
+      // Ambil data trace dari mock berdasarkan kategori/ID jika tersedia fallback
+      const mockFallback = ALL_PRODUCTS.find(p => (p as any).qrBatchId === query.trim());
+
       setSearched({
-        id: dbData.batch_code,
-        title: dbData.product_name,
-        imageUrl: "/images/patchouli-oil-placeholder.jpg",
+        id: dbData.qr_batch_id,
+        title: dbData.title,
+        imageUrl: dbData.image_url || mockFallback?.imageUrl || "/images/patchouli-oil-placeholder.jpg",
         isRealDb: true,
-        coa: { paLevel: dbData.patchouli_alcohol },
-        traceability: [
+        coa: dbData.coa_records ? { paLevel: dbData.coa_records.pa_level } : (mockFallback as any)?.coa,
+        traceability: (mockFallback as any)?.traceability || [
           {
-            stage: "Kebun",
-            title: { ID: "Panen & Penyulingan Hulu Petani", EN: "Farmer Harvest & Distillation" },
-            description: { ID: `Dikelola oleh ${dbData.farmer_name}`, EN: `Managed by ${dbData.farmer_name}` },
-            date: dbData.distillation_date,
-            location: dbData.farmer_location,
-          },
-          {
-            stage: "Pengujian",
-            title: { ID: "Uji Laboratorium Mutu ARC-USK", EN: "ARC-USK Lab Quality Test" },
-            description: { ID: `Analis: ${dbData.lab_analyst}. No Sertifikat: ${dbData.arc_certificate_no}`, EN: `Analyst: ${dbData.lab_analyst}. Cert No: ${dbData.arc_certificate_no}` },
-            date: dbData.created_at,
-            location: "Banda Aceh, Indonesia",
+            stage: "Botol",
+            title: { ID: "Produk Terverifikasi", EN: "Verified Product" },
+            description: { ID: "Produk telah masuk dalam database ATSIRA.", EN: "Product registered in ATSIRA database." },
+            date: new Date().toLocaleDateString(),
+            location: "ATSIRA System",
           }
         ]
       });
@@ -155,7 +164,7 @@ function TraceabilityContent() {
           </form>
           
           <p className="text-[11px] text-white/70 mt-4 bg-black/30 inline-block px-3 py-1 rounded-full border border-white/10">
-            <span className="font-bold text-amber-400">{T.hint[lang]}</span> PAT-2026-001, fp-sabun-nilam, fin-1
+            <span className="font-bold text-amber-400">{T.hint[lang]}</span> ATSIRA-F001, ATSIRA-R001
           </p>
         </div>
       </section>

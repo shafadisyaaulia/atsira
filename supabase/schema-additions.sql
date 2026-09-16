@@ -3,6 +3,60 @@
 -- Tambahan untuk PEMASTA (field data), PENELITI (quality), dan traceability real
 -- ============================================================================
 
+-- ---------- MIGRASI REGION: Ubah kolom dari enum farm_region ke TEXT ----------
+-- Alasan: Pemasta beroperasi di seluruh Indonesia (tidak hanya Aceh),
+-- sehingga enum yang kaku tidak cocok. Wilayah sekarang dipilih via cascade
+-- Provinsi → Kabupaten dari API Wilayah Indonesia (Emsifa) dan disimpan
+-- sebagai plain text dengan format "Kabupaten, Provinsi".
+-- Referensi: Diskusi handover Sept 2026 — keputusan bersama tim.
+
+-- field_stories
+alter table public.field_stories
+  alter column region type text using region::text;
+
+-- market_price_updates
+alter table public.market_price_updates
+  alter column region type text using region::text;
+
+-- field_activity_logs
+alter table public.field_activity_logs
+  alter column region type text using region::text;
+
+
+-- ---------- SUPABASE STORAGE: Bucket untuk foto Field Story ----------
+-- Bucket ini dipakai oleh POST /api/pemasta/field-stories saat menerima
+-- foto kegiatan dari form "Tulis Dokumentasi Baru" di dashboard Pemasta.
+-- Foto bersifat publik karena akan ditampilkan di halaman publik NilamStory.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'field-story-images',
+  'field-story-images',
+  true,
+  5242880,  -- 5 MB limit per file
+  array['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+-- Policy: siapa pun bisa membaca (GET) file dari bucket ini
+create policy "Public read access for field story images"
+  on storage.objects for select
+  using (bucket_id = 'field-story-images');
+
+-- Policy: hanya authenticated user (role Pemasta) yang bisa upload
+create policy "Authenticated users can upload field story images"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'field-story-images');
+
+-- Policy: authenticated user bisa hapus/update file milik sendiri
+create policy "Authenticated users can update or delete their field story images"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'field-story-images');
+
 -- ---------- FIELD STORIES (Pemasta dokumentasi kegiatan kebun) ----------
 create table if not exists public.field_stories (
   slug text primary key,

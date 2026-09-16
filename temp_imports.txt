@@ -1,0 +1,16 @@
+﻿"use client";
+
+import { useState, useEffect } from "react";
+import { 
+  Droplet, MapPin, Calendar, Activity, TrendingUp, 
+  BookOpen, FileText, Plus, 
+  Upload, LayoutDashboard, PenSquare, LogOut, Sparkles,
+  Scale, Layers, Sprout, Coins, Globe, Users
+} from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store";
+import { getLang, subscribeLang, toggleLang } from "@/lib/language";

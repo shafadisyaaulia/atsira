@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { 
   ArrowRight, Mail, Lock, Eye, EyeOff, ArrowLeft, 
-  Sparkles, Sprout, Droplet, FlaskConical, Store 
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -26,11 +25,6 @@ const T_LOGIN = {
   loading: { id: "Memvalidasi akun...", en: "Authenticating..." },
   noAccount: { id: "Belum punya akun?", en: "Don't have an account yet?" },
   registerHere: { id: "Daftar di sini", en: "Sign Up here" },
-  demoTitle: { id: "Akses Cepat Demo Juri", en: "Jury Quick Demo Access" },
-  demoSub: { 
-    id: "Klik ikon peran di bawah untuk simulasi login otomatis tanpa input manual.", 
-    en: "Click a role icon below to simulate instant login without manual inputs." 
-  }
 };
 
 export default function LoginPage() {
@@ -45,15 +39,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  function detectRoleFromEmail(targetEmail: string): "petani" | "umkm" | "buyer" | "peneliti" | "pemasta" {
-    const lowerEmail = targetEmail.toLowerCase();
-    if (lowerEmail.includes("pemasta") || lowerEmail.includes("@pemasta") || lowerEmail.includes("aman@")) return "pemasta";
-    if (lowerEmail.includes("syukur@") || lowerEmail.includes("@petani.")) return "petani";
-    if (lowerEmail.includes("khali") || lowerEmail.includes("umkm") || lowerEmail.includes("@seulawah") || lowerEmail.includes("atelier")) return "umkm";
-    if (lowerEmail.includes("@arc") || lowerEmail.includes("usk") || lowerEmail.includes("peneliti")) return "peneliti";
-    return "buyer";
-  }
-
   async function processLogin(targetEmail: string, targetPassword: string) {
     const supabase = createSupabaseBrowserClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email: targetEmail, password: targetPassword });
@@ -64,19 +49,41 @@ export default function LoginPage() {
       return;
     }
 
-    const detectedRole = detectRoleFromEmail(targetEmail);
+    // Ambil role asli dari tabel profiles
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
+    // Role asli dari DB
+    const rawRole = profile?.role || "buyer";
+    
+    // Normalisasi role DB yang mungkin berbeda dengan sistem ATSIRA
+    const ROLE_MAP: Record<string, string> = {
+      "seller": "umkm",     // Role lama "seller" → umkm
+      "arc": "peneliti",    // Role lama "arc" → peneliti
+      "farmer": "petani",   // Alias lainnya
+    };
+    const dbRole = ROLE_MAP[rawRole] ?? rawRole;
+    
+    // URL redirect: petani & umkm masuk ke /dashboard/seller
+    const sellerRoles = ["petani", "umkm"];
+    const redirectPath = sellerRoles.includes(dbRole) ? "/dashboard/seller" : `/dashboard/${dbRole}`;
+    
     const userName =
       data.user.user_metadata?.full_name ||
       data.user.user_metadata?.name ||
       targetEmail.split("@")[0];
 
-    login(detectedRole, userName, {
+    // Simpan role ke store (sudah dinormalisasi)
+    login(dbRole as any, userName, {
       id: data.user.id,
       email: data.user.email || targetEmail,
     });
 
     setTimeout(() => {
-      router.push(`/dashboard/${detectedRole}`);
+      router.push(redirectPath);
     }, 600);
   }
 
@@ -89,23 +96,10 @@ export default function LoginPage() {
   }
 
   // Handler Pintu Pintas Demo (Quick Login Selector)
-  const handleQuickDemo = (demoEmail: string) => {
-    setLoading(true);
-    setEmail(demoEmail);
-    setPassword("demo123");
-    setErrorMessage("");
-    setTimeout(() => {
-      processLogin(demoEmail, "demo123");
-    }, 600);
-  };
+  // Handler dihapus
 
   // Konfigurasi 4 Peran Prototipe Juri Pilihan Anda
-  const DEMO_ROLES = [
-    { name: "Seller", email: "distributor@seller.com", icon: Sprout, color: "hover:border-emerald-500 hover:bg-emerald-50/40 text-emerald-700" },
-    { name: "Pemasta", email: "aman@pemasta.com", icon: Droplet, color: "hover:border-teal-500 hover:bg-teal-50/40 text-teal-700" },
-    { name: "ARC Lab", email: "syakir@usk.ac.id", icon: FlaskConical, color: "hover:border-amber-500 hover:bg-amber-50/40 text-amber-700" },
-    { name: "Buyer", email: "export@buyer.com", icon: Store, color: "hover:border-stone-500 hover:bg-stone-50 text-stone-700" },
-  ];
+  // Konfigurasi dihapus
 
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -183,43 +177,6 @@ export default function LoginPage() {
               {!loading && <ArrowRight className="w-5 h-5 ml-2 inline" />}
             </Button>
           </form>
-
-          {/* ── SEPARATOR & PANEL DEBUGS / QUICK DEMO JURI ── */}
-          <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-stone-200"></div>
-            <span className="flex-shrink mx-4 text-[10px] text-stone-400 font-bold uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-500" /> {T_LOGIN.demoTitle[currentLang]}
-            </span>
-            <div className="flex-grow border-t border-stone-200"></div>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-[11px] text-stone-400 text-center leading-normal">
-              {T_LOGIN.demoSub[currentLang]}
-            </p>
-            
-            {/* Grid 4 Tombol Peran Baru (Seller, Pemasta, ARC, Buyer) */}
-            <div className="grid grid-cols-4 gap-2">
-              {DEMO_ROLES.map((role) => {
-                const Icon = role.icon;
-                return (
-                  <button
-                    key={role.name}
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleQuickDemo(role.email)}
-                    className={`p-2.5 border border-stone-200 rounded-xl flex flex-col items-center gap-1 transition-all group ${role.color} ${
-                      loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                    }`}
-                    title={role.email}
-                  >
-                    <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                    <span className="text-[10px] font-bold tracking-tight">{role.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
         </Card>
 

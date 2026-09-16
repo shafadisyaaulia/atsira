@@ -1,81 +1,99 @@
-import type { AnalyzerInput, AnalyzerResult } from "@/lib/types";
+import type { AnalyzerResult } from "@/lib/types";
 
 /**
  * ============================================================================
- * FASE 2 TODO — Ganti implementasi mock di bawah dengan panggilan Gemini API:
+ * ATSIRA QualitySense Engine — Base Logic
  *
- * import { GoogleGenerativeAI } from "@google/generative-ai";
- * const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
- * const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+ * Spesifikasi kalkulasi berdasarkan:
+ *   - Dokumen Task Atsira (ARC-USK / Handover)
+ *   - SNI 06-2385-2006
+ *   - Konfirmasi rekan pengembang (Sept 2026)
  *
- * Kirim foto (base64) + input form sebagai prompt terstruktur, minta model
- * mengembalikan JSON: { paLevel, grade, acidNumber, density, confidenceScore,
- * recommendedPriceMin, recommendedPriceMax, improvementTips }.
+ * Input utama:
+ *   - paActual   : Kadar Patchouli Alcohol (%) yang diketik Pemasta/Seller
+ *   - hargaBase  : Harga referensi terbaru dari tabel market_price_updates Pemasta
+ *                  (ambil dari API /api/pemasta/market-prices sebelum memanggil fungsi ini)
  *
- * Idealnya panggilan ini terjadi di Route Handler (app/api/analyzer/route.ts)
- * supaya API key tidak pernah dikirim ke client. Function ini lalu memanggil
- * fetch("/api/analyzer", { method: "POST", body: ... }) dari sisi client.
+ * Formula Harga Rekomendasi:
+ *   Harga Rekomendasi = Harga Base × (1 + (PA Actual − 30) / 100)
+ *
+ * Penentuan Grade (sesuai ARC-USK):
+ *   Grade A (Super/Ekspor)  : PA ≥ 32%
+ *   Grade B (Lokal Top)     : PA 30–31.9%
+ *   Grade C (Standard)      : PA < 30%
  * ============================================================================
  */
 
-function estimatePaFromInputs(input: AnalyzerInput): number {
-  // Heuristik sederhana untuk demo — mensimulasikan model NIRS-PLS.
-  let base = 30;
-  if (input.color === "Coklat Muda") base += 3;
-  if (input.color === "Coklat Tua") base += 1.5;
-  if (input.color === "Jernih") base -= 4;
-  if (input.viscosity === "Sedang") base += 1.2;
-  if (input.viscosity === "Tinggi") base += 0.5;
-  if (input.distillationMethod === "Penyulingan Uap") base += 1.5;
-  if (input.region.toLowerCase().includes("gayo")) base += 1.5; // dataran tinggi -> rendemen lebih baik
-  const jitter = (Math.random() - 0.5) * 1.2;
-  return Math.round((base + jitter) * 10) / 10;
-}
+const PA_STANDARD = 30; // Nilai acuan dasar PA untuk kalkulasi harga
 
+/**
+ * Tentukan grade berdasarkan kadar PA.
+ */
 function gradeFromPa(pa: number): AnalyzerResult["grade"] {
-  if (pa >= 32) return "Premium";
-  if (pa >= 28) return "Standard";
-  if (pa >= 20) return "Economy";
-  return "Reject";
+  if (pa >= 32) return "Grade A";
+  if (pa >= 30) return "Grade B";
+  return "Grade C";
 }
 
-export async function runNilamAnalyzer(input: AnalyzerInput): Promise<AnalyzerResult> {
-  // Jika region & karakteristik cocok persis dengan profil Pak Syukur, kembalikan
-  // angka terkunci 34.2% agar konsisten dengan cerita demo di seluruh platform.
-  const isGayoProfile =
-    input.region.toLowerCase().includes("gayo") &&
-    input.color === "Coklat Muda" &&
-    input.distillationMethod === "Penyulingan Uap";
-
-  const paLevel = isGayoProfile ? 34.2 : estimatePaFromInputs(input);
-  const grade = gradeFromPa(paLevel);
-
-  const priceMap: Record<string, [number, number]> = {
-    Premium: [1250000, 1480000],
-    Standard: [950000, 1180000],
-    Economy: [650000, 900000],
-    Reject: [300000, 500000],
-  };
-  const [min, max] = priceMap[grade];
-
-  const tips: string[] = [];
-  if (grade !== "Premium") {
-    tips.push("Pertimbangkan memanen daun di usia 6-8 bulan untuk kadar PA lebih tinggi.");
-    tips.push("Gunakan metode penyulingan uap dengan tekanan rendah selama 8 jam.");
+/**
+ * Keterangan grade dalam Bahasa Indonesia untuk ditampilkan di UI.
+ */
+export function gradeLabel(grade: AnalyzerResult["grade"]): string {
+  switch (grade) {
+    case "Grade A": return "Super / Ekspor";
+    case "Grade B": return "Lokal Top";
+    case "Grade C": return "Standard";
   }
-  if (input.viscosity === "Rendah") {
-    tips.push("Kekentalan rendah dapat mengindikasikan kadar air tinggi — periksa proses layu sebelum penyulingan.");
+}
+
+/**
+ * Tips perbaikan mutu berdasarkan grade.
+ */
+function improvementTips(grade: AnalyzerResult["grade"]): string[] {
+  if (grade === "Grade A") return [];
+  const tips = [
+    "Panen daun nilam di usia 6–8 bulan untuk kadar PA lebih optimal.",
+    "Gunakan metode penyulingan uap (steam distillation) dengan tekanan rendah, durasi 6–8 jam.",
+  ];
+  if (grade === "Grade C") {
+    tips.push("Pastikan bahan baku tidak terlalu muda (< 4 bulan) karena kadar PA belum terbentuk sempurna.");
+    tips.push("Simpan minyak di jerigen plastik bersih atau botol kaca — hindari drum besi yang bisa meningkatkan kadar Fe.");
   }
+  return tips;
+}
+
+/**
+ * Jalankan kalkulasi QualitySense.
+ *
+ * @param paActual   Kadar PA (%) dari input Pemasta / Seller
+ * @param hargaBase  Harga referensi terbaru (Rp/kg) dari market_price_updates Pemasta
+ * @returns          AnalyzerResult lengkap
+ */
+export function runNilamAnalyzer(
+  paActual: number,
+  hargaBase: number
+): AnalyzerResult {
+  const grade = gradeFromPa(paActual);
+
+  // Formula rekomendasi harga dari dokumen spesifikasi ARC-USK
+  const hargaRekomendasi = Math.round(
+    hargaBase * (1 + (paActual - PA_STANDARD) / 100)
+  );
+
+  // Tampilkan rentang ±5% sebagai batas negosiasi
+  const recommendedPriceMin = Math.round(hargaRekomendasi * 0.95);
+  const recommendedPriceMax = Math.round(hargaRekomendasi * 1.05);
 
   return {
-    paLevel,
+    paLevel: paActual,
     grade,
-    acidNumber: Math.round((3.2 + Math.random() * 1.5) * 100) / 100,
-    density: Math.round((0.94 + Math.random() * 0.04) * 1000) / 1000,
-    confidenceScore: isGayoProfile ? 96.3 : Math.round((85 + Math.random() * 10) * 10) / 10,
-    recommendedPriceMin: min,
-    recommendedPriceMax: max,
-    improvementTips: tips,
+    // acidNumber & density tidak dikalkulasi (butuh uji lab fisik ARC-USK)
+    acidNumber: 0,
+    density: 0,
+    confidenceScore: 100, // Deterministic — tidak ada probabilistik
+    recommendedPriceMin,
+    recommendedPriceMax,
+    improvementTips: improvementTips(grade),
     analyzedAt: new Date().toISOString(),
   };
 }

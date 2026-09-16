@@ -3,6 +3,7 @@ import { Playfair_Display, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/g
 import "./globals.css";
 import { AtBotWidget } from "@/components/shared/AtBotWidget";
 import Script from "next/script";
+import ClientLayout from "@/components/layout/ClientLayout";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -84,9 +85,11 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body bg-surface text-on-surface relative">
-        <div className="grain-overlay" aria-hidden="true" />
-        <div className="relative z-[2]">{children}</div>
-        <AtBotWidget />
+        <ClientLayout>
+            <div className="grain-overlay" aria-hidden="true" />
+            <div className="relative z-[2]">{children}</div>
+            <AtBotWidget />
+        </ClientLayout>
 
         {/* Wadah selektor bahasa diletakkan secara presisi agar Google skrip bisa mendeteksi perubahan state halaman */}
        {/* Elemen jangkar Google Translate */}
