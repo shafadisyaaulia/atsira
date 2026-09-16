@@ -4,9 +4,15 @@ import { createClient } from "@supabase/supabase-js";
 import Midtrans from "midtrans-client";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16" as any,
-});
+function getStripe() {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY tidak dikonfigurasi");
+  }
+  return new Stripe(secretKey, {
+    apiVersion: "2023-10-16" as any,
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -106,7 +112,7 @@ export async function POST(request: Request) {
         quantity: Number(item.qty || item.quantity || 1),
       }));
 
-      const session = await stripe.checkout.sessions.create({
+      const session = await getStripe().checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: lineItems,
         mode: "payment",
