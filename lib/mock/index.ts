@@ -10,12 +10,15 @@ export function formatIDR(value: number): string {
   }).format(value);
 }
 
-export function formatDateID(dateStr: string): string {
+export function formatDateID(dateStr: string | undefined | null): string {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "-";
   return new Intl.DateTimeFormat("id-ID", {
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(new Date(dateStr));
+  }).format(d);
 }
 
 export function gradeColor(grade: string): { bg: string; text: string } {
