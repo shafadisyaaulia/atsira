@@ -41,11 +41,11 @@ export default function BuyerDashboardPage() {
 
       if (orders) {
         const expense = orders
-          .filter(o => o.status !== "Dibatalkan" && o.status !== "cancelled")
+          .filter(o => o.status !== "Dibatalkan")
           .reduce((acc, curr) => acc + Number(curr.total || 0), 0);
         setTotalPengadaan(expense);
 
-        const validOrders = orders.filter(o => o.status !== "Dibatalkan" && o.status !== "cancelled");
+        const validOrders = orders.filter(o => o.status !== "Dibatalkan");
         setTotalKontrak(validOrders.length);
 
         let volume = 0;

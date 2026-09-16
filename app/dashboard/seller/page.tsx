@@ -66,12 +66,12 @@ export default function SellerDashboardPage() {
       if (orders) {
         // Hitung pendapatan (hanya status Selesai atau setidaknya diproses, bukan dibatalkan)
         const income = orders
-          .filter(o => o.status !== "Dibatalkan" && o.status !== "cancelled")
+          .filter(o => o.status !== "Dibatalkan")
           .reduce((acc, curr) => acc + Number(curr.total || 0), 0);
         setTotalPendapatan(income);
         
         // Hitung pesanan baru
-        const newOrds = orders.filter(o => o.status === "pending" || o.status === "Menunggu Konfirmasi" || o.status === "Menunggu Pembayaran");
+        const newOrds = orders.filter(o => o.status === "Menunggu Pembayaran");
         setPesananBaru(newOrds.length);
         
         // 3 pesanan terbaru
