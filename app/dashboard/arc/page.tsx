@@ -9,6 +9,8 @@ import {
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useEffect } from "react";
 
 // Data Antrean Verifikasi Lab Minyak Nilam (Sinkron dengan Log Lapangan Pemasta)
 const MOCK_LAB_QUEUE = [
