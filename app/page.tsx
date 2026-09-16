@@ -248,7 +248,7 @@ export default function HomePage() {
           <div className="lg:w-1/2 relative">
             <div className="aspect-square rounded-[40px] overflow-hidden shadow-2xl relative">
               <img
-                src="/stories/professional_documentary_photography_of_an_atsira_team_meeting_with_acehnese.png"
+                src="/images/hero-bg.png"
                 alt="Tim ATSIRA"
                 className="w-full h-full object-cover"
               />
