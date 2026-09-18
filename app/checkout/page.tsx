@@ -141,15 +141,22 @@ export default function CheckoutPage() {
 
   const paymentOptions = isInternational
     ? [
-        { id: "stripe", label: "Credit / Debit Card (Visa/Mastercard via Stripe)" }
+        { id: "stripe", label: "Credit / Debit Card (Visa/Mastercard via Stripe)", icon: "💳" }
       ]
     : [
-        { id: "midtrans", label: "Virtual Account (BCA, Mandiri, BSI) / QRIS Domestik" }
+        { id: "qris",        label: "QRIS (GoPay, OVO, DANA, ShopeePay, dll)", icon: "📱" },
+        { id: "bca_va",      label: "Virtual Account BCA",                       icon: "🏦" },
+        { id: "mandiri_va",  label: "Virtual Account Mandiri",                    icon: "🏦" },
+        { id: "bni_va",      label: "Virtual Account BNI",                        icon: "🏦" },
+        { id: "bri_va",      label: "Virtual Account BRI",                        icon: "🏦" },
+        { id: "bsi_va",      label: "Virtual Account BSI",                        icon: "🏦" },
+        { id: "gopay",       label: "GoPay",                                      icon: "🟢" },
+        { id: "shopeepay",   label: "ShopeePay",                                  icon: "🟠" },
       ];
 
   useEffect(() => {
     setCourier("std");
-    setPayment(isInternational ? "stripe" : "cod");
+    setPayment(isInternational ? "stripe" : "qris");
   }, [isInternational]);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -168,6 +175,12 @@ export default function CheckoutPage() {
 
     try {
       const selectedPaymentMethod = isInternational ? "stripe" : "midtrans";
+      // Map local selection to Midtrans payment_type for pre-selection
+      const midtransPaymentType = payment === "qris" ? "qris" 
+        : payment === "gopay" ? "gopay"
+        : payment === "shopeepay" ? "shopeepay"
+        : payment.endsWith("_va") ? payment // bca_va, mandiri_va, etc.
+        : null;
 
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -192,6 +205,7 @@ export default function CheckoutPage() {
           tax,
           total,
           paymentMethod: selectedPaymentMethod,
+          midtransPaymentType,
           courier: courierOptions.find((option) => option.id === courier)?.label ?? courier,
           orderType: "B2C",
         }),
@@ -480,8 +494,11 @@ export default function CheckoutPage() {
                         : "border-surface-container-high hover:bg-surface-container-low"
                     }`}
                   >
-                    <span className="text-xs font-bold text-on-surface">{p.label}</span>
-                    <span className="w-3.5 h-3.5 rounded-full border-2 transition-all border-outline-variant" style={payment === p.id ? { borderColor: "var(--md-sys-color-primary)", backgroundColor: "var(--md-sys-color-primary)", boxShadow: "0 0 0 4px #d1fae5" } : {}} />
+                    <span className="flex items-center gap-3 text-xs font-bold text-on-surface">
+                      <span className="text-base">{p.icon}</span>
+                      {p.label}
+                    </span>
+                    <span className="w-3.5 h-3.5 rounded-full border-2 transition-all border-outline-variant flex-shrink-0" style={payment === p.id ? { borderColor: "var(--md-sys-color-primary)", backgroundColor: "var(--md-sys-color-primary)", boxShadow: "0 0 0 4px #d1fae5" } : {}} />
                   </button>
                 ))}
               </div>

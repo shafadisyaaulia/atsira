@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       shipping_fee: Number(shippingFee || 0),
       tax: Number(tax || 0),
       total: Number(total || 0),
-      status: paymentMethod === "cod" ? "pending" : "pending",
+      status: "Menunggu Pembayaran",
       payment_method: paymentMethod || "midtrans",
       courier: courier || "JNE Regular",
       tracking_number: null,
