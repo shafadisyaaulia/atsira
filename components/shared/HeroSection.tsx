@@ -11,12 +11,12 @@ import { useLang } from "@/components/layout/Navbar";
 // 2. Kamus Translasi Lokal untuk HeroSection
 const T_HERO = {
   badge: {
-    ID: "Warisan Modern",
-    EN: "Modern Heritage"
+    ID: "",
+    EN: ""
   },
   title: {
-    ID: "Emas Cair dari Aceh: Ekosistem Wewangian Digital",
-    EN: "Liquid Gold from Aceh: Digital Fragrance Ecosystem"
+    ID: "Kenali perjalanan minyak nilam Aceh dari awal sampai akhir.",
+    EN: "Discover the journey of Aceh patchouli oil from start to finish."
   },
   desc: {
     ID: "Melestarikan budidaya kuno melalui Blockchain dan AI. Rasakan sinergi tradisi dan presisi dalam minyak atsiri paling berharga di dunia.",
@@ -67,17 +67,19 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-10 max-w-2xl">
-        <span
-          className="text-clay-earth mb-4 block uppercase tracking-widest"
-          style={{
-            fontFamily: "Plus Jakarta Sans, sans-serif",
-            fontSize: "14px",
-            fontWeight: "600",
-            letterSpacing: "0.05em",
-          }}
-        >
-          {T_HERO.badge[lang]}
-        </span>
+        {T_HERO.badge[lang] && (
+          <span
+            className="text-clay-earth mb-4 block uppercase tracking-widest"
+            style={{
+              fontFamily: "Plus Jakarta Sans, sans-serif",
+              fontSize: "14px",
+              fontWeight: "600",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {T_HERO.badge[lang]}
+          </span>
+        )}
         <h1
           className="text-ink-green mb-6 leading-tight"
           style={{

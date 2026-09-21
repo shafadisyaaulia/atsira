@@ -54,8 +54,8 @@ const T_HOME = {
   rootsStat2: { ID: "Peningkatan Pendapatan bagi Petani", EN: "Income Increase for Farmers" },
   rootsReport: { ID: "Baca Laporan Dampak 2026 →", EN: "Read the 2026 Impact Report →" },
   rootsQuote: {
-    ID: "“Kami tidak hanya menjual minyak; kami melindungi warisan yang hampir hilang.”",
-    EN: "“We don't just sell oil; we protect a heritage that was almost lost.”"
+    ID: "“Ia (nilam) adalah warisan budaya dan identitas ekonomi kita. Untuk menjadikannya unggul di pasar global, kita membutuhkan sinergi antar bidang ilmu, teknologi tepat guna, dan kebijakan pembangunan yang berpihak pada produk lokal.” — Dr. Syaifullah Muhammad pada pembukaan IConPEORI.",
+    EN: "“It (patchouli) is our cultural heritage and economic identity. To make it competitive in the global market, we need synergy between scientific fields, appropriate technology, and development policies that favor local products.” — Dr. Syaifullah Muhammad at the opening of IConPEORI."
   },
 
   // Bagian CTA bawah
