@@ -7,7 +7,7 @@ export default function TermsPage() {
         <h1 className="font-display text-4xl font-bold text-primary mb-8">Ketentuan Layanan</h1>
         <div className="prose text-on-surface-variant space-y-4">
           <p>Terakhir diperbarui: 14 September 2026</p>
-          <p>Selamat datang di ATSIRA. Dengan menggunakan platform kami, Anda setuju untuk mematuhi ketentuan berikut...</p>
+          <p>Selamat datang di atSira. Dengan menggunakan platform kami, Anda setuju untuk mematuhi ketentuan berikut...</p>
           <h2 className="text-xl font-bold text-primary mt-6">1. Penggunaan Platform</h2>
           <p>Anda bertanggung jawab atas penggunaan akun Anda...</p>
         </div>

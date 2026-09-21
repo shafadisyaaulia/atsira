@@ -284,3 +284,44 @@ values (
   jsonb_build_object('value', 'Rp 1,3M–Rp 1,6M/kg', 'note', 'Based on PA, rendemen, market trends')
 )
 on conflict do nothing;
+
+-- ============================================================================
+-- TABEL KOMUNITAS & PESAN CHAT (atSira Connect / Community)
+-- ============================================================================
+
+create table if not exists public.communities (
+  id text primary key,
+  name text not null,
+  description text default '',
+  category text default 'Umum',
+  is_public boolean default true,
+  member_count integer default 1,
+  created_by text default 'atSira',
+  created_at timestamptz default now()
+);
+
+create table if not exists public.community_messages (
+  id text primary key,
+  community_id text references public.communities(id) on delete cascade,
+  sender_name text not null,
+  sender_role text default 'Umum',
+  content text not null,
+  likes integer default 0,
+  created_at timestamptz default now()
+);
+
+-- Enable RLS
+alter table public.communities enable row level security;
+alter table public.community_messages enable row level security;
+
+-- Policies
+create policy "Allow all read communities" on public.communities for select using (true);
+create policy "Allow all insert communities" on public.communities for insert with check (true);
+
+create policy "Allow all read messages" on public.community_messages for select using (true);
+create policy "Allow all insert messages" on public.community_messages for insert with check (true);
+create policy "Allow all update messages" on public.community_messages for update using (true);
+
+-- Enable Realtime
+alter publication supabase_realtime add table public.community_messages;
+

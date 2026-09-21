@@ -1,5 +1,5 @@
 // ============================================================================
-// ATSIRA — Core Domain Types
+// atSira — Core Domain Types
 // Schema ini dirancang agar 1:1 mudah dipetakan ke tabel Supabase (PostgreSQL)
 // nantinya. Setiap interface = calon nama tabel (snake_case di DB).
 // ============================================================================

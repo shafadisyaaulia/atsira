@@ -55,7 +55,7 @@ export default function BuyerPesananPage() {
             month: "long",
             day: "numeric"
           }),
-          productName: firstItem.title || "Minyak Nilam Murni ATSIRA",
+          productName: firstItem.title || "Minyak Nilam Murni atSira",
           quantity: firstItem.qty ? `${firstItem.qty} ${firstItem.unit || "kg"}` : "1 Lot",
           totalPrice: Number(order.total || order.total_amount || 0),
           status: order.status || "Menunggu Pembayaran",
@@ -110,7 +110,7 @@ export default function BuyerPesananPage() {
         const payload = {
           orderId: order.id,
           buyerEmail: order.buyerEmail || "buyer@atsira.id",
-          buyerName: order.buyerName || "Pembeli ATSIRA",
+          buyerName: order.buyerName || "Pembeli atSira",
           items: order.items.length > 0 
             ? order.items.map((i: any) => ({
                 title: i.title || "Minyak Atsiri",
@@ -143,7 +143,7 @@ export default function BuyerPesananPage() {
         const payload = {
           orderId: order.id,
           total: order.totalPrice,
-          buyerName: order.buyerName || "Pembeli ATSIRA",
+          buyerName: order.buyerName || "Pembeli atSira",
         };
         const res = await fetch("/api/payments/create-midtrans", {
           method: "POST",

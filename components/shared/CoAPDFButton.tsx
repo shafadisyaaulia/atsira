@@ -250,17 +250,17 @@ export async function generateCoAPDF(data: CoAData): Promise<void> {
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   doc.text(
-    "Sertifikat ini diterbitkan secara digital oleh ARC-USK melalui platform ATSIRA. Berlaku tanpa tanda tangan fisik.",
+    "Sertifikat ini diterbitkan secara digital oleh ARC-USK melalui platform atSira. Berlaku tanpa tanda tangan fisik.",
     pageW / 2,
     pageH - 13,
     { align: "center" }
   );
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.text("ATSIRA — Platform Ekosistem Nilam Indonesia", pageW / 2, pageH - 6, { align: "center" });
+  doc.text("atSira — Platform Ekosistem Nilam Indonesia", pageW / 2, pageH - 6, { align: "center" });
 
   // ── Simpan PDF ──
-  const filename = `CoA-${data.batch_id || (data.id || "ATSIRA").slice(0, 8).toUpperCase()}-${data.pa_level.toFixed(0)}PA.pdf`;
+  const filename = `CoA-${data.batch_id || (data.id || "atSira").slice(0, 8).toUpperCase()}-${data.pa_level.toFixed(0)}PA.pdf`;
   doc.save(filename);
 }
 

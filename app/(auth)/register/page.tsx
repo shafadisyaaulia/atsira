@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils/cn";
 const T_REG = {
   title: { id: "Buat Akun Baru", en: "Create New Account" },
   sub: { 
-    id: "Bergabunglah ke dalam ekosistem minyak nilam ATSIRA.", 
-    en: "Join the premier ATSIRA patchouli oil trade & analysis ecosystem." 
+    id: "Bergabunglah ke dalam ekosistem minyak nilam atSira.", 
+    en: "Join the premier atSira patchouli oil trade & analysis ecosystem." 
   },
   roleLabel: { id: "Saya mendaftar sebagai:", en: "I am registering as:" },
   rolePetani: { id: "Petani (Penghasil Minyak)", en: "Farmer (Oil Producer)" },
@@ -125,7 +125,7 @@ function RegisterForm() {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <Link href="/" className="font-display text-3xl font-bold text-secondary-fixed">
-            ATSIRA
+            atSira
           </Link>
           <h1 className="font-display text-headline-md text-white mt-6 mb-2">
             {T_REG.title[currentLang]}

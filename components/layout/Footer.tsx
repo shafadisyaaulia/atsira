@@ -106,10 +106,9 @@ export function Footer() {
       <div className="border-t border-white/10 py-8">
         <div className="container-app flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-inverse-on-surface/60">
           
-          {/* Teks Legal Kemitraan */}
-          <div className="space-y-1.5 text-center md:text-left">
-            <p>© 2026 atSira Ecosystem. Bekerja sama dengan ARC-USK, Universitas Syiah Kuala.</p>
-            <p className="text-inverse-on-surface/40">Ditenagai oleh teknologi NIRS-PLS &amp; verifikasi blockchain.</p>
+          {/* Teks Legal */}
+          <div className="text-center md:text-left">
+            <p>© 2026 atSira. All rights reserved.</p>
           </div>
 
           {/* Badges SDGs */}

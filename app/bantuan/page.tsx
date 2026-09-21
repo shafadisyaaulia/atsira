@@ -1,224 +1,378 @@
 "use client";
 
 import { useState } from "react";
-import { Search, HelpCircle, ChevronDown, MessageCircle, Mail, Phone, ShieldCheck, ShoppingBag, LifeBuoy, FileText, Download } from "lucide-react";
+import { 
+  Search, 
+  HelpCircle, 
+  ChevronDown, 
+  MessageCircle, 
+  Mail, 
+  ShieldCheck, 
+  ShoppingBag, 
+  FileText, 
+  Download, 
+  Sparkles,
+  BookOpen,
+  ArrowRight,
+  ExternalLink
+} from "lucide-react";
+import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
+import { useLang } from "@/components/layout/Navbar";
 
 // ====== KAMUS BAHASA LOKAL ======
 const T = {
-  title: { ID: "Help Center & Dukungan", EN: "Help Center & Support" },
-  subtitle: { ID: "Punya pertanyaan seputar ATSIRA? Temukan jawaban instan dan unduh buku panduan aplikasi di bawah ini.", EN: "Have questions about ATSIRA? Find instant answers and download application user guides below." },
-  searchPlaceholder: { ID: "Cari bantuan (misal: cara jual, lacak QR, daftar akun)...", EN: "Search help (e.g., how to sell, track QR, register account)..." },
+  badge: { ID: "Pusat Bantuan & Edukasi", EN: "Help Center & Knowledge" },
+  title: { ID: "Bagaimana kami bisa membantu Anda?", EN: "How can we assist you today?" },
+  subtitle: { 
+    ID: "Temukan jawaban seputar ekosistem atSira, transaksi nilam, verifikasi kualitas AI, dan panduan lengkap aplikasi.", 
+    EN: "Find answers about the atSira ecosystem, patchouli trading, AI verification, and comprehensive platform guides." 
+  },
+  searchPlaceholder: { 
+    ID: "Cari topik bantuan (misal: QualitySense, NilamTrace QR, cara beli, SNI)...", 
+    EN: "Search help topics (e.g. QualitySense, NilamTrace QR, checkout, SNI)..." 
+  },
+  quickTags: [
+    { ID: "QualitySense AI", EN: "QualitySense AI" },
+    { ID: "NilamTrace QR", EN: "NilamTrace QR" },
+    { ID: "Buku Panduan", EN: "User Manual" },
+    { ID: "Standar SNI", EN: "SNI Standard" }
+  ],
   
-  pdfTitle: { ID: "Buku Panduan Penggunaan Aplikasi (PDF)", EN: "Application User Manuals (PDF)" },
-  pdfSubtitle: { ID: "Pelajari panduan lengkap langkah demi langkah penggunaan sistem mulai dari proses Login hingga Logout.", EN: "Learn step-by-step complete system guides from Login to Logout processes." },
-  pdfBuyerDesc: { ID: "Panduan alur mencari produk, check out, keranjang belanja, hingga pelacakan NilamTrace.", EN: "Guide for product searching, check-out, shopping cart, and NilamTrace tracking." },
-  pdfSellerDesc: { ID: "Panduan kelola produk toko, proses pesanan, hingga penggunaan fitur QualitySense AI.", EN: "Guide for product management, processing orders, and using QualitySense AI feature." },
-  pdfBtn: { ID: "Unduh Panduan (PDF)", EN: "Download Manual (PDF)" },
+  // 3 Quick Cards
+  cardManualTitle: { ID: "Buku Panduan Aktor", EN: "User Action Guide" },
+  cardManualDesc: { ID: "Panduan lengkap alur login, jual-beli marketplace, dan operasional akun.", EN: "Complete step-by-step guides for trading, verification, and dashboard operations." },
+  cardManualBtn: { ID: "Unduh PDF", EN: "Download PDF" },
 
-  contactTitle: { ID: "Masih Butuh Bantuan?", EN: "Still Need Help?" },
-  contactSubtitle: { ID: "Tim support kami siap melayani Anda kapan saja.", EN: "Our support team is ready to serve you anytime." },
+  cardAiTitle: { ID: "Tanya Asisten atBot", EN: "Ask atBot Assistant" },
+  cardAiDesc: { ID: "Tanya langsung seputar kadar PA, harga referensi dunia, dan rekomendasi suling.", EN: "Instant AI answers regarding PA levels, global price trends, and distillation tips." },
+  cardAiBtn: { ID: "Buka Chat atBot", EN: "Open atBot Chat" },
+
+  cardContactTitle: { ID: "Kontak Tim Dukungan", EN: "Contact Support Team" },
+  cardContactDesc: { ID: "Hubungi tim teknis ARC-USK atau administrator jika menemui kendala.", EN: "Reach out to ARC-USK technical team or system administrators for direct assistance." },
+  cardContactBtn: { ID: "Kirim Email", EN: "Send Email" },
+
+  faqHeading: { ID: "Pertanyaan yang Sering Diajukan", EN: "Frequently Asked Questions" },
+  allCategory: { ID: "Semua Kategori", EN: "All Categories" },
+  noResults: { ID: "Tidak ada topik bantuan yang cocok dengan pencarian Anda.", EN: "No help topics match your search query." },
 };
 
-// ====== MOCK DATA FAQ BERDASARKAN KATEGORI + WARNA KHUSUS ======
-const FAQ_DATA = [
+// ====== DAFTAR FAQ KATEGORISAL ======
+const FAQ_CATEGORIES = [
   {
-    category: "Umum & Akun",
-    icon: HelpCircle,
-    colorClasses: {
-      badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      accent: "border-l-emerald-500",
-      iconBg: "bg-emerald-500 text-white"
-    },
+    id: "general",
+    title: { ID: "Umum & Ekosistem", EN: "General & Ecosystem" },
     items: [
       {
-        q: "Apa itu platform ATSIRA?",
-        a: "ATSIRA adalah platform ekosistem digital terintegrasi untuk rantai pasok minyak nilam. Platform ini menghubungkan Petani/Seller, Komunitas PEMASTA untuk transparansi harga, dan konsumen umum dalam satu jaringan tepercaya."
+        q: { ID: "Apa itu platform atSira?", EN: "What is the atSira platform?" },
+        a: { 
+          ID: "atSira adalah ekosistem digital terintegrasi untuk rantai pasok minyak nilam Aceh. Platform ini menghubungkan petani, penyuling, pemasta, industri pembeli, dan peneliti ARC-USK dalam jaringan perdagangan yang transparan dan terverifikasi.", 
+          EN: "atSira is an integrated digital ecosystem for the Aceh patchouli supply chain, connecting farmers, distillers, pemasta, global buyers, and ARC-USK researchers in a transparent and verified trading network." 
+        }
       },
       {
-        q: "Bagaimana cara beralih bahasa di platform?",
-        a: "Anda cukup mengklik tombol bahasa (ID / EN) di pojok kanan atas Navbar untuk mengubah seluruh teks panduan secara instan."
+        q: { ID: "Bagaimana cara beralih bahasa di platform?", EN: "How do I switch the platform language?" },
+        a: { 
+          ID: "Anda dapat mengganti bahasa kapan saja dengan mengklik tombol pemilih bahasa (ID / EN) pada bilah navigasi (Navbar) di bagian atas layar.", 
+          EN: "You can switch languages anytime by clicking the language selector button (ID / EN) in the top navigation bar." 
+        }
       }
     ]
   },
   {
-    category: "Marketplace & Transaksi",
-    icon: ShoppingBag,
-    colorClasses: {
-      badge: "bg-amber-50 text-amber-700 border-amber-200",
-      accent: "border-l-amber-500",
-      iconBg: "bg-amber-500 text-white"
-    },
+    id: "marketplace",
+    title: { ID: "Marketplace & Transaksi", EN: "Marketplace & Orders" },
     items: [
       {
-        q: "Bagaimana cara membeli produk di Marketplace?",
-        a: "Masuk ke menu Marketplace di Navbar, pilih produk minyak nilam mentah atau produk turunan jadi yang Anda inginkan, masukkan ke keranjang belanja, lalu klik check out untuk menyelesaikan pembayaran."
+        q: { ID: "Bagaimana alur pembelian produk di Marketplace?", EN: "How does purchasing products on Marketplace work?" },
+        a: { 
+          ID: "Buka halaman Marketplace, pilih minyak nilam mentah atau produk jadi bersertifikasi, masukkan ke keranjang, dan lakukan proses checkout aman yang terhubung dengan payment gateway terpercaya.", 
+          EN: "Visit the Marketplace page, choose raw patchouli oil or certified finished goods, add to cart, and proceed with secure checkout backed by verified payment gateways." 
+        }
       },
       {
-        q: "Di mana fitur QualitySense AI milik Seller?",
-        a: "Fitur QualitySense AI sengaja disembunyikan dari halaman publik demi keamanan. Fitur ini hanya bisa diakses oleh akun dengan role Seller setelah melakukan login masuk ke area Dashboard Seller mereka."
+        q: { ID: "Bagaimana cara kerja verifikasi QualitySense AI?", EN: "How does QualitySense AI verification work?" },
+        a: { 
+          ID: "QualitySense AI menggunakan model NIRS-PLS yang dilatih bersama ARC-USK untuk memprediksi kadar Patchouli Alcohol (PA) dan kemurnian minyak secara cepat sebelum produk dipasarkan.", 
+          EN: "QualitySense AI uses NIRS-PLS models trained alongside ARC-USK to rapidly predict Patchouli Alcohol (PA) content and purity before products enter the marketplace." 
+        }
       }
     ]
   },
   {
-    category: "NilamTrace & Traceability",
-    icon: ShieldCheck,
-    colorClasses: {
-      badge: "bg-blue-50 text-blue-700 border-blue-200",
-      accent: "border-l-blue-500",
-      iconBg: "bg-blue-500 text-white"
-    },
+    id: "traceability",
+    title: { ID: "NilamTrace & Sertifikasi", EN: "NilamTrace & Certification" },
     items: [
       {
-        q: "Bagaimana cara kerja fitur NilamTrace?",
-        a: "NilamTrace melacak keaslian dokumen dan asal-usul minyak nilam dari hulu ke hilir. Pembeli tinggal memasukkan kode batch atau memindai QR Code produk di halaman Pelacakan untuk melihat riwayat panen dan penyulingan secara transparan."
+        q: { ID: "Bagaimana cara melacak keaslian batch melalui NilamTrace?", EN: "How do I trace batch authenticity with NilamTrace?" },
+        a: { 
+          ID: "Kunjungi menu NilamTrace lalu masukkan kode batch (misal: atSira-F001 atau atSira-R001) atau pindai kode QR yang tertera pada kemasan untuk melihat riwayat kebun, tanggal distilasi, dan uji laboratorium ARC-USK.", 
+          EN: "Go to the NilamTrace menu and enter the batch ID (e.g. atSira-F001 or atSira-R001) or scan the QR code on the packaging to view farm origin, distillation dates, and ARC-USK lab tests." 
+        }
+      },
+      {
+        q: { ID: "Apakah sertifikat Certificate of Analysis (CoA) bisa diunduh?", EN: "Can the Certificate of Analysis (CoA) be downloaded?" },
+        a: { 
+          ID: "Ya, setiap produk yang telah lulus verifikasi laboratorium memiliki tombol 'Unduh Sertifikat CoA PDF' yang dapat diunduh langsung oleh pembeli dan seller.", 
+          EN: "Yes, every product that has passed laboratory verification includes a 'Download CoA PDF Certificate' button for instant export by buyers and sellers." 
+        }
       }
     ]
   }
 ];
 
 export default function HelpCenterPage() {
-  const lang = typeof window !== "undefined" && localStorage.getItem("lang") === "EN" ? "EN" : "ID";
+  const lang = useLang();
+  const isId = lang === "ID";
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [openIndex, setOpenIndex] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [openIndex, setOpenIndex] = useState<string | null>("general-0");
 
-  const toggleAccordion = (catIdx: number, itemIdx: number) => {
-    const key = `${catIdx}-${itemIdx}`;
+  const toggleAccordion = (key: string) => {
     setOpenIndex(openIndex === key ? null : key);
   };
 
+  // Filter FAQ berdasarkan pencarian dan kategori
+  const filteredCategories = FAQ_CATEGORIES.map((cat) => {
+    if (selectedCategory !== "all" && cat.id !== selectedCategory) {
+      return null;
+    }
+    const filteredItems = cat.items.filter((item) => {
+      const q = isId ? item.q.ID : item.q.EN;
+      const a = isId ? item.a.ID : item.a.EN;
+      const query = searchQuery.toLowerCase();
+      return q.toLowerCase().includes(query) || a.toLowerCase().includes(query);
+    });
+    if (filteredItems.length === 0) return null;
+    return {
+      ...cat,
+      items: filteredItems,
+    };
+  }).filter(Boolean);
+
   return (
     <PageShell>
-      <div className="min-h-screen bg-gradient-to-b from-surface via-surface-container-lowest/20 to-surface py-12">
-        <div className="container-app max-w-4xl px-4 mx-auto space-y-14">
+      <div className="min-h-screen bg-[#fbf9f4] py-16 sm:py-20 text-stone-900">
+        <div className="container-app max-w-5xl mx-auto space-y-16">
           
-          {/* 1. HEADER & BAR PENCARIAN */}
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <div className="inline-flex p-3 bg-gradient-to-tr from-primary to-amber-500 rounded-2xl text-white shadow-md mb-2">
-              <LifeBuoy className="w-8 h-8 animate-spin-slow" />
+          {/* 1. HERO SECTION - CLEAN & ELEGANT */}
+          <div className="text-center space-y-5 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-stone-200 shadow-sm text-stone-800 text-xs font-semibold">
+              <HelpCircle className="w-4 h-4 text-emerald-700" />
+              <span>{T.badge[lang]}</span>
             </div>
-            <h1 className="font-display text-3xl font-black text-on-surface tracking-tight bg-gradient-to-r from-primary via-emerald-700 to-amber-600 bg-clip-text text-transparent">
+
+            <h1 className="font-display text-3xl sm:text-5xl font-bold text-stone-900 tracking-tight leading-tight">
               {T.title[lang]}
             </h1>
-            <p className="text-sm text-on-surface-variant leading-relaxed">
+
+            <p className="text-stone-600 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
               {T.subtitle[lang]}
             </p>
             
-            <div className="relative mt-6 bg-surface border-2 border-primary/20 rounded-2xl px-5 py-3.5 flex items-center shadow-md focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all">
-              <Search className="w-5 h-5 text-primary mr-3 flex-shrink-0" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={T.searchPlaceholder[lang]}
-                className="w-full bg-transparent text-sm outline-none text-on-surface placeholder:text-outline/60"
-              />
-            </div>
-          </div>
-
-          {/* 2. SEKSI PREMIUM: UNDUH BUKU PANDUAN PDF (STEP BY STEP) */}
-          <div className="bg-surface-container-low/40 rounded-3xl p-6 border border-surface-container-high space-y-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-primary font-black text-base">
-                <FileText className="w-5 h-5 text-amber-600" />
-                <h2>{T.pdfTitle[lang]}</h2>
-              </div>
-              <p className="text-xs text-on-surface-variant">{T.pdfSubtitle[lang]}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Kartu Panduan Sisi Buyer (Warna Oranye Kekuningan) */}
-              <div className="bg-surface border-2 border-amber-500/10 hover:border-amber-500/30 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition-all group">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-2.5 py-1 rounded-full border border-amber-200">
-                      ROLE: BUYER / PEMBELI
-                    </span>
-                    <FileText className="w-5 h-5 text-amber-500 group-hover:animate-bounce" />
-                  </div>
-                  <h3 className="text-sm font-bold text-on-surface pt-1">Panduan Aktor Buyer</h3>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">{T.pdfBuyerDesc[lang]}</p>
-                </div>
-                {/* Atur rute file PDF Anda di properti href */}
-                <div 
-                  className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-stone-100 text-stone-500 text-xs font-bold cursor-not-allowed"
-                >
-                  Coming Soon
-                </div>
+            {/* Search Bar */}
+            <div className="relative mt-6 max-w-2xl mx-auto">
+              <div className="relative bg-white border border-stone-300 rounded-2xl p-2 shadow-sm focus-within:border-emerald-800 focus-within:ring-2 focus-within:ring-emerald-800/20 transition-all flex items-center">
+                <Search className="w-5 h-5 text-stone-400 ml-3 mr-2 flex-shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={T.searchPlaceholder[lang]}
+                  className="w-full bg-transparent text-sm outline-none text-stone-900 placeholder:text-stone-400 py-2 pr-4"
+                />
               </div>
 
-              {/* Kartu Panduan Sisi Seller (Warna Hijau Daun Nilam) */}
-              <div className="bg-surface border-2 border-emerald-500/10 hover:border-emerald-500/30 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition-all group">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200">
-                      ROLE: SELLER / PETANI
-                    </span>
-                    <FileText className="w-5 h-5 text-emerald-500 group-hover:animate-bounce" />
-                  </div>
-                  <h3 className="text-sm font-bold text-on-surface pt-1">Panduan Aktor Seller</h3>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">{T.pdfSellerDesc[lang]}</p>
-                </div>
-                {/* Atur rute file PDF Anda di properti href */}
-                <div 
-                  className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-stone-100 text-stone-500 text-xs font-bold cursor-not-allowed"
-                >
-                  Coming Soon
-                </div>
+              {/* Quick Suggestion Tags */}
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs text-stone-500">
+                <span className="font-medium text-stone-400">{isId ? "Pencarian populer:" : "Popular topics:"}</span>
+                {T.quickTags.map((tag) => (
+                  <button
+                    key={tag[lang]}
+                    onClick={() => setSearchQuery(tag[lang])}
+                    className="bg-white/80 hover:bg-emerald-50 hover:text-emerald-800 border border-stone-200/80 px-2.5 py-1 rounded-lg transition-colors"
+                  >
+                    {tag[lang]}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* 3. AKORDEON FAQ BERWARNA WARNI */}
-          <div className="space-y-10">
-            {FAQ_DATA.map((cat, catIdx) => {
-              const CatIcon = cat.icon;
-              
-              const filteredItems = cat.items.filter(item => 
-                item.q.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                item.a.toLowerCase().includes(searchQuery.toLowerCase())
-              );
-
-              if (filteredItems.length === 0) return null;
-
-              return (
-                <div key={catIdx} className="space-y-4">
-                  <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider ${cat.colorClasses.badge}`}>
-                    <CatIcon className="w-3.5 h-3.5" />
-                    <span>{cat.category}</span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {filteredItems.map((item, itemIdx) => {
-                      const isCurrentOpen = openIndex === `${catIdx}-${itemIdx}`;
-                      return (
-                        <div 
-                          key={itemIdx} 
-                          className={`bg-surface border border-surface-container-high border-l-4 ${cat.colorClasses.accent} rounded-xl overflow-hidden transition-all shadow-sm hover:shadow-md`}
-                        >
-                          <button
-                            onClick={() => toggleAccordion(catIdx, itemIdx)}
-                            className="w-full flex items-center justify-between p-4 text-left font-semibold text-sm text-on-surface hover:bg-surface-container-low transition-colors"
-                          >
-                            <span className={isCurrentOpen ? "text-on-surface font-bold" : ""}>{item.q}</span>
-                            <div className={`p-1 rounded-full transition-all ${isCurrentOpen ? cat.colorClasses.iconBg : "bg-surface-container-high"}`}>
-                              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isCurrentOpen ? "rotate-180 text-white" : "text-outline"}`} />
-                            </div>
-                          </button>
-
-                          {isCurrentOpen && (
-                            <div className="px-5 pb-5 pt-2 text-sm text-on-surface-variant bg-gradient-to-b from-surface to-surface-container-lowest/40 border-t border-surface-container-low leading-relaxed animate-in slide-in-from-top-2 duration-200">
-                              {item.a}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+          {/* 2. 3 ESSENTIAL ACTION CARDS - UNIFIED & MODERN */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1: Buku Panduan PDF */}
+            <div className="bg-white rounded-2xl border border-stone-200/80 p-6 shadow-sm hover:shadow-md hover:border-emerald-700/30 transition-all flex flex-col justify-between group">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-emerald-800 group-hover:bg-emerald-800 group-hover:text-white transition-colors">
+                  <BookOpen className="w-5 h-5" />
                 </div>
-              );
-            })}
+                <h3 className="font-display font-bold text-lg text-stone-900">
+                  {T.cardManualTitle[lang]}
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  {T.cardManualDesc[lang]}
+                </p>
+              </div>
+
+              <div className="pt-6 mt-4 border-t border-stone-100">
+                <Link
+                  href="/traceability"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all"
+                >
+                  <span>{T.cardManualBtn[lang]}</span>
+                  <Download className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 2: Asisten atBot AI */}
+            <div className="bg-white rounded-2xl border border-stone-200/80 p-6 shadow-sm hover:shadow-md hover:border-emerald-700/30 transition-all flex flex-col justify-between group">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-stone-900">
+                  {T.cardAiTitle[lang]}
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  {T.cardAiDesc[lang]}
+                </p>
+              </div>
+
+              <div className="pt-6 mt-4 border-t border-stone-100">
+                <button
+                  onClick={() => {
+                    const atbotBtn = document.querySelector('button[aria-label*="atBot"], button[title*="atBot"]') as HTMLElement;
+                    if (atbotBtn) atbotBtn.click();
+                  }}
+                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all"
+                >
+                  <span>{T.cardAiBtn[lang]}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Card 3: Kontak Support */}
+            <div className="bg-white rounded-2xl border border-stone-200/80 p-6 shadow-sm hover:shadow-md hover:border-emerald-700/30 transition-all flex flex-col justify-between group">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-stone-700 group-hover:bg-stone-800 group-hover:text-white transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-stone-900">
+                  {T.cardContactTitle[lang]}
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  {T.cardContactDesc[lang]}
+                </p>
+              </div>
+
+              <div className="pt-6 mt-4 border-t border-stone-100">
+                <a
+                  href="mailto:support@atsira.id"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all"
+                >
+                  <span>{T.cardContactBtn[lang]}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. FAQ ACCORDION - SOPHISTICATED & CLEAN */}
+          <div className="space-y-8 pt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-5">
+              <h2 className="font-display text-2xl font-bold text-stone-900">
+                {T.faqHeading[lang]}
+              </h2>
+
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedCategory("all")}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    selectedCategory === "all"
+                      ? "bg-emerald-900 text-white shadow-sm"
+                      : "bg-white text-stone-600 hover:bg-stone-100 border border-stone-200"
+                  }`}
+                >
+                  {T.allCategory[lang]}
+                </button>
+                {FAQ_CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      selectedCategory === cat.id
+                        ? "bg-emerald-900 text-white shadow-sm"
+                        : "bg-white text-stone-600 hover:bg-stone-100 border border-stone-200"
+                    }`}
+                  >
+                    {isId ? cat.title.ID : cat.title.EN}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Accordion List */}
+            {filteredCategories.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center text-stone-500 text-sm">
+                {T.noResults[lang]}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredCategories.map((cat) => {
+                  if (!cat) return null;
+                  return (
+                    <div key={cat.id} className="space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-900/80 px-1">
+                        {isId ? cat.title.ID : cat.title.EN}
+                      </h3>
+
+                      <div className="space-y-2.5">
+                        {cat.items.map((item, itemIdx) => {
+                          const itemKey = `${cat.id}-${itemIdx}`;
+                          const isOpen = openIndex === itemKey;
+                          const questionText = isId ? item.q.ID : item.q.EN;
+                          const answerText = isId ? item.a.ID : item.a.EN;
+
+                          return (
+                            <div
+                              key={itemIdx}
+                              className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${
+                                isOpen 
+                                  ? "border-emerald-800/40 shadow-sm" 
+                                  : "border-stone-200/80 hover:border-stone-300"
+                              }`}
+                            >
+                              <button
+                                onClick={() => toggleAccordion(itemKey)}
+                                className="w-full flex items-center justify-between p-4 sm:p-5 text-left transition-colors"
+                              >
+                                <span className={`text-sm sm:text-base font-semibold pr-4 ${isOpen ? "text-emerald-900 font-bold" : "text-stone-800"}`}>
+                                  {questionText}
+                                </span>
+                                <span className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-200 ${isOpen ? "bg-emerald-50 text-emerald-900 rotate-180" : "bg-stone-100 text-stone-500"}`}>
+                                  <ChevronDown className="w-4 h-4" />
+                                </span>
+                              </button>
+
+                              {isOpen && (
+                                <div className="px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-stone-100">
+                                  {answerText}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
         </div>

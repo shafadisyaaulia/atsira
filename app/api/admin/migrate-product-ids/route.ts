@@ -29,7 +29,7 @@ export async function GET() {
         
         // Cek ID lama untuk menentukan suffix
         const suffix = table === 'finished_products' ? 'F' : 'R';
-        const batchId = `ATSIRA-${suffix}${(i + 1).toString().padStart(3, '0')}`;
+        const batchId = `atSira-${suffix}${(i + 1).toString().padStart(3, '0')}`;
         
         const { error: updateError } = await supabase
             .from(table)

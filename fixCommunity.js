@@ -42,7 +42,7 @@ const ALL_COMMUNITIES: Community[] = [
   { id: "arc-riset", name: "ARC-USK Publikasi Riset", description: "Kanal resmi ARC-USK untuk berbagi hasil penelitian, dataset, dan informasi uji laboratorium.", category: "ARC-USK", type: "public", memberCount: 28 },
   { id: "pemasta-internal", name: "PEMASTA Koordinasi Internal", description: "Ruang koordinasi antar-PEMASTA Node. Hanya untuk anggota yang diundang.", category: "PEMASTA", type: "private", memberCount: 31, inviteCode: "PMST-2026" },
   { id: "arc-internal", name: "ARC-USK Lab Internal", description: "Diskusi teknis analis & peneliti lab ARC-USK. Akses hanya dengan kode undangan.", category: "ARC-USK", type: "private", memberCount: 12, inviteCode: "ARC-LAB" },
-  { id: "buyer-network", name: "Buyer Network Premium", description: "Jaringan eksklusif buyer ekspor dan industri besar. Undangan oleh tim ATSIRA.", category: "UMKM & Buyer", type: "private", memberCount: 19, inviteCode: "BUYER-VIP" },
+  { id: "buyer-network", name: "Buyer Network Premium", description: "Jaringan eksklusif buyer ekspor dan industri besar. Undangan oleh tim atSira.", category: "UMKM & Buyer", type: "private", memberCount: 19, inviteCode: "BUYER-VIP" },
 ];
 
 const DEFAULT_JOINED = ["harga-pasar", "petani-aceh"];
@@ -244,7 +244,7 @@ export default function DashboardCommunityPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-black text-stone-900 font-display flex items-center gap-2">
-              <Users className="w-6 h-6 text-emerald-700" /> ATSIRA Connect
+              <Users className="w-6 h-6 text-emerald-700" /> atSira Connect
             </h1>
             <p className="text-xs text-stone-500 mt-0.5">{T_COMM.subtitle[lang]}</p>
           </div>

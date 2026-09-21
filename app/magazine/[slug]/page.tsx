@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card, Badge } from "@/components/ui/Card";
 
+import { MAGAZINE_ARTICLES } from "@/lib/mock/ecosystem";
+
 const formatDateID = (dateStr: string) => {
   if (!dateStr) return "-";
   const date = new Date(dateStr);
@@ -31,26 +33,46 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ slug: 
   useEffect(() => {
     if (!slug) return;
 
+    // Direct match from mock first
+    const mockFound = MAGAZINE_ARTICLES.find((a) => a.slug === slug);
+    if (mockFound) {
+      setArticle({
+        ...mockFound,
+        imageUrl: mockFound.imageUrl,
+        publishedAt: mockFound.publishedAt,
+        readMinutes: mockFound.readMinutes,
+      });
+      setRelated(
+        MAGAZINE_ARTICLES.filter((a) => a.slug !== slug).slice(0, 2)
+      );
+      setLoading(false);
+    }
+
     const fetchArticle = async () => {
       try {
         const res = await fetch("/api/pemasta/field-stories");
         const json = await res.json();
-        const articles = json.data || [];
+        const articles = (json.data || []).map((a: any) => ({
+          ...a,
+          imageUrl: a.image_url ?? a.imageUrl ?? "/images/nilamstory-card.jpg",
+          publishedAt: a.published_at ?? a.publishedAt ?? "",
+          readMinutes: a.read_minutes ?? a.readMinutes ?? 3,
+          authorRole: a.author_role ?? a.authorRole ?? "",
+        }));
 
         const found = articles.find((a: any) => a.slug === slug);
-        if (!found) {
+        if (found) {
+          setArticle(found);
+          const relatedArticles = articles
+            .filter((a: any) => a.slug !== slug)
+            .slice(0, 2);
+          setRelated(relatedArticles);
+        } else if (!mockFound) {
           notFound();
         }
-
-        setArticle(found);
-
-        const relatedArticles = articles
-          .filter((a: any) => a.slug !== slug && a.category === found.category)
-          .slice(0, 2);
-        setRelated(relatedArticles);
       } catch (err) {
         console.error("Failed to fetch article:", err);
-        notFound();
+        if (!mockFound) notFound();
       } finally {
         setLoading(false);
       }

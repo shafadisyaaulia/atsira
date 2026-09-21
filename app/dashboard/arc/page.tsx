@@ -68,7 +68,7 @@ const T_ARC = {
   
   repoTitle: { ID: "Repositori Sertifikat", EN: "Certificate Repository" },
   
-  rComingSoon: { ID: "Fasilitas ini sedang disiapkan menjadi repositori ilmiah publik. Nantinya ARC dapat mempublikasikan temuan metode distilasi agar diakses langsung oleh petani melalui ATSIRA.", EN: "This facility is being prepared as a public scientific repository. Later ARC can publish new distillation methods to be accessed directly by farmers via ATSIRA." },
+  rComingSoon: { ID: "Fasilitas ini sedang disiapkan menjadi repositori ilmiah publik. Nantinya ARC dapat mempublikasikan temuan metode distilasi agar diakses langsung oleh petani melalui atSira.", EN: "This facility is being prepared as a public scientific repository. Later ARC can publish new distillation methods to be accessed directly by farmers via atSira." },
   rBtn: { ID: "Fitur Segera Hadir (Tahap 2)", EN: "Coming Soon (Phase 2)" },
   
   sidebarRole: { ID: "Laboratorium Pusat", EN: "Central Laboratory" },
@@ -187,7 +187,7 @@ export default function ArcDashboard() {
           <div className="flex items-center gap-4 px-2">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-800 to-emerald-950 flex items-center justify-center text-amber-400 font-black font-display text-xl shadow-lg shadow-emerald-900/20 border border-emerald-900">ARC</div>
             <div>
-              <span className="font-display font-black text-stone-900 text-base block tracking-tight">ATSIRA ARC</span>
+              <span className="font-display font-black text-stone-900 text-base block tracking-tight">atSira ARC</span>
               <span className="text-[10px] text-emerald-700 font-extrabold block uppercase tracking-widest">{T_ARC.sidebarRole[lang]}</span>
             </div>
           </div>
@@ -267,7 +267,7 @@ export default function ArcDashboard() {
           
           <Link href="/dashboard/community" className="group flex items-center gap-2 bg-gradient-to-r from-emerald-100 to-emerald-200 hover:from-emerald-200 hover:to-emerald-300 text-emerald-900 px-5 py-2.5 rounded-full border border-emerald-300 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 mt-2">
             <Users className="w-4 h-4 text-emerald-700 group-hover:text-emerald-900" />
-            <span className="text-xs font-black tracking-wide">ATSIRA Connect</span>
+            <span className="text-xs font-black tracking-wide">atSira Connect</span>
           </Link>
         </header>
 

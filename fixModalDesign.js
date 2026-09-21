@@ -10,7 +10,7 @@ const newModal = `{showAddModal && (
               <span className="text-stone-500 font-bold text-sm px-1">X</span>
             </button>
             <h2 className="font-black text-stone-800 text-lg mb-1">{T_COMM.modalAddTitle[lang]}</h2>
-            <p className="text-xs text-stone-500 mb-5">Komunitas bisa diikuti oleh semua pengguna ATSIRA sesuai kategori.</p>
+            <p className="text-xs text-stone-500 mb-5">Komunitas bisa diikuti oleh semua pengguna atSira sesuai kategori.</p>
             <form onSubmit={handleAddCommunity} className="space-y-4">
               <div>
                 <label className="text-[11px] font-bold text-stone-700 block mb-1">{T_COMM.modalAddName[lang]} *</label>

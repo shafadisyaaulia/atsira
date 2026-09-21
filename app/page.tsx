@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, SectionEyebrow, Badge } from "@/components/ui/Card";
 import { IMPACT_METRICS } from "@/lib/mock";
 import HeroSection from "@/components/shared/HeroSection";
+import FeatureCardsSection from "@/components/shared/FeatureCardsSection";
 import { useAuthStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
@@ -17,16 +18,16 @@ import { useLang } from "@/components/layout/Navbar";
 // 2. Kamus Translasi Lokal untuk Semua Komponen di HomePage
 const T_HOME = {
   // Bagian Showcase AI
-  aiEyebrow: { ID: "Teknologi Presisi", EN: "Precision Technology" },
   aiTitle: { ID: "Verifikasi Kemurnian Berbasis AI", EN: "AI-Powered Purity Verification" },
+  aiSubtitle: { ID: "Verifikasi kualitas minyak sebelum menentukan harga.", EN: "Verify oil quality before determining price." },
   aiDesc: {
-    ID: "Menggunakan model pembelajaran mesin canggih yang dilatih oleh peneliti di ARC-USK, QualitySense memastikan setiap tetes minyak memenuhi standar kemewahan internasional sebelum mencapai pasar.",
-    EN: "Utilizing advanced machine learning models trained by researchers at ARC-USK, QualitySense ensures every single drop of oil meets international luxury standards before reaching the market."
+    ID: "QualitySense membaca kadar patchouli alcohol dan parameter kualitas minyak nilam, lalu membandingkan hasilnya dengan standar SNI. Data tersebut membantu memberikan gambaran kualitas dan kisaran harga yang sesuai berdasarkan data transaksi yang tersedia.",
+    EN: "QualitySense measures patchouli alcohol content and oil quality parameters, comparing results against SNI standards. This data helps provide quality insights and fair price estimations based on available transaction data."
   },
   aiFeatures: [
-    { ID: "Profil Kromatografi Cerdas", EN: "Intelligent Chromatographic Profiling" },
-    { ID: "Analisis Tanah & Iklim Makro", EN: "Soil & Macro-climate Analysis" },
-    { ID: "Penilaian Kualitas Waktu Nyata", EN: "Real-Time Quality Assessment" }
+    { ID: "Kadar Patchouli Alcohol", EN: "Patchouli Alcohol Content" },
+    { ID: "Profil Minyak (GC-MS)", EN: "Oil Profile (GC-MS)" },
+    { ID: "Kesesuaian dengan Standar SNI", EN: "SNI Standard Compliance" }
   ],
   aiCardTitle: { ID: "QualitySense v2.4", EN: "QualitySense v2.4" },
   aiPurity: { ID: "Tingkat Kemurnian", EN: "Purity Level" },
@@ -43,12 +44,11 @@ const T_HOME = {
     EN: "Real-time evaluation of Aceh Patchouli against international indices."
   },
 
-  // Bagian Testimoni / Akar Kami
-  rootsEyebrow: { ID: "Akar Kami", EN: "Our Roots" },
-  rootsTitle: { ID: "Berakar Secara Berkelanjutan. Terverifikasi Secara Digital.", EN: "Sustainably Rooted. Digitally Verified." },
+  // Bagian Kemitraan / Tentang Kami
+  rootsTitle: { ID: "Dibangun bersama pelaku nilam Aceh", EN: "Built together with Aceh patchouli actors" },
   rootsDesc: {
-    ID: "atSira tumbuh dari kolaborasi bersama Atsiri Research Center (ARC) Universitas Syiah Kuala, petani nilam, penyuling, dan para pelaku di sepanjang rantai nilam Aceh. Kami menyederhanakan informasi tentang kualitas, harga, dan perjalanan minyak nilam agar lebih mudah dipahami, sehingga setiap pihak dapat melihat proses dan nilai di balik setiap tetes minyak nilam.",
-    EN: "atSira grows from a collaboration with the Atsiri Research Center (ARC) at Syiah Kuala University, patchouli farmers, distillers, and actors along the Aceh patchouli supply chain. We simplify information about the quality, price, and journey of patchouli oil to make it easier to understand, so that every party can see the process and value behind every drop of patchouli oil."
+    ID: "atSira dikembangkan bersama Atsiri Research Center (ARC) Universitas Syiah Kuala, petani nilam, penyuling, dan berbagai pihak yang terlibat dalam rantai nilam Aceh. Kami ingin membuat informasi tentang kualitas, harga, dan perjalanan minyak nilam lebih mudah dipahami oleh petani maupun pembeli.",
+    EN: "atSira was developed together with the Atsiri Research Center (ARC) at Universitas Syiah Kuala, patchouli farmers, distillers, and various stakeholders involved in the Aceh patchouli chain. We aim to make information regarding quality, price, and the journey of patchouli oil easier to understand for both farmers and buyers."
   },
   rootsStat1: { ID: "Mata Pencaharian Didukung", EN: "Livelihoods Supported" },
   rootsStat2: { ID: "Peningkatan Pendapatan bagi Petani", EN: "Income Increase for Farmers" },
@@ -72,28 +72,33 @@ const T_HOME = {
   ctaBtnPartner: { ID: "Gabung sebagai Mitra", EN: "Join as Partner" }
 };
 
+import { MAGAZINE_ARTICLES } from "@/lib/mock/ecosystem";
+
 export default function HomePage() {
   // 3. Ambil nilai state bahasa aktif saat ini ("ID" atau "EN")
   const lang = useLang();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const [stories, setStories] = useState<any[]>([]);
+  
+  const mapStories = (data: any[]) => data.map((s: any) => ({
+    id: s.slug,
+    title: s.title,
+    category: s.category,
+    description: s.excerpt,
+    author: s.author,
+    authorRole: s.author_role ?? s.authorRole ?? "Kontributor",
+    imageUrl: s.image_url ?? s.imageUrl ?? null,
+    date: new Date(s.published_at ?? s.publishedAt ?? Date.now()).toLocaleDateString("id-ID", { month: "short", day: "numeric", year: "numeric" })
+  }));
+
+  const [stories, setStories] = useState<any[]>(mapStories(MAGAZINE_ARTICLES));
 
   useEffect(() => {
     fetch("/api/pemasta/field-stories")
       .then(res => res.json())
       .then(json => {
-        if (json.data) {
-          setStories(json.data.map((s: any) => ({
-            id: s.slug,
-            title: s.title,
-            category: s.category,
-            description: s.excerpt,
-            author: s.author,
-            authorRole: s.author_role,
-            imageUrl: s.image_url || null,
-            date: new Date(s.published_at).toLocaleDateString("id-ID", { month: "short", day: "numeric", year: "numeric" })
-          })));
+        if (json.data && json.data.length > 0) {
+          setStories(mapStories(json.data));
         }
       })
       .catch(err => console.error(err));
@@ -124,6 +129,9 @@ export default function HomePage() {
   return (
     <PageShell>
       <HeroSection />
+
+      {/* KARTU FITUR NILAMTRACE & NILAMSTORY */}
+      <FeatureCardsSection />
 
       {/* AI VERIFICATION SHOWCASE */}
       <section className="py-24 bg-primary text-inverse-on-surface relative overflow-hidden">
@@ -174,11 +182,13 @@ export default function HomePage() {
           </Card>
 
           <div>
-            <SectionEyebrow className="text-secondary-fixed">{T_HOME.aiEyebrow[lang]}</SectionEyebrow>
-            <h2 className="font-display text-headline-lg-mobile lg:text-headline-lg mb-5 text-balance">
+            <h2 className="font-display text-headline-lg-mobile lg:text-headline-lg mb-3 text-balance">
               {T_HOME.aiTitle[lang]}
             </h2>
-            <p className="text-body-lg text-inverse-on-surface/75 mb-7">
+            <p className="text-secondary-fixed font-semibold text-base sm:text-lg mb-4">
+              {T_HOME.aiSubtitle[lang]}
+            </p>
+            <p className="text-body-lg text-inverse-on-surface/80 mb-7 leading-relaxed">
               {T_HOME.aiDesc[lang]}
             </p>
             <ul className="space-y-3 mb-8">
@@ -253,24 +263,18 @@ export default function HomePage() {
             <div className="aspect-square rounded-[40px] overflow-hidden shadow-2xl relative">
               <img
                 src="/stories/professional_documentary_photography_of_an_atsira_team_meeting_with_acehnese.png"
-                alt="Tim ATSIRA"
+                alt="Tim atSira"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-ink-green/10" />
             </div>
 
             {/* Floating Quote Card */}
-            <div className="absolute -bottom-10 -right-4 sm:-right-10 bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-xs border border-sand-gray">
-              <p
-                className="text-ink-green mb-2 italic"
-                style={{ fontFamily: "Playfair Display, serif", fontSize: "20px", lineHeight: "28px", fontWeight: "600" }}
-              >
+            <div className="absolute -bottom-10 -right-4 sm:-right-10 bg-white p-5 sm:p-7 rounded-2xl shadow-2xl max-w-xs border border-stone-200">
+              <p className="text-stone-800 mb-3 italic font-normal text-xs sm:text-sm leading-relaxed">
                 {T_HOME.rootsQuote[lang]}
               </p>
-              <p
-                className="text-clay-earth"
-                style={{ fontFamily: "Plus Jakarta Sans, sans-serif", fontSize: "14px", fontWeight: "600", letterSpacing: "0.05em" }}
-              >
+              <p className="text-emerald-800 font-semibold text-xs tracking-wide">
                 {T_HOME.rootsQuoteAuthor[lang]}
               </p>
             </div>
@@ -278,7 +282,6 @@ export default function HomePage() {
 
           {/* Right: Text */}
           <div className="lg:w-1/2">
-            <SectionEyebrow>{T_HOME.rootsEyebrow[lang]}</SectionEyebrow>
             <h2 className="font-display text-headline-lg-mobile lg:text-headline-lg text-primary mb-5 text-balance">
               {T_HOME.rootsTitle[lang]}
             </h2>
@@ -309,52 +312,64 @@ export default function HomePage() {
             <div className="text-center max-w-2xl mx-auto mb-16">
               <SectionEyebrow>{lang === "ID" ? "Cerita Komunitas" : "Community Stories"}</SectionEyebrow>
               <h2 className="font-display text-headline-lg-mobile lg:text-4xl text-primary mt-4 mb-4 text-balance">
-                {lang === "ID" ? "Nilam Story Hub" : "Patchouli Story Hub"}
+                {lang === "ID" ? "Nilam Story" : "Patchouli Story"}
               </h2>
               <p className="text-body-lg text-on-surface-variant">
                 {lang === "ID" 
-                  ? "Kabar terbaru, edukasi, dan dokumentasi lapangan langsung dari para Pahlawan Nilam (Pemasta) di berbagai daerah."
-                  : "Latest updates, education, and field documentation straight from our Patchouli Heroes (Pemasta) across regions."}
+                  ? "Dokumentasi kegiatan atSira bersama petani hebat Aceh, berkolaborasi dengan akademisi, dan memberdayakan komoditas lokal hulu ke hilir."
+                  : "Field activity documentation of atSira alongside great Aceh farmers, collaborating with researchers, and empowering local commodities from upstream to downstream."}
               </p>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {stories.slice(0, 3).map((s) => (
-                <Card key={s.id} className="p-6 border border-stone-200 flex flex-col gap-4 hover:shadow-lg transition-all group bg-white">
-                  {s.imageUrl && (
-                    <div className="rounded-xl overflow-hidden aspect-[16/10] mb-2">
-                      <img
-                        src={s.imageUrl}
-                        alt={s.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      {s.category}
-                    </span>
-                    <span className="text-xs font-semibold text-stone-400">{s.date}</span>
-                  </div>
-                  <div>
-                    <h3 className="font-display text-xl font-bold text-stone-900 leading-tight mb-2 group-hover:text-emerald-700 transition-colors">
-                      {s.title}
-                    </h3>
-                    <p className="text-sm text-stone-500 line-clamp-3 leading-relaxed">
-                      {s.description}
-                    </p>
-                  </div>
-                  <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-[9px] font-bold text-white">
-                        {s.author.charAt(0)}
+                <Link key={s.id} href={`/magazine/${s.id}`} className="block h-full">
+                  <Card className="p-6 border border-stone-200 flex flex-col gap-4 hover:shadow-lg hover:border-emerald-500/40 transition-all group bg-white h-full">
+                    {s.imageUrl && (
+                      <div className="rounded-xl overflow-hidden aspect-[16/10] mb-2 bg-stone-100">
+                        <img
+                          src={s.imageUrl}
+                          alt={s.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
                       </div>
-                      <span className="text-xs font-bold text-stone-700">{s.author}</span>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                        {s.category}
+                      </span>
+                      <span className="text-xs font-semibold text-stone-400">{s.date}</span>
                     </div>
-                    <span className="text-[10px] text-stone-400 font-medium bg-stone-100 px-2 py-0.5 rounded-full">{s.authorRole}</span>
-                  </div>
-                </Card>
+                    <div>
+                      <h3 className="font-display text-xl font-bold text-stone-900 leading-tight mb-2 group-hover:text-emerald-700 transition-colors">
+                        {s.title}
+                      </h3>
+                      <p className="text-sm text-stone-500 line-clamp-3 leading-relaxed">
+                        {s.description}
+                      </p>
+                    </div>
+                    <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-[9px] font-bold text-white">
+                          {s.author.charAt(0)}
+                        </div>
+                        <span className="text-xs font-bold text-stone-700">{s.author}</span>
+                      </div>
+                      <span className="text-[10px] text-stone-400 font-medium bg-stone-100 px-2 py-0.5 rounded-full">{s.authorRole}</span>
+                    </div>
+                  </Card>
+                </Link>
               ))}
+            </div>
+
+            <div className="text-center mt-12">
+              <Link
+                href="/magazine"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-800 text-white font-semibold text-sm hover:bg-emerald-900 transition-colors shadow-md"
+              >
+                <span>{lang === "ID" ? "Lihat Semua Cerita di Nilam Story" : "View All Stories in Nilam Story"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </section>

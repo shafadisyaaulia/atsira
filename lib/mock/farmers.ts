@@ -19,7 +19,7 @@ export const FARMERS: Farmer[] = [
     totalHarvests: 18,
     ecoBadge: true,
     avatarUrl: "https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?w=200&h=200&fit=crop",
-    quote: "Sejak ada ATSIRA, saya jual langsung tanpa tengkulak. Harga jadi adil.",
+    quote: "Sejak ada atSira, saya jual langsung tanpa tengkulak. Harga jadi adil.",
   },
   {
     id: "farmer-abdullah-baratdaya",

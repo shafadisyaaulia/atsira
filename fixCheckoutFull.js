@@ -28,7 +28,7 @@ const newOptions = `const paymentOptions = isInternational
           { id: "va_bca",     label: "Virtual Account BCA" },
           { id: "va_mandiri", label: "Virtual Account Mandiri" },
           { id: "va_bsi",     label: "Virtual Account BSI (Syariah)" },
-          { id: "escrow",     label: "ATSIRA Secure Pay / Rekber (Coming Soon)", disabled: true }
+          { id: "escrow",     label: "atSira Secure Pay / Rekber (Coming Soon)", disabled: true }
         ];`;
 
 content = content.replace(oldOptions, newOptions);

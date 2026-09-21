@@ -5,9 +5,9 @@ export async function GET() {
   const supabase = await createSupabaseServerClient();
 
   const updates = [
-    { id: 'a1111111-1111-4111-8111-111111111111', batchId: 'ATSIRA-R001' },
-    { id: 'a1111111-1111-4111-8111-111111111112', batchId: 'ATSIRA-R002' },
-    { id: 'a1111111-1111-4111-8111-111111111113', batchId: 'ATSIRA-R003' },
+    { id: 'a1111111-1111-4111-8111-111111111111', batchId: 'atSira-R001' },
+    { id: 'a1111111-1111-4111-8111-111111111112', batchId: 'atSira-R002' },
+    { id: 'a1111111-1111-4111-8111-111111111113', batchId: 'atSira-R003' },
   ];
 
   const results = [];

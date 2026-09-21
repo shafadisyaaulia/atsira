@@ -50,7 +50,7 @@ const withInjected = `  return (
             >
               ✅ Saya Sudah Bayar — Konfirmasi Pembayaran
             </button>
-            <p className="text-[10px] text-stone-400">Pembayaran akan diverifikasi otomatis oleh sistem ATSIRA.</p>
+            <p className="text-[10px] text-stone-400">Pembayaran akan diverifikasi otomatis oleh sistem atSira.</p>
           </div>
         </div>
       )}

@@ -204,7 +204,7 @@ function ContentCreator() {
       </div>
       <div className="grid lg:grid-cols-[1fr_1fr] gap-6">
         <Card className="p-6">
-          <p className="font-semibold text-on-surface mb-4">Tulis Artikel Baru untuk ATSIRA Magazine</p>
+          <p className="font-semibold text-on-surface mb-4">Tulis Artikel Baru untuk atSira Magazine</p>
           <form
             onSubmit={(e) => {
               e.preventDefault();

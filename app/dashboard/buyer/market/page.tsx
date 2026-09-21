@@ -246,7 +246,7 @@ export default function BuyerDashboardMarketplace() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-200 pb-4">
           <div>
             <h1 className="font-display text-2xl font-black text-stone-900 tracking-tight">Sourcing Hub & Marketplace</h1>
-            <p className="text-xs text-stone-500 mt-0.5">Jelajahi komoditas minyak nilam & produk turunan resmi ATSIRA.</p>
+            <p className="text-xs text-stone-500 mt-0.5">Jelajahi komoditas minyak nilam & produk turunan resmi atSira.</p>
           </div>
 
           <Button onClick={() => setIsCartOpen(true)} className="relative bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 py-2.5 px-4 shadow-sm">

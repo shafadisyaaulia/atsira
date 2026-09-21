@@ -92,7 +92,7 @@ export default function MarketplaceAnalyzerPage() {
 
   return (
     <PageShell>
-      {/* PANEL ATAS / HERO - TEMA HIJAU EMAS KHAS ATSIRA */}
+      {/* PANEL ATAS / HERO - TEMA HIJAU EMAS KHAS atSira */}
       <section className="bg-primary py-14 text-inverse-on-surface">
         <div className="container-app">
           <SectionEyebrow className="text-secondary-fixed">Fitur Utama</SectionEyebrow>
@@ -229,7 +229,7 @@ export default function MarketplaceAnalyzerPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between border-b border-stone-800 pb-2.5">
                       <span className="text-[10px] font-bold text-amber-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> STATUS ATSIRA VERIFIED
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> STATUS atSira VERIFIED
                       </span>
                       <span className="bg-emerald-950 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">
                         {scanResult.status}

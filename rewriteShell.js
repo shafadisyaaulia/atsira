@@ -115,7 +115,7 @@ export function DashboardShell({ role: roleProp, children }: { role?: UserRole; 
         {/* LOGO & INDIKATOR PANEL */}
         <div className="p-6 border-b border-surface-container-high">
           <Link href="/" className="font-display text-xl font-black text-emerald-950 tracking-tight">
-            ATSIRA
+            atSira
           </Link>
           <p className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mt-0.5">
             {ROLE_LABEL[role]}
@@ -174,7 +174,7 @@ export function DashboardShell({ role: roleProp, children }: { role?: UserRole; 
       {/* NAVBAR ATAS UNTUK MOBILE SCREEN */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-40 bg-surface-container-lowest border-b border-surface-container-high px-4 py-3 flex items-center justify-between">
         <Link href="/" className="font-display text-lg font-black text-emerald-950">
-          ATSIRA
+          atSira
         </Link>
         <div className="flex items-center gap-3">
           <Link href="/dashboard/community" className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-950 text-[10px] font-black px-2.5 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all">
@@ -199,7 +199,7 @@ export function DashboardShell({ role: roleProp, children }: { role?: UserRole; 
           <div className="flex items-center gap-4">
             <Link href="/dashboard/community" className="group flex items-center gap-2 bg-gradient-to-r from-emerald-100 to-emerald-200 hover:from-emerald-200 hover:to-emerald-300 text-emerald-900 px-4 py-2 rounded-full border border-emerald-300 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
               <Users className="w-4 h-4 text-emerald-700 group-hover:text-emerald-900" />
-              <span className="text-[11px] font-black tracking-wide">ATSIRA Connect</span>
+              <span className="text-[11px] font-black tracking-wide">atSira Connect</span>
             </Link>
             <div className="w-9 h-9 rounded-full bg-emerald-900 flex items-center justify-center font-black text-xs text-emerald-100 uppercase shadow-sm border border-emerald-950">
               {(user?.name ?? "U").charAt(0)}

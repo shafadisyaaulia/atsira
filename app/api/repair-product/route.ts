@@ -6,7 +6,7 @@ export async function GET() {
   
   // Target the problematic product directly
   const productId = '0be6d79e-b851-4fbe-a2c6-3c4e1c49e08a';
-  const newBatchId = 'ATSIRA-F999';
+  const newBatchId = 'atSira-F999';
 
   const { data, error } = await supabase
     .from('finished_products')

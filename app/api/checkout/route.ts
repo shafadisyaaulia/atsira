@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       id: orderId,
       buyer_id: buyerId || null,
       seller_id: items[0]?.seller || items[0]?.sellerId || null,
-      buyer_name: buyerName || "Pembeli ATSIRA",
+      buyer_name: buyerName || "Pembeli atSira",
       order_type: orderType || "B2C",
       subtotal: Number(subtotal || 0),
       shipping_fee: Number(shippingFee || 0),
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     const orderItems = items.map((item: any) => ({
       order_id: orderId,
       product_id: item.productId || item.id || item.product_id || "00000000-0000-0000-0000-000000000000",
-      title: item.title || item.name || item.product_title || "Produk Nilam ATSIRA",
+      title: item.title || item.name || item.product_title || "Produk Nilam atSira",
       qty: Number(item.qty || item.quantity || 1),
       unit: item.unit || "pcs",
       price: Number(item.price || 0),
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       const lineItems = items.map((item: any) => ({
         price_data: {
           currency: "idr",
-          product_data: { name: item.title || item.name || "Produk ATSIRA" },
+          product_data: { name: item.title || item.name || "Produk atSira" },
           unit_amount: Math.round(Number(item.price || 0)),
         },
         quantity: Number(item.qty || item.quantity || 1),
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
         gross_amount: Math.round(Number(total || 0)),
       },
       customer_details: {
-        first_name: buyerName || "Pembeli ATSIRA",
+        first_name: buyerName || "Pembeli atSira",
       },
     };
 

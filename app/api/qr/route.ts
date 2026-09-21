@@ -5,7 +5,7 @@ import QRCode from "qrcode";
  * GET /api/qr?data=<url_or_code>&label=<label>
  *
  * Generate QR code sebagai PNG (base64 data URL).
- * QR mengarah ke halaman traceability ATSIRA dengan batch ID.
+ * QR mengarah ke halaman traceability atSira dengan batch ID.
  *
  * Contoh: /api/qr?data=PAT-2026-001&label=Nilam+Grade+A
  */
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       width: 400,
       margin: 2,
       color: {
-        dark: "#1a3a2a",   // Warna gelap: hijau tua ATSIRA
+        dark: "#1a3a2a",   // Warna gelap: hijau tua atSira
         light: "#ffffff",
       },
       errorCorrectionLevel: "H", // High — tahan terhadap kerusakan label

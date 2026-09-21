@@ -92,7 +92,7 @@ export default function CartPage() {
             <Button onClick={() => router.push("/checkout")} size="lg" className="w-full">
               Lanjut ke Pembayaran
             </Button>
-            <p className="text-xs text-outline text-center mt-3">Belanja Anda dilindungi sistem Escrow ATSIRA</p>
+            <p className="text-xs text-outline text-center mt-3">Belanja Anda dilindungi sistem Escrow atSira</p>
           </Card>
         </div>
       </div>

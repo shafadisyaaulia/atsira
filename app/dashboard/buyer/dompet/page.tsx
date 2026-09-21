@@ -83,7 +83,7 @@ export default function BuyerWalletPage() {
         const payload = {
           orderId: order.id,
           buyerEmail: order.buyer_email || "buyer@atsira.id",
-          buyerName: order.buyer_name || "Pembeli ATSIRA",
+          buyerName: order.buyer_name || "Pembeli atSira",
           items: order.items && order.items.length > 0 
             ? order.items.map((i: any) => ({
                 title: i.title || "Minyak Atsiri",
@@ -118,7 +118,7 @@ export default function BuyerWalletPage() {
         const payload = {
           orderId: order.id,
           total: Number(order.total || 0),
-          buyerName: order.buyer_name || "Pembeli ATSIRA",
+          buyerName: order.buyer_name || "Pembeli atSira",
           bank: selectedBank
         };
         const res = await fetch("/api/payments/create-midtrans", {
@@ -151,7 +151,7 @@ export default function BuyerWalletPage() {
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <p className="text-xs font-black uppercase tracking-wider text-emerald-400">ATSIRA Clearing & Payment Gateway</p>
+              <p className="text-xs font-black uppercase tracking-wider text-emerald-400">atSira Clearing & Payment Gateway</p>
             </div>
             <p className="text-[11px] text-emerald-200/70">Pilih profil rute pembayaran untuk Midtrans (VA Domestik) atau Stripe (Visa Global).</p>
           </div>
@@ -231,7 +231,7 @@ export default function BuyerWalletPage() {
             {orders.map((order) => {
               const orderAmount = Number(order.total || 0);
               const isUnpaid = order.status === "Menunggu Pembayaran";
-              const itemTitle = order.items && order.items.length > 0 ? order.items[0].title : "Produk Essential Oil ATSIRA";
+              const itemTitle = order.items && order.items.length > 0 ? order.items[0].title : "Produk Essential Oil atSira";
 
               return (
                 <div key={order.id} className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">

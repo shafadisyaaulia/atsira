@@ -131,7 +131,7 @@ content = content.replace(
           <div className="mt-4 px-2 pb-4 flex flex-col gap-2">
             <Link href="/dashboard/community">
               <button className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-emerald-100/50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-colors">
-                <Users className="w-4 h-4" /> ATSIRA Connect
+                <Users className="w-4 h-4" /> atSira Connect
               </button>
             </Link>
             <div className="flex gap-2">

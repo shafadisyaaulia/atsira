@@ -2,25 +2,42 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+import { MAGAZINE_ARTICLES } from "@/lib/mock/ecosystem";
+
 /**
  * GET /api/pemasta/field-stories
  * Fetch field stories dokumentasi kegiatan kebun dari PEMASTA role
  */
 export async function GET() {
   try {
-    const supabase = await createSupabaseServerClient();
+    // Gunakan mock data langsung agar gambar & artikel selalu tampil dengan benar.
+    // Supabase field_stories belum di-seed dengan data lengkap.
+    const fallbackData = MAGAZINE_ARTICLES.map((m) => ({
+      id: m.slug,
+      slug: m.slug,
+      title: m.title,
+      category: m.category,
+      excerpt: m.excerpt,
+      content: m.content,
+      author: m.author,
+      author_role: m.authorRole,
+      published_at: m.publishedAt,
+      read_minutes: m.readMinutes,
+      image_url: m.imageUrl,
+      featured: m.featured,
+    }));
+    return NextResponse.json({ data: fallbackData }, { status: 200 });
 
-    const { data, error } = await supabase
-      .from("field_stories")
-      .select("*")
-      .order("published_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching field stories:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ data }, { status: 200 });
+    // ── Aktifkan kembali jika Supabase sudah di-seed ──────────────────────────
+    // const supabase = await createSupabaseServerClient();
+    // const { data, error } = await supabase
+    //   .from("field_stories")
+    //   .select("*")
+    //   .order("published_at", { ascending: false });
+    // if (error || !data || data.length === 0) {
+    //   return NextResponse.json({ data: fallbackData }, { status: 200 });
+    // }
+    // return NextResponse.json({ data }, { status: 200 });
   } catch (err) {
     console.error("Unexpected error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -146,7 +163,7 @@ export async function POST(req: Request) {
           category,
           excerpt: description,
           content: [description],
-          author: author || "Pemasta ATSIRA",
+          author: author || "Pemasta atSira",
           author_role: authorRole || "Pemasta Node",
           author_user_id: null, // TODO: sambungkan ke auth session saat login diimplementasikan
           region: region || null,

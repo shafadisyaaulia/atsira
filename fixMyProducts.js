@@ -612,7 +612,7 @@ export default function MyProductsPage() {
                           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6">
                             <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
                               <strong className="block mb-1">Penting:</strong>
-                              Kirimkan sampel fisik produk ini secara langsung ke alamat ARC-USK. Setelah form ini disimpan, segera hubungi pihak lab melalui ATSIRA Connect.
+                              Kirimkan sampel fisik produk ini secara langsung ke alamat ARC-USK. Setelah form ini disimpan, segera hubungi pihak lab melalui atSira Connect.
                             </p>
                           </div>
 
@@ -621,7 +621,7 @@ export default function MyProductsPage() {
                               Simpan Pengajuan
                             </button>
                             <Link href="/dashboard/community" className="w-full py-3 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-bold flex items-center justify-center gap-2 transition-colors">
-                              <MessageSquare className="w-4 h-4" /> Hubungi Lab via ATSIRA Connect
+                              <MessageSquare className="w-4 h-4" /> Hubungi Lab via atSira Connect
                             </Link>
                           </div>
                         </div>

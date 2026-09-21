@@ -21,13 +21,13 @@ const STAGE_ICON: Record<string, any> = {
 const T = {
   eyebrow: { ID: "Verifikasi Transparansi Produk", EN: "Product Transparency Verification" },
   title: { ID: "Telusuri Jejak Nilam Anda", EN: "Trace Your Patchouli Journey" },
-  placeholder: { ID: "Masukkan ID Batch atau Kode Produk (misal: ATSIRA-F001 / ATSIRA-R001)", EN: "Enter Batch ID or Product Code (e.g. ATSIRA-F001 / ATSIRA-R001)" },
+  placeholder: { ID: "Masukkan ID Batch atau Kode Produk (misal: atSira-F001 / atSira-R001)", EN: "Enter Batch ID or Product Code (e.g. atSira-F001 / atSira-R001)" },
   searchBtn: { ID: "Lacak Sekarang", EN: "Track Now" },
   hint: { ID: "Coba salin ID simulasi:", EN: "Try simulation IDs:" },
   notFound: { ID: "ID produk tidak ditemukan. Pastikan kode yang dimasukkan benar.", EN: "Product ID not found. Please check your code." },
   verified: { ID: "Terverifikasi ARC-USK", EN: "Verified by ARC-USK" },
   timelineTitle: { ID: "Perjalanan Rantai Pasok Digital", EN: "Digital Supply Chain Journey" },
-  ledgerLabel: { ID: "Tercatat Permanen di Ledger Terenkripsi ATSIRA", EN: "Permanently Recorded on ATSIRA Encrypted Ledger" },
+  ledgerLabel: { ID: "Tercatat Permanen di Ledger Terenkripsi atSira", EN: "Permanently Recorded on atSira Encrypted Ledger" },
   emptyState: { ID: "Masukkan ID produk atau pindaikan QR Code pada botol kemasan untuk melihat rekam jejak hulu ke hilir.", EN: "Enter product ID or scan QR Code on bottle to view crop-to-bottle records." },
   paLabel: { ID: "Kadar Patchouli Alcohol", EN: "Patchouli Alcohol Level" },
   gradeLabel: { ID: "Klasifikasi Mutu", EN: "Quality Grade" },
@@ -103,9 +103,9 @@ function TraceabilityContent() {
           {
             stage: "Botol",
             title: { ID: "Produk Terverifikasi", EN: "Verified Product" },
-            description: { ID: "Produk telah masuk dalam database ATSIRA.", EN: "Product registered in ATSIRA database." },
+            description: { ID: "Produk telah masuk dalam database atSira.", EN: "Product registered in atSira database." },
             date: new Date().toLocaleDateString(),
-            location: "ATSIRA System",
+            location: "atSira System",
           }
         ]
       });
@@ -164,7 +164,7 @@ function TraceabilityContent() {
           </form>
           
           <p className="text-[11px] text-white/70 mt-4 bg-black/30 inline-block px-3 py-1 rounded-full border border-white/10">
-            <span className="font-bold text-amber-400">{T.hint[lang]}</span> ATSIRA-F001, ATSIRA-R001
+            <span className="font-bold text-amber-400">{T.hint[lang]}</span> atSira-F001, atSira-R001
           </p>
         </div>
       </section>

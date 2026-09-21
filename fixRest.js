@@ -42,7 +42,7 @@ const sidebarRegex = /<div className="border-t border-stone-100 pt-4 space-y-3">
 const newSidebar = `<div className="border-t border-surface-container-high pt-4 space-y-2 bg-stone-50/50 -mx-5 px-5 pb-5 rounded-b-3xl">
           <Link href="/dashboard/community">
             <button className="w-full flex items-center justify-center gap-2 py-2 px-3 mb-2 rounded-xl bg-emerald-100/50 hover:bg-emerald-100 border border-emerald-200/50 text-emerald-800 text-xs font-bold transition-colors shadow-sm">
-              <Users className="w-3.5 h-3.5" /> ATSIRA Connect
+              <Users className="w-3.5 h-3.5" /> atSira Connect
             </button>
           </Link>
           <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-surface-container-high shadow-sm">

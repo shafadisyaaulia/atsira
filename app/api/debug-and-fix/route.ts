@@ -19,7 +19,7 @@ export async function GET() {
   // 2. Try update by using the exact record returned
   const { data, error } = await supabase
     .from('finished_products')
-    .update({ qr_batch_id: 'ATSIRA-F001' })
+    .update({ qr_batch_id: 'atSira-F001' })
     .match({ id: record.id })
     .select();
 

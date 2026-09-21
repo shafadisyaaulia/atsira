@@ -13,7 +13,7 @@ import { useCartStore } from "@/lib/store";
 const T = {
   success: { ID: "Pembayaran Berhasil", EN: "Payment Successful" },
   processing: { ID: "Pesanan sedang diproses.", EN: "Your order is being processed." },
-  escrowTitle: { ID: "Dana Anda Aman di Escrow ATSIRA", EN: "Your Funds are Safe in ATSIRA Escrow" },
+  escrowTitle: { ID: "Dana Anda Aman di Escrow atSira", EN: "Your Funds are Safe in atSira Escrow" },
   escrowDesc: { 
     ID: "Pembayaran Anda ditahan dengan aman oleh sistem escrow dan baru akan dicairkan ke penjual setelah barang Anda terima dengan baik.", 
     EN: "Your payment is securely held by the escrow system and will only be disbursed to the seller after you successfully receive the package." 

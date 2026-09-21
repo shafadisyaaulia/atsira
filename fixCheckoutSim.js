@@ -18,7 +18,7 @@ content = content.replace(
       : [
           { id: "cod", label: "Cash on Delivery (COD) / Bayar di Tempat" },
           { id: "midtrans", label: "Virtual Account / QRIS (Coming Soon)", disabled: true },
-          { id: "escrow", label: "ATSIRA Secure Pay / Rekber (Coming Soon)", disabled: true }
+          { id: "escrow", label: "atSira Secure Pay / Rekber (Coming Soon)", disabled: true }
         ];`,
   `const paymentOptions = isInternational 
       ? [
@@ -30,7 +30,7 @@ content = content.replace(
           { id: "va_bca", label: "Virtual Account BCA" },
           { id: "va_mandiri", label: "Virtual Account Mandiri" },
           { id: "va_bsi", label: "Virtual Account BSI (Syariah)" },
-          { id: "escrow", label: "ATSIRA Secure Pay / Rekber (Coming Soon)", disabled: true }
+          { id: "escrow", label: "atSira Secure Pay / Rekber (Coming Soon)", disabled: true }
         ];`
 );
 

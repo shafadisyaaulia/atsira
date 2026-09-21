@@ -5,17 +5,17 @@ import { NextResponse } from "next/server";
  * Body: { messages: { role: "user" | "assistant", content: string }[] }
  *
  * Mengirimkan riwayat percakapan ke Groq API (model: llama3-70b-8192)
- * dan mengembalikan balasan Nila — asisten virtual ATSIRA.
+ * dan mengembalikan balasan Nila — asisten virtual atSira.
  */
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-const SYSTEM_PROMPT = `Kamu adalah AtBot 🌿, asisten virtual ATSIRA — platform agribisnis minyak nilam Indonesia.
+const SYSTEM_PROMPT = `Kamu adalah AtBot 🌿, asisten virtual atSira — platform agribisnis minyak nilam Indonesia.
 
 Kepribadianmu:
 - Ramah, hangat, dan suportif
 - Berbicara dalam Bahasa Indonesia yang santai tapi tetap profesional
-- Fokus pada topik nilam, petani, UMKM, dan platform ATSIRA
+- Fokus pada topik nilam, petani, UMKM, dan platform atSira
 - Jawaban ringkas (maks 3-4 kalimat), kecuali diminta penjelasan panjang
 
 Pengetahuanmu mencakup:
@@ -24,10 +24,10 @@ Pengetahuanmu mencakup:
   - Grade A (Super/Ekspor): PA ≥ 32%
   - Grade B (Lokal Top): PA 30-31.9%
   - Grade C (Standard): PA < 30%
-- Platform ATSIRA: cara listing produk, cara pakai QualitySense, cara cek harga pasar
+- Platform atSira: cara listing produk, cara pakai QualitySense, cara cek harga pasar
 - Harga: bervariasi tergantung grade dan wilayah, Pemasta yang menentukan harga referensi terbaru
 
-Jika pertanyaan di luar topik nilam/ATSIRA, tetap bantu tapi arahkan kembali ke konteks pertanian nilam.
+Jika pertanyaan di luar topik nilam/atSira, tetap bantu tapi arahkan kembali ke konteks pertanian nilam.
 Jangan membahas politik, agama, atau topik sensitif.
 Selalu akhiri dengan tawaran bantuan lanjutan jika relevan.`;
 
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     if (!groqKey) {
       // Fallback jika Groq key belum diisi — kembalikan pesan informatif
       return NextResponse.json({
-        reply: "Maaf, saya sedang dalam mode offline. Silakan hubungi tim ATSIRA untuk bantuan lebih lanjut! 🌿",
+        reply: "Maaf, saya sedang dalam mode offline. Silakan hubungi tim atSira untuk bantuan lebih lanjut! 🌿",
       });
     }
 

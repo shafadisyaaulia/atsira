@@ -48,7 +48,7 @@ const saveFunction = `
     if (error) {
       alert("Gagal menyimpan ke My Products: " + error.message);
     } else {
-      alert("Berhasil disimpan! Label ATSIRA Verified telah ditambahkan.");
+      alert("Berhasil disimpan! Label atSira Verified telah ditambahkan.");
       window.location.href = "/dashboard/seller/produk";
     }
   }
@@ -64,7 +64,7 @@ const buttonJSX = `
                     className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" /> 
-                    {isSaving ? "Menyimpan..." : "Simpan ke My Products (ATSIRA Verified)"}
+                    {isSaving ? "Menyimpan..." : "Simpan ke My Products (atSira Verified)"}
                   </Button>
 `;
 

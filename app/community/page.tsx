@@ -38,12 +38,12 @@ interface Message {
 const CATEGORIES = ["Semua", "Petani & Penyuling", "UMKM & Buyer", "PEMASTA", "ARC-USK", "Umum"];
 
 const SEED_COMMUNITIES: Community[] = [
-  { id: "petani-aceh", name: "Petani Nilam Aceh", description: "Grup diskusi khusus petani dan penyuling minyak nilam seluruh Aceh.", category: "Petani & Penyuling", is_public: true, member_count: 84, created_by: "ATSIRA", created_at: "" },
-  { id: "umkm-nilam", name: "UMKM Produk Nilam", description: "Forum bagi UMKM yang mengolah minyak nilam menjadi produk jadi seperti parfum, sabun, dan aromaterapi.", category: "UMKM & Buyer", is_public: true, member_count: 47, created_by: "ATSIRA", created_at: "" },
-  { id: "pemasta-hub", name: "PEMASTA Hub", description: "Ruang koordinasi antar anggota PEMASTA — update harga lapangan, temuan anomali, dan rembug komunitas.", category: "PEMASTA", is_public: true, member_count: 31, created_by: "ATSIRA", created_at: "" },
-  { id: "harga-pasar", name: "Info Harga Pasar", description: "Update harga minyak nilam harian dari berbagai wilayah. Semua role boleh berbagi informasi.", category: "Umum", is_public: true, member_count: 120, created_by: "ATSIRA", created_at: "" },
-  { id: "tips-suling", name: "Tips & Teknik Penyulingan", description: "Berbagi pengalaman penyulingan, troubleshooting, dan inovasi teknologi produksi.", category: "Petani & Penyuling", is_public: true, member_count: 62, created_by: "ATSIRA", created_at: "" },
-  { id: "arc-riset", name: "ARC-USK Publikasi Riset", description: "Kanal resmi ARC-USK untuk berbagi hasil penelitian, dataset, dan informasi uji laboratorium.", category: "ARC-USK", is_public: true, member_count: 28, created_by: "ATSIRA", created_at: "" },
+  { id: "petani-aceh", name: "Petani Nilam Aceh", description: "Grup diskusi khusus petani dan penyuling minyak nilam seluruh Aceh.", category: "Petani & Penyuling", is_public: true, member_count: 84, created_by: "atSira", created_at: "" },
+  { id: "umkm-nilam", name: "UMKM Produk Nilam", description: "Forum bagi UMKM yang mengolah minyak nilam menjadi produk jadi seperti parfum, sabun, dan aromaterapi.", category: "UMKM & Buyer", is_public: true, member_count: 47, created_by: "atSira", created_at: "" },
+  { id: "pemasta-hub", name: "PEMASTA Hub", description: "Ruang koordinasi antar anggota PEMASTA — update harga lapangan, temuan anomali, dan rembug komunitas.", category: "PEMASTA", is_public: true, member_count: 31, created_by: "atSira", created_at: "" },
+  { id: "harga-pasar", name: "Info Harga Pasar", description: "Update harga minyak nilam harian dari berbagai wilayah. Semua role boleh berbagi informasi.", category: "Umum", is_public: true, member_count: 120, created_by: "atSira", created_at: "" },
+  { id: "tips-suling", name: "Tips & Teknik Penyulingan", description: "Berbagi pengalaman penyulingan, troubleshooting, dan inovasi teknologi produksi.", category: "Petani & Penyuling", is_public: true, member_count: 62, created_by: "atSira", created_at: "" },
+  { id: "arc-riset", name: "ARC-USK Publikasi Riset", description: "Kanal resmi ARC-USK untuk berbagi hasil penelitian, dataset, dan informasi uji laboratorium.", category: "ARC-USK", is_public: true, member_count: 28, created_by: "atSira", created_at: "" },
 ];
 
 const SEED_MESSAGES: Record<string, Message[]> = {
@@ -80,19 +80,39 @@ export default function CommunityPage() {
 
   // ── Load messages ketika pilih komunitas ──
   const loadMessages = useCallback(async (communityId: string) => {
-    // 1. Ambil dari Supabase
-    const { data, error } = await supabase
-      .from("community_messages")
-      .select("*")
-      .eq("community_id", communityId)
-      .order("created_at", { ascending: true });
+    // 1. Load dari LocalStorage terlebih dahulu (agar offline/mock pesan tersimpan)
+    let localSaved: Message[] = [];
+    try {
+      const saved = localStorage.getItem(`atsira_chat_${communityId}`);
+      if (saved) localSaved = JSON.parse(saved);
+    } catch (_) {}
 
-    if (error) {
-      console.error("Gagal load pesan:", error);
-      // Fallback ke seed jika tabel belum ada atau error
-      setMessages(SEED_MESSAGES[communityId] || []);
-    } else {
-      setMessages(data || []);
+    const seed = SEED_MESSAGES[communityId] || [];
+    const baseList = [...seed, ...localSaved.filter(lm => !seed.some(sm => sm.id === lm.id))];
+    setMessages(baseList);
+
+    // 2. Ambil dari Supabase (jika tabel sudah ada)
+    try {
+      const { data, error } = await supabase
+        .from("community_messages")
+        .select("*")
+        .eq("community_id", communityId)
+        .order("created_at", { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        // Gabungkan data server dengan pesan lokal
+        setMessages((prev) => {
+          const combined = [...data];
+          for (const m of prev) {
+            if (!combined.some((c) => c.id === m.id)) {
+              combined.push(m);
+            }
+          }
+          return combined;
+        });
+      }
+    } catch (_) {
+      // Supabase table mungkin belum dibuat, tetap gunakan data lokal
     }
   }, [supabase]);
 
@@ -102,33 +122,31 @@ export default function CommunityPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
     // Supabase Realtime subscription
-    const channel = supabase
-      .channel(`community:${activeCommunity.id}`)
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "community_messages",
-        filter: `community_id=eq.${activeCommunity.id}`,
-      }, (payload) => {
-        const msg = payload.new as Message;
-        
-        // Cek apakah pesan sudah ada di state (untuk menghindari duplikasi pesan sendiri)
-        setMessages((prev) => {
-          if (prev.some(m => m.id === msg.id)) return prev;
-          return [...prev, msg];
-        });
-        
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-      })
-      .subscribe();
+    try {
+      const channel = supabase
+        .channel(`community:${activeCommunity.id}`)
+        .on("postgres_changes", {
+          event: "INSERT",
+          schema: "public",
+          table: "community_messages",
+          filter: `community_id=eq.${activeCommunity.id}`,
+        }, (payload) => {
+          const msg = payload.new as Message;
+          setMessages((prev) => {
+            if (prev.some(m => m.id === msg.id)) return prev;
+            return [...prev, msg];
+          });
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+        })
+        .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+      return () => { supabase.removeChannel(channel); };
+    } catch (_) {}
   }, [activeCommunity, loadMessages, supabase]);
 
   // ── Kirim pesan ──
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
-    console.log("DEBUG: userName in sendMessage:", userName);
     if (!userName) {
       alert("Silakan login terlebih dahulu untuk bergabung dalam percakapan!");
       return;
@@ -140,34 +158,36 @@ export default function CommunityPage() {
     const msg: Message = {
       id: tempId,
       community_id: activeCommunity.id,
-      sender_name: userName || "Pengguna ATSIRA",
+      sender_name: userName || "Pengguna atSira",
       sender_role: userRole || "Umum",
       content: newMessage.trim(),
       likes: 0,
       created_at: new Date().toISOString(),
     };
 
-    // Optimistic UI dikurangi, kita akan handle sinkronisasi lebih ketat
+    // 1. Update UI secara langsung (Optimistic)
     setMessages((prev) => [...prev, msg]);
     setNewMessage("");
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
 
-    // Simpan ke Supabase
-    const { data, error } = await supabase.from("community_messages").insert([{
-      id: tempId,
-      community_id: msg.community_id,
-      sender_name: msg.sender_name,
-      sender_role: msg.sender_role,
-      content: msg.content,
-    }]).select().single();
+    // 2. Simpan ke LocalStorage agar tidak hilang saat refresh
+    try {
+      const existing = JSON.parse(localStorage.getItem(`atsira_chat_${activeCommunity.id}`) || "[]");
+      localStorage.setItem(`atsira_chat_${activeCommunity.id}`, JSON.stringify([...existing, msg]));
+    } catch (_) {}
 
-    if (error) {
-      console.error("Gagal simpan pesan:", error);
-      // Rollback UI jika gagal
-      setMessages((prev) => prev.filter(m => m.id !== tempId));
+    // 3. Simpan ke Supabase (jika tabel tersedia)
+    try {
+      await supabase.from("community_messages").insert([{
+        id: tempId,
+        community_id: msg.community_id,
+        sender_name: msg.sender_name,
+        sender_role: msg.sender_role,
+        content: msg.content,
+      }]);
+    } catch (_) {
+      // Abaikan jika Supabase belum di-migrate, pesan tetap tampil di UI & LocalStorage
     }
-    // Jika berhasil, kita tidak perlu menambahkan lagi di callback realtime 
-    // karena kita sudah tambahkan secara lokal (optimistic).
 
     setSending(false);
   }
@@ -267,7 +287,7 @@ export default function CommunityPage() {
             <div className="inline-flex p-3 bg-emerald-50 rounded-2xl text-emerald-700 mb-3">
               <Users className="w-8 h-8" />
             </div>
-            <h1 className="font-display text-3xl font-black text-stone-900 tracking-tight">ATSIRA Connect</h1>
+            <h1 className="font-display text-3xl font-black text-stone-900 tracking-tight">atSira Connect</h1>
             <p className="text-sm text-stone-500 max-w-lg mx-auto mt-1">
               Ruang kolaborasi, diskusi harga real-time, dan komunitas nilam Indonesia.
             </p>
@@ -393,7 +413,7 @@ export default function CommunityPage() {
                     </p>
                     <a href="/login" 
                        className="inline-block px-4 py-2 bg-emerald-700 text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors">
-                       Login ke ATSIRA
+                       Login ke atSira
                     </a>
                   </div>
                 ) : (
@@ -428,7 +448,7 @@ export default function CommunityPage() {
               <X className="w-4 h-4 text-stone-500" />
             </button>
             <h2 className="font-black text-stone-800 text-lg mb-1">Buat Komunitas Baru</h2>
-            <p className="text-xs text-stone-500 mb-5">Komunitas bisa diikuti oleh semua pengguna ATSIRA sesuai kategori.</p>
+            <p className="text-xs text-stone-500 mb-5">Komunitas bisa diikuti oleh semua pengguna atSira sesuai kategori.</p>
             <form onSubmit={createCommunity} className="space-y-4">
               <div>
                 <label className="text-[11px] font-bold text-stone-700 block mb-1">Nama Komunitas *</label>

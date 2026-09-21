@@ -20,5 +20,5 @@ export async function GET(request: Request) {
   const seq = (count! + 1).toString().padStart(2, '0');
   const gradeChar = grade === 'Grade A' ? 'A' : grade === 'Grade B' ? 'B' : 'C';
 
-  return NextResponse.json({ batchId: `ATSIRA-${gradeChar}${seq}` });
+  return NextResponse.json({ batchId: `atSira-${gradeChar}${seq}` });
 }

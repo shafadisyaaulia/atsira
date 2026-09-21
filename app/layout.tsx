@@ -27,10 +27,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ATSIRA — Digital Fragrance Ecosystem",
+  title: "atSira — Digital Fragrance Ecosystem",
   description:
     "Ekosistem wewangian digital yang menghubungkan petani, penyuling, peneliti ARC-USK, UMKM parfum, dan konsumen dalam satu rantai nilai nilam Aceh yang transparan dan terverifikasi.",
-  keywords: ["nilam aceh", "patchouli oil", "minyak atsiri", "ATSIRA", "fragrance ecosystem"],
+  keywords: ["nilam aceh", "patchouli oil", "minyak atsiri", "atSira", "fragrance ecosystem"],
 };
 
 export default function RootLayout({

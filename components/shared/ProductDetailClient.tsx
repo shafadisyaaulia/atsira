@@ -74,7 +74,7 @@ export function ProductDetailClient({ product }: { product: any }) {
       const currentProduct = {
         id: currentId,
         name: product?.title || product?.name || "Produk",
-        seller: product?.storeName || product?.seller || "Seller ATSIRA",
+        seller: product?.storeName || product?.seller || "Seller atSira",
         location: product?.region || "Aceh",
         price: `Rp ${(product?.price || 0).toLocaleString("id-ID")}`,
         unit: product?.unit || "kg",

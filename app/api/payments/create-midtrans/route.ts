@@ -55,7 +55,7 @@ export async function POST(request: Request) {
         gross_amount: Math.round(Number(total)),
       },
       customer_details: {
-        first_name: buyerName || "Pembeli ATSIRA",
+        first_name: buyerName || "Pembeli atSira",
       },
     };
 

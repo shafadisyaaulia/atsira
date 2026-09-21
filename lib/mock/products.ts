@@ -33,7 +33,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     imageUrl: "/images/products/minyak nilam 1.png", // Menggunakan aset foto Anda
     description:
       "Minyak nilam mentah hasil sulingan uap dari kebun Gayo, dataran tinggi Aceh Tengah. Dianalisis melalui Nilam Analyzer AI dengan kadar Patchouli Alcohol 34.2%, masuk kategori Premium sesuai SNI 06-2385-2006.",
-    qrBatchId: "ATSIRA-R001",
+    qrBatchId: "atSira-R001",
   },
   {
     id: "raw-baratdaya-002",
@@ -61,7 +61,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     imageUrl: "/images/products/minyak nilam.png", // Menggunakan aset foto Anda
     description:
       "Minyak nilam dari Koperasi Aceh Barat, telah diverifikasi langsung oleh laboratorium ARC-USK. Cocok untuk kebutuhan parfum kelas menengah-atas dengan rendemen tinggi.",
-    qrBatchId: "ATSIRA-R002",
+    qrBatchId: "atSira-R002",
   },
   {
     id: "raw-vetiver-003",
@@ -92,7 +92,7 @@ export const RAW_OIL_LISTINGS: RawOilListing[] = [
     imageUrl: "/images/products/minyak nilam 2.png", // Menggunakan aset foto Anda
     description:
       "Akar wangi premium dengan profil aroma woody-earthy yang khas, diburu oleh rumah parfum internasional untuk base note mewah.",
-    qrBatchId: "ATSIRA-R003",
+    qrBatchId: "atSira-R003",
   },
 ];
 
@@ -146,7 +146,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
   {
     id: "fp-seulawah-elixir",
     type: "finished-product",
-    title: "Parfum Eksklusif ATSIRA - Eau De Parfum", // Judul disesuaikan dengan MOCK_FINISHED_PRODUCTS Anda
+    title: "Parfum Eksklusif atSira - Eau De Parfum", // Judul disesuaikan dengan MOCK_FINISHED_PRODUCTS Anda
     category: "Parfum",
     umkmId: "umkm-seulawah",
     price: 350000, // Harga disesuaikan agar sama dengan di toko
@@ -169,7 +169,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-gayo-001",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: SYUKUR_COA,
-    qrBatchId: "ATSIRA-F001",
+    qrBatchId: "atSira-F001",
   },
   {
     id: "fp-gayowood-musk",
@@ -192,7 +192,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-baratdaya-002",
     traceability: SEULAWAH_TRACE.map((s) => ({ ...s, title: s.title.replace("Bener Meriah", "Aceh Barat") })),
     coaSnapshot: RAW_OIL_LISTINGS[1].coa,
-    qrBatchId: "ATSIRA-F002",
+    qrBatchId: "atSira-F002",
   },
   {
     id: "fp-nilam-diffuser",
@@ -213,7 +213,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-gayo-001",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: SYUKUR_COA,
-    qrBatchId: "ATSIRA-F003",
+    qrBatchId: "atSira-F003",
   },
   {
     id: "fp-sabun-nilam",
@@ -234,7 +234,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-vetiver-003",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: RAW_OIL_LISTINGS[2].coa,
-    qrBatchId: "ATSIRA-F004",
+    qrBatchId: "atSira-F004",
   },
   {
     id: "fp-minyak-eceran",
@@ -255,7 +255,7 @@ export const FINISHED_PRODUCTS: FinishedProduct[] = [
     sourcedFromRawOilId: "raw-gayo-001",
     traceability: SEULAWAH_TRACE,
     coaSnapshot: SYUKUR_COA,
-    qrBatchId: "ATSIRA-F006",
+    qrBatchId: "atSira-F006",
   },
 ];
 

@@ -8,7 +8,7 @@ export async function GET() {
   // Try update with match instead of eq just in case
   const { data, error } = await supabase
     .from('finished_products')
-    .update({ qr_batch_id: 'ATSIRA-F001' })
+    .update({ qr_batch_id: 'atSira-F001' })
     .match({ id: productId })
     .select();
 

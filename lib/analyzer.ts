@@ -2,7 +2,7 @@ import type { AnalyzerResult } from "@/lib/types";
 
 /**
  * ============================================================================
- * ATSIRA QualitySense Engine — Base Logic
+ * atSira QualitySense Engine — Base Logic
  *
  * Spesifikasi kalkulasi berdasarkan:
  *   - Dokumen Task Atsira (ARC-USK / Handover)
@@ -71,26 +71,36 @@ function improvementTips(grade: AnalyzerResult["grade"]): string[] {
  */
 export function runNilamAnalyzer(
   paActual: number,
-  hargaBase: number
+  hargaBase?: number
 ): AnalyzerResult {
   const grade = gradeFromPa(paActual);
 
-  // Formula rekomendasi harga dari dokumen spesifikasi ARC-USK
-  const hargaRekomendasi = Math.round(
-    hargaBase * (1 + (paActual - PA_STANDARD) / 100)
-  );
+  let recommendedPriceMin = 800_000;
+  let recommendedPriceMax = 1_000_000;
 
-  // Tampilkan rentang ±5% sebagai batas negosiasi
-  const recommendedPriceMin = Math.round(hargaRekomendasi * 0.95);
-  const recommendedPriceMax = Math.round(hargaRekomendasi * 1.05);
+  if (paActual >= 32) {
+    // 32% ke atas: 1,9 juta - 2 juta
+    const bonus = Math.min(Math.round((paActual - 32) * 25_000), 100_000);
+    recommendedPriceMin = 1_900_000 + bonus;
+    recommendedPriceMax = 2_000_000 + bonus;
+  } else if (paActual >= 30) {
+    // 30 - 32%: 1,5 juta (rentang negosiasi 1.45jt - 1.55jt)
+    const factor = (paActual - 30) / 2;
+    recommendedPriceMin = Math.round(1_450_000 + factor * 50_000);
+    recommendedPriceMax = Math.round(1_500_000 + factor * 50_000);
+  } else {
+    // 32 ke bawah / di bawah standar (< 30%): 800 ribu - 1 juta
+    const factor = Math.max(0, Math.min(1, paActual / 30));
+    recommendedPriceMin = Math.round(800_000 + factor * 100_000);
+    recommendedPriceMax = Math.round(900_000 + factor * 100_000);
+  }
 
   return {
     paLevel: paActual,
     grade,
-    // acidNumber & density tidak dikalkulasi (butuh uji lab fisik ARC-USK)
     acidNumber: 0,
     density: 0,
-    confidenceScore: 100, // Deterministic — tidak ada probabilistik
+    confidenceScore: 100,
     recommendedPriceMin,
     recommendedPriceMax,
     improvementTips: improvementTips(grade),

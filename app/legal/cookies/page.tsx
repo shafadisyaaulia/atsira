@@ -7,7 +7,7 @@ export default function CookiesPage() {
         <h1 className="font-display text-4xl font-bold text-primary mb-8">Kebijakan Cookie</h1>
         <div className="prose text-on-surface-variant space-y-4">
           <p>Terakhir diperbarui: 14 September 2026</p>
-          <p>Kami menggunakan cookies untuk meningkatkan pengalaman Anda di ATSIRA...</p>
+          <p>Kami menggunakan cookies untuk meningkatkan pengalaman Anda di atSira...</p>
         </div>
       </div>
     </PageShell>

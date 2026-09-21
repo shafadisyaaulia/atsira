@@ -13,12 +13,13 @@ import { useAuthStore } from "@/lib/store";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const T_LOGIN = {
-  title: { id: "Masuk ke Aplikasi", en: "Sign In to ATSIRA" },
+  title: { id: "Masuk ke Aplikasi", en: "Sign In to atSira" },
   sub: { 
-    id: "Silakan masukkan email dan kata sandi akun ATSIRA Anda.", 
+    id: "Silakan masukkan email dan kata sandi akun atSira Anda.", 
     en: "Please enter your registered email and password to access the platform." 
   },
   emailLabel: { id: "Alamat Email", en: "Email Address" },
+  emailPlaceholder: { id: "tulis email anda", en: "enter your email" },
   passLabel: { id: "Kata Sandi", en: "Password" },
   btnSubmit: { id: "Masuk Sekarang", en: "Sign In Now" },
   btnBack: { id: "Kembali ke Beranda", en: "Back to Home" },
@@ -59,7 +60,7 @@ export default function LoginPage() {
     // Role asli dari DB
     const rawRole = profile?.role || "buyer";
     
-    // Normalisasi role DB yang mungkin berbeda dengan sistem ATSIRA
+    // Normalisasi role DB yang mungkin berbeda dengan sistem atSira
     const ROLE_MAP: Record<string, string> = {
       "seller": "umkm",     // Role lama "seller" → umkm
       "farmer": "petani",   // Alias lainnya
@@ -123,10 +124,10 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Link href="/" className="font-display text-3xl font-bold text-secondary-fixed hover:opacity-90 transition-opacity">
-            ATSIRA
+          <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
+            <img src="/images/logo-atsira.png" alt="atSira Logo" className="h-12 mx-auto mb-2 brightness-0 invert object-contain" />
           </Link>
-          <h1 className="font-display text-headline-md text-white mt-6 mb-2">
+          <h1 className="font-display text-headline-md text-white mt-4 mb-2">
             {T_LOGIN.title[currentLang]}
           </h1>
           <p className="text-inverse-on-surface/70 text-sm p-1">
@@ -147,7 +148,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 required
-                placeholder="buyer@email.com"
+                placeholder={T_LOGIN.emailPlaceholder[currentLang]}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-sand-gray bg-bone-wash text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"

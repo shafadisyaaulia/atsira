@@ -14,7 +14,7 @@ interface NilamTraceQRProps {
  * Komponen NilamTrace QR Generator.
  *
  * Klik tombol → generate QR dari API → tampilkan modal dengan:
- * - Preview QR code berwarna hijau ATSIRA
+ * - Preview QR code berwarna hijau atSira
  * - Link traceability
  * - Tombol unduh PNG
  * - Tombol salin link

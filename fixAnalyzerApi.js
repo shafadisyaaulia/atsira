@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         
         const prompt = \`
-          Kamu adalah AI spesialis minyak nilam (Patchouli Oil) ATSIRA.
+          Kamu adalah AI spesialis minyak nilam (Patchouli Oil) atSira.
           Seorang petani baru saja mengetes minyak nilamnya dengan parameter fisik berikut:
           - Kadar PA (Patchouli Alcohol): \${paActual}% (Grade: \${result.grade})
           - Warna/Kondisi: \${visualStyle === "clear-yellow" ? "Bening/Kuning Cerah" : "Keruh/Cokelat Tua/Ada Endapan"}

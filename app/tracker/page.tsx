@@ -32,7 +32,7 @@ export default function TrackerPage() {
       <section className="bg-primary py-14 text-inverse-on-surface">
         <div className="container-app">
           <SectionEyebrow className="text-secondary-fixed">Akuntabilitas Publik</SectionEyebrow>
-          <h1 className="font-display text-headline-lg-mobile lg:text-headline-lg mb-3">ATSIRA Impact Tracker</h1>
+          <h1 className="font-display text-headline-lg-mobile lg:text-headline-lg mb-3">atSira Impact Tracker</h1>
           <p className="text-inverse-on-surface/75 max-w-2xl">
             Bukan hanya laporan — ini adalah argumen untuk investor, pemerintah, dan lembaga internasional
             yang ingin mendukung revitalisasi ekosistem nilam Aceh.

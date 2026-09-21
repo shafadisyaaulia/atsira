@@ -2,7 +2,7 @@
 let hero = fs.readFileSync("components/shared/HeroSection.tsx", "utf8");
 const newImg = `<img
             src="/stories/high_tech_laboratory_photography_at_arc_usk._a_researcher_in_a_white_lab_coat.png"
-            alt="ATSIRA Hero"
+            alt="atSira Hero"
             className="w-full h-full object-cover"
           />`;
 const oldDiv = `<div

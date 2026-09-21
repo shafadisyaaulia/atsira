@@ -115,7 +115,7 @@ export default function PriceDashboardPage() {
                 <p className="font-semibold text-on-surface">Harga Referensi Global</p>
               </div>
               <div className="space-y-4">
-                <RefRow label="Aceh (ATSIRA)" price={GLOBAL_REFERENCE_PRICES.acehLocal.pricePerKg} note="Harga lokal saat ini" />
+                <RefRow label="Aceh (atSira)" price={GLOBAL_REFERENCE_PRICES.acehLocal.pricePerKg} note="Harga lokal saat ini" />
                 <RefRow label="Singapura" price={GLOBAL_REFERENCE_PRICES.singapore.pricePerKg} note={GLOBAL_REFERENCE_PRICES.singapore.unit} />
                 <RefRow label="Grasse, Prancis" price={GLOBAL_REFERENCE_PRICES.grasse.pricePerKg} note={GLOBAL_REFERENCE_PRICES.grasse.unit} />
               </div>

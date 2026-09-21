@@ -8,7 +8,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('traceability_logs')
     .select('batch_code, product_name')
-    .ilike('batch_code', 'ATSIRA-F005');
+    .ilike('batch_code', 'atSira-F005');
 
   return NextResponse.json({ data, error });
 }
