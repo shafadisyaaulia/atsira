@@ -21,7 +21,7 @@ const T_REG = {
   roleLabel: { id: "Saya mendaftar sebagai:", en: "I am registering as:" },
   rolePetani: { id: "Petani (Penghasil Minyak)", en: "Farmer (Oil Producer)" },
   roleUmkm: { id: "UMKM (Produk Turunan)", en: "MSME (Derivative Product)" },
-  roleBuyer: { id: "Buyer (Lokal / Ekspor)", en: "International / Local Buyer" },
+  roleBuyer: { id: "Pembeli (Lokal / Ekspor)", en: "International / Local Buyer" },
   nameLabel: { id: "Nama Lengkap", en: "Full Name / Company Name" },
   namePlaceholder: { id: "Masukkan nama Anda", en: "Enter your full or enterprise name" },
   emailLabel: { id: "Alamat Email", en: "Email Address" },

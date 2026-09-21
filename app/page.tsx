@@ -20,21 +20,21 @@ const T_HOME = {
   aiEyebrow: { ID: "Teknologi Presisi", EN: "Precision Technology" },
   aiTitle: { ID: "Verifikasi Kemurnian Berbasis AI", EN: "AI-Powered Purity Verification" },
   aiDesc: {
-    ID: "Menggunakan model pembelajaran mesin canggih yang dilatih oleh peneliti di ARC-USK, Penganalisis Nilam memastikan setiap tetes minyak memenuhi standar kemewahan internasional sebelum mencapai pasar.",
-    EN: "Utilizing advanced machine learning models trained by researchers at ARC-USK, the Patchouli Analyzer ensures every single drop of oil meets international luxury standards before reaching the market."
+    ID: "Menggunakan model pembelajaran mesin canggih yang dilatih oleh peneliti di ARC-USK, QualitySense memastikan setiap tetes minyak memenuhi standar kemewahan internasional sebelum mencapai pasar.",
+    EN: "Utilizing advanced machine learning models trained by researchers at ARC-USK, QualitySense ensures every single drop of oil meets international luxury standards before reaching the market."
   },
   aiFeatures: [
-    { ID: "Analisis Komposisi Kimia Instan", EN: "Instant Chemical Composition Analysis" },
-    { ID: "Autentikasi Batch Blockchain", EN: "Blockchain Batch Authentication" },
+    { ID: "Profil Kromatografi Cerdas", EN: "Intelligent Chromatographic Profiling" },
+    { ID: "Analisis Tanah & Iklim Makro", EN: "Soil & Macro-climate Analysis" },
     { ID: "Penilaian Kualitas Waktu Nyata", EN: "Real-Time Quality Assessment" }
   ],
-  aiCardTitle: { ID: "Penganalisis Nilam v2.4", EN: "Patchouli Analyzer v2.4" },
+  aiCardTitle: { ID: "QualitySense v2.4", EN: "QualitySense v2.4" },
   aiPurity: { ID: "Tingkat Kemurnian", EN: "Purity Level" },
   aiAuthentic: { ID: "Bandingkan Otentik", EN: "Authenticity Ratio" },
   aiProfile: { ID: "Profil Terpilih", EN: "Selected Profile" },
   aiCode: { ID: "Kode Lokasi", EN: "Location Code" },
   aiBtnScan: { ID: "Mulai Pindai", EN: "Start Scan" },
-  aiBtnTry: { ID: "Coba Penganalisis Sekarang", EN: "Try Analyzer Now" },
+  aiBtnTry: { ID: "Coba QualitySense Sekarang", EN: "Try QualitySense Now" },
 
   // Bagian Metrik Pasar
   marketTitle: { ID: "Wawasan Pasar Global", EN: "Global Market Insights" },
@@ -47,8 +47,8 @@ const T_HOME = {
   rootsEyebrow: { ID: "Akar Kami", EN: "Our Roots" },
   rootsTitle: { ID: "Berakar Secara Berkelanjutan. Terverifikasi Secara Digital.", EN: "Sustainably Rooted. Digitally Verified." },
   rootsDesc: {
-    ID: "ATSIRA dibangun dalam kemitraan mendalam dengan Atsiri Research Center (ARC) di Universitas Syiah Kuala. Bersama-sama, kami telah merevitalisasi ekonomi nilam di Aceh, memastikan petani menerima harga yang adil sementara dunia menerima minyak semurni mungkin.",
-    EN: "ATSIRA is built in deep partnership with the Atsiri Research Center (ARC) at Syiah Kuala University. Together, we have revitalized the patchouli economy in Aceh, ensuring farmers receive fair prices while the world receives the purest oil possible."
+    ID: "atSira dibangun dalam kemitraan mendalam dengan Atsiri Research Center (ARC) di Universitas Syiah Kuala. Bersama-sama, kami telah merevitalisasi ekonomi nilam di Aceh, memastikan petani menerima harga yang adil sementara dunia menerima minyak semurni mungkin.",
+    EN: "atSira is built in deep partnership with the Atsiri Research Center (ARC) at Syiah Kuala University. Together, we have revitalized the patchouli economy in Aceh, ensuring farmers receive fair prices while the world receives the purest oil possible."
   },
   rootsStat1: { ID: "Mata Pencaharian Didukung", EN: "Livelihoods Supported" },
   rootsStat2: { ID: "Peningkatan Pendapatan bagi Petani", EN: "Income Increase for Farmers" },
@@ -59,10 +59,10 @@ const T_HOME = {
   },
 
   // Bagian CTA bawah
-  ctaTitle: { ID: "Bergabunglah dalam Renaisans Wewangian", EN: "Join the Fragrance Renaissance" },
-  ctaDesc: {
-    ID: "Apakah Anda seorang petani Aceh, operator distilasi, atau merek wewangian global, ATSIRA menyediakan alat untuk tumbuh bersama.",
-    EN: "Whether you are an Aceh farmer, distillation operator, or a global fragrance brand, ATSIRA provides the tools to grow together."
+  ctaTitle: { ID: "Bergabunglah dengan Ekosistem Nilam", EN: "Join the Patchouli Ecosystem" },
+  ctaDesc: { 
+    ID: "Apakah Anda seorang petani Aceh, operator distilasi, atau merek wewangian global, atSira menyediakan alat untuk tumbuh bersama.",
+    EN: "Whether you are an Aceh farmer, distillation operator, or a global fragrance brand, atSira provides the tools to grow together."
   },
   ctaBtnFarmer: { ID: "Gabung sebagai Petani", EN: "Join as Farmer" },
   ctaBtnPartner: { ID: "Gabung sebagai Mitra", EN: "Join as Partner" }
@@ -100,7 +100,7 @@ export default function HomePage() {
   const ROLE_LABELS: Record<string, string> = {
     petani: "Petani",
     umkm: "UMKM / Seller",
-    buyer: "Buyer",
+    buyer: "Pembeli",
     peneliti: "Peneliti",
     pemasta: "Pemasta",
   };
@@ -207,9 +207,9 @@ export default function HomePage() {
                 <ShieldAlert className="w-8 h-8 text-error" />
               </div>
               <h3 className="font-display text-headline-md text-primary mb-2">Akses Terbatas</h3>
-              <p className="text-on-surface-variant mb-6">
-                Fitur Penganalisis AI hanya tersedia untuk <strong>Petani</strong>.
-              </p>
+                <p className="text-on-surface-variant mb-6">
+                  Fitur QualitySense hanya tersedia untuk <strong>Petani</strong>.
+                </p>
               <Button onClick={() => setShowRoleModal(false)} variant="primary" className="w-full">
                 Mengerti
               </Button>

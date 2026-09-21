@@ -135,23 +135,24 @@ export default function CheckoutPage() {
         { id: "exp", label: "DHL Express International", desc: "3 - 5 Days", price: 1200000 }
       ]
     : [
-        { id: "std", label: "JNE Regular / J&T Express", desc: "3 - 5 Hari Kerja", price: 15000 },
-        { id: "exp", label: "Pos Indonesia Kilat Khusus", desc: "1 - 2 Hari Kerja", price: 45000 }
+        { id: "std", label: "JNE Regular / J&T Express (Darat)", desc: "3 - 5 Hari Kerja", price: 15000 },
+        { id: "lion", label: "Lion Parcel (Kargo Udara / Antar Pulau)", desc: "1 - 3 Hari Kerja", price: 45000 },
+        { id: "exp", label: "Pos Indonesia Kilat Khusus", desc: "1 - 2 Hari Kerja", price: 35000 }
       ];
 
   const paymentOptions = isInternational
     ? [
-        { id: "stripe", label: "Credit / Debit Card (Visa/Mastercard via Stripe)", icon: "💳" }
+        { id: "stripe", label: "Credit / Debit Card (Visa/Mastercard)", logoText: "VISA", logoColor: "bg-blue-800" }
       ]
     : [
-        { id: "qris",        label: "QRIS (GoPay, OVO, DANA, ShopeePay, dll)", icon: "📱" },
-        { id: "bca_va",      label: "Virtual Account BCA",                       icon: "🏦" },
-        { id: "mandiri_va",  label: "Virtual Account Mandiri",                    icon: "🏦" },
-        { id: "bni_va",      label: "Virtual Account BNI",                        icon: "🏦" },
-        { id: "bri_va",      label: "Virtual Account BRI",                        icon: "🏦" },
-        { id: "bsi_va",      label: "Virtual Account BSI",                        icon: "🏦" },
-        { id: "gopay",       label: "GoPay",                                      icon: "🟢" },
-        { id: "shopeepay",   label: "ShopeePay",                                  icon: "🟠" },
+        { id: "qris",        label: "QRIS (Semua E-Wallet & M-Banking)", logoText: "QRIS", logoColor: "bg-red-500" },
+        { id: "bca_va",      label: "BCA Virtual Account",               logoText: "BCA",  logoColor: "bg-blue-700" },
+        { id: "mandiri_va",  label: "Mandiri Virtual Account",           logoText: "MANDIRI", logoColor: "bg-yellow-500 text-blue-900" },
+        { id: "bni_va",      label: "BNI Virtual Account",               logoText: "BNI",  logoColor: "bg-teal-600" },
+        { id: "bri_va",      label: "BRI Virtual Account",               logoText: "BRI",  logoColor: "bg-blue-600" },
+        { id: "bsi_va",      label: "BSI Virtual Account",               logoText: "BSI",  logoColor: "bg-teal-500" },
+        { id: "gopay",       label: "GoPay",                             logoText: "GOPAY", logoColor: "bg-green-500" },
+        { id: "shopeepay",   label: "ShopeePay",                         logoText: "SHOPEE", logoColor: "bg-orange-500" },
       ];
 
   useEffect(() => {
@@ -495,7 +496,9 @@ export default function CheckoutPage() {
                     }`}
                   >
                     <span className="flex items-center gap-3 text-xs font-bold text-on-surface">
-                      <span className="text-base">{p.icon}</span>
+                      <span className={`px-2 py-1 rounded text-[10px] font-black text-white tracking-wider ${p.logoColor}`}>
+                        {p.logoText}
+                      </span>
                       {p.label}
                     </span>
                     <span className="w-3.5 h-3.5 rounded-full border-2 transition-all border-outline-variant flex-shrink-0" style={payment === p.id ? { borderColor: "var(--md-sys-color-primary)", backgroundColor: "var(--md-sys-color-primary)", boxShadow: "0 0 0 4px #d1fae5" } : {}} />

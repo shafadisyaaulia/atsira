@@ -45,7 +45,7 @@ const T = {
   market:    { ID: "Marketplace",   EN: "Marketplace" },
   trace:     { ID: "NilamTrace",    EN: "NilamTrace" },
   story:     { ID: "NilamStory",    EN: "NilamStory" },
-  connect:   { ID: "ATSIRA Connect", EN: "ATSIRA Connect" },
+  connect:   { ID: "atSira Connect", EN: "atSira Connect" },
   help:      { ID: "Help Center",   EN: "Help Center" },
   cart:      { ID: "Keranjang",     EN: "Cart" },
   login:     { ID: "Masuk Aplikasi", EN: "Sign In" },
@@ -94,7 +94,7 @@ export function Navbar() {
           <Link href="/" className="flex items-center h-full w-full justify-start transition-opacity hover:opacity-90">
             <Image 
               src="/images/logo-atsira.png" 
-              alt="ATSIRA Logo"
+              alt="atSira Logo"
               width={180}
               height={76}
               className="h-[68px] w-auto object-contain block scale-[1.7] origin-left pl-2"

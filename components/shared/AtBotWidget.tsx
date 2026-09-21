@@ -86,7 +86,7 @@ export function AtBotWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3">
+    <div className="fixed bottom-24 right-6 z-[60] flex flex-col items-end gap-3">
       {open && (
         <div className="w-[340px] max-w-[88vw] h-[460px] bg-surface-container-lowest rounded-lg shadow-elevation-2 border border-surface-container-high flex flex-col overflow-hidden animate-in">
           {/* Header */}
@@ -97,7 +97,7 @@ export function AtBotWidget() {
             <div className="flex-1">
               <p className="font-semibold text-sm leading-tight">AtBot</p>
               <p className="text-xs text-inverse-on-surface/70 leading-tight">
-                {isLoading ? "Sedang mengetik..." : "Asisten ATSIRA · Online"}
+                {isLoading ? "Sedang mengetik..." : "Asisten atSira ✨ Online"}
               </p>
             </div>
             <button onClick={() => setOpen(false)} aria-label="Tutup chat">

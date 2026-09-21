@@ -65,7 +65,7 @@ module.exports = {
       },
       fontFamily: {
         display: ["var(--font-playfair)", "Georgia", "serif"],
-        body: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        body: ["var(--font-poppins)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "JetBrains Mono", "monospace"],
       },
       fontSize: {

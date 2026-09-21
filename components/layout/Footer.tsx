@@ -10,7 +10,7 @@ const FOOTER_COLUMNS = [
   {
     title: "Ekosistem",
     links: [
-      { label: "Penganalisis AI", href: "/dashboard/seller/qualitysense", requireAuth: true, requireRole: "petani" as const },
+      { label: "QualitySense", href: "/dashboard/seller/qualitysense", requireAuth: true, requireRole: "petani" as const },
       { label: "Rantai Pasok", href: "/traceability" },
       { label: "Pasar", href: "/marketplace" },
     ],
@@ -60,7 +60,7 @@ export function Footer() {
           <ShieldAlert className="w-6 h-6 text-error" />
           <div className="flex-1">
             <p className="font-semibold">Akses Terbatas</p>
-            <p className="text-sm opacity-90">Fitur Penganalisis AI hanya untuk Petani.</p>
+            <p className="text-sm opacity-90">Fitur QualitySense hanya untuk Petani.</p>
           </div>
           <button onClick={() => setRoleWarning(false)} className="p-2 hover:bg-black/5 rounded-full">
             <X className="w-5 h-5" />
@@ -71,7 +71,7 @@ export function Footer() {
       {/* Bagian Grid Atas */}
       <div className="container-app py-16 grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-10">
         <div>
-          <p className="font-display text-4xl font-bold text-secondary-fixed mb-3">ATSIRA</p>
+          <img src="/images/logo-atsira.png" alt="atSira Logo" className="h-12 mb-4 brightness-0 invert object-contain" />
           <p className="text-sm text-inverse-on-surface/70 max-w-xs">
             Ekosistem digital terintegrasi pertama di Indonesia untuk perdagangan minyak nilam Aceh
             yang transparan dan terverifikasi.
@@ -102,37 +102,23 @@ export function Footer() {
         ))}
       </div>
 
-      {/* Bagian Bottom Bar dengan Integrasi Logo Pemasta */}
+      {/* Bagian Bottom Bar dengan SDGs */}
       <div className="border-t border-white/10 py-8">
         <div className="container-app flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-inverse-on-surface/60">
           
           {/* Teks Legal Kemitraan */}
           <div className="space-y-1.5 text-center md:text-left">
-            <p>© 2026 ATSIRA Ecosystem. Bekerja sama dengan ARC-USK, Universitas Syiah Kuala.</p>
+            <p>© 2026 atSira Ecosystem. Bekerja sama dengan ARC-USK, Universitas Syiah Kuala.</p>
             <p className="text-inverse-on-surface/40">Ditenagai oleh teknologi NIRS-PLS &amp; verifikasi blockchain.</p>
           </div>
 
-          {/* Badge Logo & Kemitraan Pemasta */}
-          <div className="flex items-center gap-3.5 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm hover:border-secondary-fixed/30 hover:bg-white/[0.08] transition-all">
-            <div className="text-right">
-              <span className="text-[9px] uppercase font-bold text-secondary-fixed block tracking-wider leading-none mb-1">
-                Supported & Co-Developed By
-              </span>
-              <span className="text-[11px] font-semibold text-white block">
-                Kelompok Pemasta Nilam Aceh
-              </span>
-            </div>
-            
-            {/* Divider Garis Tipis */}
-            <div className="w-px h-7 bg-white/10" />
-
-            {/* Container Logo Pemasta */}
-            <div className="relative w-8 h-8 flex items-center justify-center bg-white rounded-lg p-1 shadow-sm">
-              <img 
-                src="/images/logo-pemasta.png" 
-                alt="Logo Resmi Pemasta Nilam" 
-                className="w-full h-full object-contain"
-              />
+          {/* Badges SDGs */}
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-bold tracking-wider text-inverse-on-surface/50 uppercase mr-1">Supporting SDGs</span>
+            <div className="flex gap-2">
+              <div className="w-9 h-9 rounded-md bg-[#a21942] text-white flex items-center justify-center font-bold shadow-sm" title="SDG 8: Decent Work and Economic Growth">8</div>
+              <div className="w-9 h-9 rounded-md bg-[#fd6925] text-white flex items-center justify-center font-bold shadow-sm" title="SDG 9: Industry, Innovation and Infrastructure">9</div>
+              <div className="w-9 h-9 rounded-md bg-[#bf8b2e] text-white flex items-center justify-center font-bold shadow-sm" title="SDG 12: Responsible Consumption and Production">12</div>
             </div>
           </div>
 

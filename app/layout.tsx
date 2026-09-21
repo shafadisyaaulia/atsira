@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Playfair_Display, Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AtBotWidget } from "@/components/shared/AtBotWidget";
 import Script from "next/script";
@@ -12,10 +12,10 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const jakarta = Plus_Jakarta_Sans({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-jakarta",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html 
       lang="id" 
-      className={`${playfair.variable} ${jakarta.variable} ${jetbrainsMono.variable}`}
+      className={`${playfair.variable} ${poppins.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         {/* Mengizinkan fitur penerjemah Google berjalan, namun membersihkan tampilan bar atas yang mengganggu */}

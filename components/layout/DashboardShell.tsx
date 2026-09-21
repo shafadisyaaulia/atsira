@@ -53,7 +53,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
 
   // 3. ROLE BUYER / MITRA INDUSTRI
   buyer: [
-    { label: "Dasbor Buyer", href: "/dashboard/buyer", icon: LayoutDashboard },
+    { label: "Dasbor Pembeli", href: "/dashboard/buyer", icon: LayoutDashboard },
     { label: "Sourcing Hub", href: "/dashboard/buyer/market", icon: ShoppingBag },
     { label: "Lacak Pesanan", href: "/dashboard/buyer/pesanan", icon: Package },
     { label: "Dompet & Tagihan", href: "/dashboard/buyer/dompet", icon: Wallet },
@@ -79,7 +79,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
 const ROLE_LABEL: Record<UserRole, string> = {
   petani: "Petani & Penyuling",
   umkm: "Seller Panel",
-  buyer: "Buyer Panel",
+  buyer: "Panel Pembeli",
   peneliti: "Peneliti ARC-USK",
   pemasta: "Pemasta Node",
 };

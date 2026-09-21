@@ -23,8 +23,8 @@ const T_HERO = {
     EN: "Preserving ancient cultivation through Blockchain and AI. Experience the synergy of tradition and precision in the world's most valuable essential oil."
   },
   btnExplore: {
-    ID: "Jelajahi Ekosistem",
-    EN: "Explore Ecosystem"
+    ID: "Jelajahi atSira",
+    EN: "Explore atSira"
   },
   btnImpact: {
     ID: "Lihat Dampaknya",
