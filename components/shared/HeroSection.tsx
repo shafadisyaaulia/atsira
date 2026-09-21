@@ -15,8 +15,8 @@ const T_HERO = {
     EN: ""
   },
   title: {
-    ID: "Kenali perjalanan minyak nilam Aceh dari awal sampai akhir.",
-    EN: "Discover the journey of Aceh patchouli oil from start to finish."
+    ID: "Kenali Perjalanan Minyak Nilam Aceh Dari Awal Sampai Akhir.",
+    EN: "Discover The Journey Of Aceh Patchouli Oil From Start To Finish."
   },
   desc: {
     ID: "Melestarikan budidaya kuno melalui Blockchain dan AI. Rasakan sinergi tradisi dan presisi dalam minyak atsiri paling berharga di dunia.",
