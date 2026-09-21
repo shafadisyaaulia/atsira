@@ -115,11 +115,12 @@ export function Footer() {
           {/* Badges SDGs */}
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-bold tracking-wider text-inverse-on-surface/50 uppercase mr-1">Supporting SDGs</span>
-            <div className="flex gap-2">
-              <div className="w-9 h-9 rounded-md bg-[#a21942] text-white flex items-center justify-center font-bold shadow-sm" title="SDG 8: Decent Work and Economic Growth">8</div>
-              <div className="w-9 h-9 rounded-md bg-[#fd6925] text-white flex items-center justify-center font-bold shadow-sm" title="SDG 9: Industry, Innovation and Infrastructure">9</div>
-              <div className="w-9 h-9 rounded-md bg-[#bf8b2e] text-white flex items-center justify-center font-bold shadow-sm" title="SDG 12: Responsible Consumption and Production">12</div>
-            </div>
+            <img 
+              src="/images/sdgs-8-9-12.png" 
+              alt="SDG 8, 9, 12" 
+              className="h-10 w-auto object-contain"
+              title="SDG 8: Decent Work & Economic Growth | SDG 9: Industry, Innovation & Infrastructure | SDG 12: Responsible Consumption & Production"
+            />
           </div>
 
         </div>

@@ -95,9 +95,9 @@ export function Navbar() {
             <Image 
               src="/images/logo-atsira.png" 
               alt="atSira Logo"
-              width={180}
-              height={76}
-              className="h-[68px] w-auto object-contain block scale-[1.7] origin-left pl-2"
+              width={120}
+              height={48}
+              className="h-10 w-auto object-contain block"
               priority
             />
           </Link>
