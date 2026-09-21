@@ -86,7 +86,7 @@ export function AtBotWidget() {
   }
 
   return (
-    <div className="fixed bottom-24 right-6 z-[60] flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3">
       {open && (
         <div className="w-[340px] max-w-[88vw] h-[460px] bg-surface-container-lowest rounded-lg shadow-elevation-2 border border-surface-container-high flex flex-col overflow-hidden animate-in">
           {/* Header */}
