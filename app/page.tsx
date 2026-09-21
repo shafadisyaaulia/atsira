@@ -47,8 +47,8 @@ const T_HOME = {
   rootsEyebrow: { ID: "Akar Kami", EN: "Our Roots" },
   rootsTitle: { ID: "Berakar Secara Berkelanjutan. Terverifikasi Secara Digital.", EN: "Sustainably Rooted. Digitally Verified." },
   rootsDesc: {
-    ID: "atSira dibangun dalam kemitraan mendalam dengan Atsiri Research Center (ARC) di Universitas Syiah Kuala. Bersama-sama, kami telah merevitalisasi ekonomi nilam di Aceh, memastikan petani menerima harga yang adil sementara dunia menerima minyak semurni mungkin.",
-    EN: "atSira is built in deep partnership with the Atsiri Research Center (ARC) at Syiah Kuala University. Together, we have revitalized the patchouli economy in Aceh, ensuring farmers receive fair prices while the world receives the purest oil possible."
+    ID: "atSira tumbuh dari kolaborasi bersama Atsiri Research Center (ARC) Universitas Syiah Kuala, petani nilam, penyuling, dan para pelaku di sepanjang rantai nilam Aceh. Kami menyederhanakan informasi tentang kualitas, harga, dan perjalanan minyak nilam agar lebih mudah dipahami, sehingga setiap pihak dapat melihat proses dan nilai di balik setiap tetes minyak nilam.",
+    EN: "atSira grows from a collaboration with the Atsiri Research Center (ARC) at Syiah Kuala University, patchouli farmers, distillers, and actors along the Aceh patchouli supply chain. We simplify information about the quality, price, and journey of patchouli oil to make it easier to understand, so that every party can see the process and value behind every drop of patchouli oil."
   },
   rootsStat1: { ID: "Mata Pencaharian Didukung", EN: "Livelihoods Supported" },
   rootsStat2: { ID: "Peningkatan Pendapatan bagi Petani", EN: "Income Increase for Farmers" },
