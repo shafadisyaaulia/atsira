@@ -17,7 +17,7 @@ export function AtBotWidget() {
       id: "intro",
       role: "assistant",
       content:
-        "Halo! Saya AtBot 🌿 — asisten virtual ATSIRA. Ada yang bisa saya bantu seputar nilam, harga, atau cara pakai platform ini?",
+        "Halo! Saya AtBot 🌿 — asisten virtual atSira. Ada yang bisa saya bantu seputar nilam, harga, atau cara pakai platform ini?",
       timestamp: new Date().toISOString(),
     },
   ]);
