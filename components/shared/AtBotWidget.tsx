@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Leaf, X, Send, Loader2 } from "lucide-react";
+import { Bot, X, Send, Loader2 } from "lucide-react";
 import type { ChatMessage } from "@/lib/types";
 
 const QUICK_REPLIES = [
@@ -86,13 +86,13 @@ export function AtBotWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 lg:bottom-6 right-6 z-[60] flex flex-col items-end gap-3" style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}>
       {open && (
         <div className="w-[340px] max-w-[88vw] h-[460px] bg-surface-container-lowest rounded-lg shadow-elevation-2 border border-surface-container-high flex flex-col overflow-hidden animate-in">
           {/* Header */}
           <div className="bg-primary text-on-primary px-4 py-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center">
-              <Leaf className="w-5 h-5 text-on-secondary-fixed-variant" />
+              <Bot className="w-5 h-5 text-on-secondary-fixed-variant" />
             </div>
             <div className="flex-1">
               <p className="font-semibold text-sm leading-tight">AtBot</p>
@@ -186,10 +186,10 @@ export function AtBotWidget() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="w-14 h-14 rounded-full bg-secondary-container shadow-elevation-2 flex items-center justify-center hover:scale-105 transition-transform"
+        className="w-14 h-14 rounded-full bg-primary shadow-elevation-2 flex items-center justify-center hover:scale-105 transition-transform mb-16 lg:mb-0"
         aria-label="Buka asisten AtBot"
       >
-        <Leaf className="w-7 h-7 text-on-secondary-container" />
+        <Bot className="w-7 h-7 text-on-primary" />
       </button>
     </div>
   );
