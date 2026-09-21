@@ -186,7 +186,7 @@ export function AtBotWidget() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="w-14 h-14 rounded-full bg-secondary-container shadow-elevation-2 flex items-center justify-center hover:scale-105 transition-transform mb-16 lg:mb-0"
+        className="w-14 h-14 rounded-[28px] rounded-br-[8px] bg-secondary-container shadow-elevation-2 flex items-center justify-center hover:scale-105 transition-transform mb-16 lg:mb-0"
         aria-label="Buka asisten AtBot"
       >
         <Bot className="w-7 h-7 text-gray-900" />
