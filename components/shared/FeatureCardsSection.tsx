@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Leaf, Sparkles } from "lucide-react";
 import { useLang } from "@/components/layout/Navbar";
 
@@ -32,12 +33,15 @@ export function FeatureCardsSection() {
           <div className="relative rounded-[32px] overflow-hidden min-h-[460px] sm:min-h-[520px] flex flex-col justify-between p-6 sm:p-8 shadow-xl group">
             {/* Background Image with Dark Vignette Gradient */}
             <div className="absolute inset-0 z-0">
-              <img
+              <Image
                 src="/images/nilamtrace-card.jpg"
                 alt="NilamTrace Supply Chain"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                quality={75}
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20 z-[1]" />
             </div>
 
             {/* Top Header & Logo */}
@@ -79,12 +83,15 @@ export function FeatureCardsSection() {
           <div className="relative rounded-[32px] overflow-hidden min-h-[460px] sm:min-h-[520px] flex flex-col justify-between p-6 sm:p-8 shadow-xl group">
             {/* Background Image with Dark Vignette Gradient */}
             <div className="absolute inset-0 z-0">
-              <img
+              <Image
                 src="/images/nilamstory-card.jpg"
                 alt="NilamStory Community & Insights"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                quality={75}
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20 z-[1]" />
             </div>
 
             {/* Top Header & Logo */}

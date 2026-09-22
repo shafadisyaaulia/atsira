@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Leaf, FlaskConical, Sparkles, CheckCircle2, ShieldAlert, X } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/Button";
@@ -261,12 +262,15 @@ export default function HomePage() {
           {/* Left: Image */}
           <div className="lg:w-1/2 relative">
             <div className="aspect-square rounded-[40px] overflow-hidden shadow-2xl relative">
-              <img
+              <Image
                 src="/stories/professional_documentary_photography_of_an_atsira_team_meeting_with_acehnese.png"
                 alt="Tim atSira"
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                quality={75}
+                className="object-cover"
               />
-              <div className="absolute inset-0 bg-ink-green/10" />
+              <div className="absolute inset-0 bg-ink-green/10 z-[1]" />
             </div>
 
             {/* Floating Quote Card */}
@@ -326,11 +330,14 @@ export default function HomePage() {
                 <Link key={s.id} href={`/magazine/${s.id}`} className="block h-full">
                   <Card className="p-6 border border-stone-200 flex flex-col gap-4 hover:shadow-lg hover:border-emerald-500/40 transition-all group bg-white h-full">
                     {s.imageUrl && (
-                      <div className="rounded-xl overflow-hidden aspect-[16/10] mb-2 bg-stone-100">
-                        <img
+                      <div className="rounded-xl overflow-hidden aspect-[16/10] mb-2 bg-stone-100 relative">
+                        <Image
                           src={s.imageUrl}
                           alt={s.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          quality={75}
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     )}

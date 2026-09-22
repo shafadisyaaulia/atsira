@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { useState } from "react";
@@ -71,7 +72,13 @@ export function Footer() {
       {/* Bagian Grid Atas */}
       <div className="container-app py-16 grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-10">
         <div>
-          <img src="/images/logo-atsira.png" alt="atSira Logo" className="h-12 mb-4 brightness-0 invert object-contain" />
+          <Image
+            src="/images/logo-atsira.png"
+            alt="atSira Logo"
+            width={120}
+            height={48}
+            className="h-12 w-auto mb-4 brightness-0 invert object-contain"
+          />
           <p className="text-sm text-inverse-on-surface/70 max-w-xs">
             Ekosistem digital terintegrasi pertama di Indonesia untuk perdagangan minyak nilam Aceh
             yang transparan dan terverifikasi.
@@ -114,9 +121,11 @@ export function Footer() {
           {/* Badges SDGs */}
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-bold tracking-wider text-inverse-on-surface/50 uppercase mr-1">Supporting SDGs</span>
-            <img 
+            <Image 
               src="/images/sdgs-8-9-12.png" 
               alt="SDG 8, 9, 12" 
+              width={160}
+              height={40}
               className="h-10 w-auto object-contain"
               title="SDG 8: Decent Work & Economic Growth | SDG 9: Industry, Innovation & Infrastructure | SDG 12: Responsible Consumption & Production"
             />

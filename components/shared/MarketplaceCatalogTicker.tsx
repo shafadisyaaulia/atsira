@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Sparkles, ShieldCheck, Star } from "lucide-react";
 import { formatIDR } from "@/lib/mock";
 import { RAW_OIL_LISTINGS, FINISHED_PRODUCTS } from "@/lib/mock/products";
@@ -84,10 +85,13 @@ export function MarketplaceCatalogTicker() {
             >
               {/* Image Box */}
               <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-50/80 mb-2.5 relative flex items-center justify-center">
-                <img
+                <Image
                   src={item.imageUrl}
                   alt={item.title}
-                  className="w-full h-full object-contain p-1.5 group-hover:scale-108 transition-transform duration-500"
+                  fill
+                  sizes="(max-width: 640px) 240px, 270px"
+                  quality={70}
+                  className="object-contain p-1.5 group-hover:scale-108 transition-transform duration-500"
                 />
                 
                 {/* Badge Top Left */}

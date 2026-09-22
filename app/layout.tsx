@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { AtBotWidget } from "@/components/shared/AtBotWidget";
 import Script from "next/script";
 import ClientLayout from "@/components/layout/ClientLayout";
 
@@ -88,48 +87,50 @@ export default function RootLayout({
         <ClientLayout>
             <div className="grain-overlay" aria-hidden="true" />
             <div className="relative z-[2]">{children}</div>
-            <AtBotWidget />
         </ClientLayout>
 
         {/* Wadah selektor bahasa diletakkan secara presisi agar Google skrip bisa mendeteksi perubahan state halaman */}
        {/* Elemen jangkar Google Translate */}
         <div id="google_translate_element" style={{ display: 'none' }} />
 
-        <Script id="google-translate-init" strategy="afterInteractive">
+        <Script id="google-translate-init" strategy="lazyOnload">
           {`
             function googleTranslateElementInit() {
-              new google.translate.TranslateElement({
-                pageLanguage: 'id',
-                includedLanguages: 'en,id',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                autoDisplay: true
-              }, 'google_translate_element');
+              if (window.google && window.google.translate) {
+                new google.translate.TranslateElement({
+                  pageLanguage: 'id',
+                  includedLanguages: 'en,id',
+                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                  autoDisplay: true
+                }, 'google_translate_element');
+              }
             }
 
-            // TRIK AMPUH: Mengamati perubahan halaman Next.js secara real-time
-            // Setiap kali teks di layar berubah karena pindah page, Google Translate dipaksa memindai ulang.
             if (typeof window !== 'undefined') {
+              let timer;
               const observer = new MutationObserver(() => {
-                const translateElem = document.getElementById('google_translate_element');
-                if (translateElem && window.google && google.translate) {
-                  // Memicu ulang proses penerjemahan otomatis pada teks baru
-                  const select = document.querySelector('.goog-te-combo');
-                  if (select) {
-                    select.dispatchEvent(new Event('change'));
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(() => {
+                  const translateElem = document.getElementById('google_translate_element');
+                  if (translateElem && window.google && window.google.translate) {
+                    const select = document.querySelector('.goog-te-combo');
+                    if (select && select.value && select.value !== 'id') {
+                      select.dispatchEvent(new Event('change'));
+                    }
                   }
-                }
+                }, 800);
               });
 
               observer.observe(document.body, {
                 childList: true,
-                subtree: true
+                subtree: false
               });
             }
           `}
         </Script>
         <Script 
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" 
-          strategy="afterInteractive" 
+          strategy="lazyOnload" 
         />
       </body>
     </html>
