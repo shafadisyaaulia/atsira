@@ -13,10 +13,8 @@ import {
   Download, 
   Sparkles,
   BookOpen,
-  ArrowRight,
-  ExternalLink
+  ArrowRight
 } from "lucide-react";
-import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { useLang } from "@/components/layout/Navbar";
 
@@ -216,21 +214,21 @@ export default function HelpCenterPage() {
                 </p>
               </div>
 
-              <div className="pt-6 mt-4 border-t border-stone-100">
-                <Link
-                  href="/traceability"
-                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all"
-                >
+              <div className="pt-6 mt-4 border-t border-stone-100 flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-stone-400 cursor-not-allowed">
+                  <Download className="w-3.5 h-3.5 text-stone-400" />
                   <span>{T.cardManualBtn[lang]}</span>
-                  <Download className="w-3.5 h-3.5" />
-                </Link>
+                </div>
+                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 rounded-full">
+                  {isId ? "Segera Hadir" : "Coming Soon"}
+                </span>
               </div>
             </div>
 
             {/* Card 2: Asisten atBot AI */}
             <div className="bg-white rounded-2xl border border-stone-200/80 p-6 shadow-sm hover:shadow-md hover:border-emerald-700/30 transition-all flex flex-col justify-between group">
               <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <h3 className="font-display font-bold text-lg text-stone-900">
@@ -243,11 +241,13 @@ export default function HelpCenterPage() {
 
               <div className="pt-6 mt-4 border-t border-stone-100">
                 <button
+                  type="button"
                   onClick={() => {
-                    const atbotBtn = document.querySelector('button[aria-label*="atBot"], button[title*="atBot"]') as HTMLElement;
-                    if (atbotBtn) atbotBtn.click();
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("open-atbot"));
+                    }
                   }}
-                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all cursor-pointer"
                 >
                   <span>{T.cardAiBtn[lang]}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -269,14 +269,14 @@ export default function HelpCenterPage() {
                 </p>
               </div>
 
-              <div className="pt-6 mt-4 border-t border-stone-100">
-                <a
-                  href="mailto:support@atsira.id"
-                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all"
-                >
+              <div className="pt-6 mt-4 border-t border-stone-100 flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-stone-400 cursor-not-allowed">
+                  <Mail className="w-3.5 h-3.5 text-stone-400" />
                   <span>{T.cardContactBtn[lang]}</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                </div>
+                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 rounded-full">
+                  {isId ? "Segera Hadir" : "Coming Soon"}
+                </span>
               </div>
             </div>
           </div>

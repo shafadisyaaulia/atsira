@@ -24,6 +24,18 @@ export function AtBotWidget() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleOpen = () => {
+      setOpen(true);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    };
+    window.addEventListener("open-atbot", handleOpen);
+    return () => window.removeEventListener("open-atbot", handleOpen);
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -162,6 +174,7 @@ export function AtBotWidget() {
             className="flex items-center gap-2 p-3 border-t border-surface-container-high bg-surface-container-lowest"
           >
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Tulis pertanyaan..."
@@ -185,6 +198,7 @@ export function AtBotWidget() {
       )}
 
       <button
+        id="atbot-trigger-button"
         onClick={() => setOpen(!open)}
         className="w-14 h-14 rounded-[28px] rounded-br-[8px] bg-secondary-container shadow-elevation-2 flex items-center justify-center hover:scale-105 transition-transform mb-16 lg:mb-0"
         aria-label="Buka asisten AtBot"
